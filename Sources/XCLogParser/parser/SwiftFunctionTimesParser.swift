@@ -46,11 +46,12 @@ public class SwiftFunctionTimesParser {
             let rawFunctionTimes = logSection.text
             // the log puts almost the same string in each swift file compilation step
             // we just check we don't have it already
-            guard rawFunctionTimes.isEmpty == false,
-                let md5 = rawFunctionTimes.md5(),
-                rawTimes[md5] == nil
-            else {
+            guard rawFunctionTimes.isEmpty == false else {
                     return
+            }
+            let md5 = rawFunctionTimes.md5()
+            guard rawTimes[md5] == nil else {
+                return
             }
             rawTimes[md5] = rawFunctionTimes
         }
