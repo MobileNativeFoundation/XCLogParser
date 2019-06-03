@@ -1,0 +1,20 @@
+os: osx
+osx_image: xcode10.2
+language: swift
+
+branches:
+  only:
+    - master
+
+cache:
+  directories:
+    - .build
+
+env:
+  global:
+  - LC_CTYPE=en_US.UTF-8
+  - LANG=en_US.UTF-8
+
+script:
+  - ./ci/ci.sh
+
