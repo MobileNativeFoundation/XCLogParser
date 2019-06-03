@@ -1,0 +1,9 @@
+included:
+  - Sources
+  - Tests
+
+excluded:
+  - Sources/XCLogParser/generated
+
+disabled_rules:
+  - trailing_comma

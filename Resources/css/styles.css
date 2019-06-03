@@ -1,0 +1,75 @@
+body {
+  background-color: #f5f5f5;
+}
+
+div.info-box {
+  height: 120px;
+}
+
+main.main {
+  padding-top: 30px;
+}
+
+.swift {
+  background-color: #EE5541;
+}
+
+.objc {
+  background-color: #5E565A;
+}
+
+.xc-build-info {
+  text-align: right;
+  color: #6c757d;
+}
+.xc-content {
+  margin: 10px;
+}
+
+.xc-navbar {
+  border: 1px solid rgba(0,0,0,.125);
+  background-color: rgba(0,0,0,.03);
+  border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+.navbar-light .navbar-brand {
+  color: gray;
+}
+
+.xc-header {
+  height: 40px;
+}
+
+.xc-topboxes {
+  margin-left: 35px;
+  margin-right: 35px;
+  margin: 10px;
+}
+
+.callout-danger {
+  border-left: 4px solid red !important;
+}
+
+.callout-warning {
+  border-left: 4px solid #ffc107 !important;
+}
+
+.callout {
+  position: relative;
+  padding: 0 1rem;
+  margin: 1rem 0;
+  border-left: 4px solid #c8ced3;
+  border-radius: .25rem;
+}
+
+.header-title {
+  float: left
+}
+.header-action {
+  float: right
+}
+
+.header-action a {
+  color: gray;
+  text-decoration: none;
+}

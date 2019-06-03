@@ -1,0 +1,16 @@
+.DS_Store
+/.build
+/Packages
+/*.xcodeproj
+
+## Xcode Build generated
+build/
+DerivedData/
+
+/samples
+/releases
+
+.vscode
+
+## Generated files created by rake gen_resources
+Sources/XCLogParser/generated/

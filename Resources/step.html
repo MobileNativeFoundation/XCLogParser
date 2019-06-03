@@ -1,0 +1,214 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Client iOS Build Data</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="app header-fixed">
+  <header class="app-header navbar navbar-expand-lg navbar-light xc-navbar">
+
+    <a href="index.html" class="navbar-brand">xclogparser</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <div class="navbar-nav ml-md-auto" style="padding-right: 30px;">
+      </div>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <main class="main">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12 xc-build-info warning" id='build-info'>
+          </div>
+        </div>
+
+        <div class="row" id="info-row">
+          <div class="col-12">
+            <div class="card xc-content">
+              <div class="card-header">
+                <div class="header-title" id="info-title"></div>
+                <div class="header-action">
+                  <a class="card-header-action" href="#" data-toggle="collapse"
+                    data-target="#collapse-info" aria-expanded="true">
+                    △
+                  </a>
+                </div>
+              </div> <!-- card header-->
+              <div id="collapse-info" class="collapse show">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-sm-2">
+                      File
+                    </div>
+                    <div class="col-sm-10">
+                      <a id="info-url" href=""></a>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-sm-2">
+                      Duration
+                    </div>
+                    <div class="col-sm-10">
+                        <div id="info-duration"></div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-sm-2">
+                      Start time
+                    </div>
+                    <div class="col-sm-10">
+                      <div id="info-start-time"></div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-sm-2">
+                      End time
+                    </div>
+                    <div class="col-sm-10">
+                      <div id="info-end-time"></div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-sm-2">
+                      Signature
+                    </div>
+                    <div class="col-sm-10">
+                      <div id="info-signature"></div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-sm-2">
+                      Architecture
+                    </div>
+                    <div class="col-sm-10">
+                      <div id="info-arch"></div>
+                    </div>
+                  </div>
+                </div> <!-- card body -->
+              </div> <!-- collapse-info -->
+            </div> <!-- card -->
+          </div> <!-- info col-->
+        </div> <!-- info row -->
+
+        <div class="row" id="errors-row">
+            <div class="col-12">
+              <div class="card xc-content">
+                <div class="card-header">
+                  <div class="header-title">🛑 Errors</div>
+                  <div class="header-action">
+                    <a class="card-header-action" href="#" data-toggle="collapse"
+                      data-target="#collapse-errors" aria-expanded="true">
+                      △
+                    </a>
+                  </div>
+                </div> <!-- card header-->
+                <div id="collapse-errors" class="collapse show">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <div class="callout callout-danger">
+                        <small class="text-muted">Total</small>
+                        <br>
+                        <strong class="h4" id="errors-count"></strong>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row" id="errors">
+                      <div class="col-sm-12" id="errors-summary">
+                      </div>
+                  </div>
+                </div> <!-- card body -->
+              </div> <!-- collapse-errors -->
+              </div> <!-- card -->
+            </div> <!-- errors col-->
+          </div> <!-- errors row -->
+
+        <div class="row" id="warnings-row">
+          <div class="col-12">
+            <div class="card xc-content">
+              <div class="card-header">
+                <div class="header-title">⚠️ Warnings</div>
+                <div class="header-action">
+                  <a class="card-header-action" href="#" data-toggle="collapse"
+                    data-target="#collapse-warnings" aria-expanded="true">
+                    △
+                  </a>
+                </div>
+              </div> <!-- card header-->
+              <div id="collapse-warnings" class="collapse show">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="callout callout-warning">
+                      <small class="text-muted">Total</small>
+                      <br>
+                      <strong class="h4" id="warnings-count"></strong>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" id="warnings">
+                    <div class="col-sm-12" id="warnings-summary">
+                    </div>
+                </div>
+              </div> <!-- card body -->
+            </div> <!-- collapse-warnings -->
+            </div> <!-- card -->
+          </div> <!-- warnings col-->
+        </div> <!-- warnings row -->
+
+        <div class="row" id="functions-row">
+            <div class="col-12">
+              <div class="card xc-content">
+                <div class="card-header">
+                  <div class="header-title">Swift function times</div>
+                  <div class="header-action">
+                    <a class="card-header-action" href="#" data-toggle="collapse"
+                      data-target="#collapse-functions" aria-expanded="true">
+                      △
+                    </a>
+                  </div>
+                </div> <!-- card header-->
+
+                <div class="card-body">
+                  <div class="row" id="functions">
+                    <div class="col-sm-12" id="functions-summary">
+                    </div>
+                  </div>
+                </div> <!-- card body -->
+              </div> <!-- card -->
+            </div> <!-- functions col-->
+        </div> <!-- functions row -->
+
+
+
+      </div> <!-- container-fluid -->
+
+    </main>
+
+  </div> <!-- app body-->
+
+  <footer class="app-footer">
+    <!-- Footer content here -->
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.1.2/handlebars.min.js"></script>
+  <script type="text/javascript" src="js/build.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.23.0/moment-with-locales.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script type="text/javascript" src="js/step.js"></script>
+</body>
+</html>
