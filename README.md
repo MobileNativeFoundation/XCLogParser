@@ -33,7 +33,7 @@ We are currently working on adding more installation options.
 You can automate the parsing of `xcactivitylog` files with a post-scheme build action. In this way, the last build log can be parsed as soon as a build finishes. To do that, open the scheme editor in a projeect and expand the "Build" panel on the left side. You can then add a new "Post-action" run script and invoke the `xclogparser` executable with the required parameters:
 
 ```bash
-xclogParser parse --project MyApp --reporter html --output MyAppLogs
+xclogparser parse --project MyApp --reporter html --output MyAppLogs
 open MyAppLogs
 ```
 
