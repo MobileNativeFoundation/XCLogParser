@@ -30,7 +30,7 @@ We are currently working on adding more installation options.
 
 ## Xcode Integration
 
-You can automate the parsing of `xcactivitylog` files with a post-scheme build action. In this way, the last build log can be parsed as soon as a build finishes. To do that, open the scheme editor in a projeect and expand the "Build" panel on the left side. You can then add a new "Post-action" run script and invoke the `xclogparser` executable with the required parameters:
+You can automate the parsing of `xcactivitylog` files with a post-scheme build action. In this way, the last build log can be parsed as soon as a build finishes. To do that, open the scheme editor in a project and expand the "Build" panel on the left side. You can then add a new "Post-action" run script and invoke the `xclogparser` executable with the required parameters:
 
 ```bash
 xclogparser parse --project MyApp --reporter html --output MyAppLogs
@@ -44,7 +44,7 @@ This script assumes that the `xclogparser` executable is installed and present i
 >Note: Errors thrown in post-action run scripts are silenced, so it could be hard to notice simple mistakes.
 
 The run script is executed in a temporary directory by Xcode, so you may find it useful to immediately open the generated output with `open MyAppLogs` at the end of the script.
-The Finder will automatically open the output folder after a build completes and you can then view the generatd HTML page that contains a nice visualization of your build! ✨
+The Finder will automatically open the output folder after a build completes and you can then view the generated HTML page that contains a nice visualization of your build! ✨
 
 ## Log Types
 
@@ -71,7 +71,7 @@ xclogparser dump --file path/to/log.xcactivitylog --output activity.json
 xclogparser dump --project MyProject --output activity.json --redacted
 ```
 
-An example output has been ommitted for brevity since it can contain a lot of information regarding a build.
+An example output has been omitted for brevity since it can contain a lot of information regarding a build.
 
 <details>
   <summary>Available parameters</summary>
