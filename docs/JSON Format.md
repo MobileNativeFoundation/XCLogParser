@@ -46,10 +46,9 @@ Other fields:
 - `signature`: for build steps of type `detail` it has the actual command executed.
 - `detailStepType`: only for build steps of type `detail` . It has some info about what was run inside that step.
 - `warningCount`: the number of warnings thrown by the compiler for the given step.
-- `warnings`: the text of the warnings.
+- `warnings`: the list of warnings
 - `errorCount`: the number of errors for the given step.
 - `errors`: the list of errors.
-- `warnings`: the list of warnings
 - `swiftFunctionTimes`: Optional. If the step is a `swiftCompilation` and the app was compiled with the flags `-Xfrontend -debug-time-function-bodies` it will show the list of functions and their compilation time.
 
 When possible, the `signature` content of `detail` steps is parsed to determine its type. This makes it easier to aggregate the data.
