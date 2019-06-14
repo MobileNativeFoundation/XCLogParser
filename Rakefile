@@ -69,7 +69,8 @@ end
 
 def spm_build(configuration)
   spm_cmd = "swift build "\
-            "-c #{configuration}"
+            "-c #{configuration} "\
+            "--disable-sandbox"
   p spm_cmd
   system(spm_cmd) or abort "Build failure"
 end
