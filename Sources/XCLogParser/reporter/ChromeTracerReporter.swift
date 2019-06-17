@@ -44,7 +44,7 @@ public struct ChromeTracerReporter: LogReporter {
                                     pid: 1,
                                     tid: index,
                                     cat: target.title,
-                                    ts: Double(target.startTimestamp) * microSecondsPerSecond,
+                                    ts: target.startTimestamp * microSecondsPerSecond,
                                     id: index)
 
         let endEvent = TrackEvent(name: target.title,
@@ -52,7 +52,7 @@ public struct ChromeTracerReporter: LogReporter {
                                   pid: 1,
                                   tid: index,
                                   cat: target.title,
-                                  ts: Double(target.endTimestamp) * microSecondsPerSecond,
+                                  ts: target.endTimestamp * microSecondsPerSecond,
                                   id: index)
         return [startEvent, endEvent]
     }
@@ -63,9 +63,9 @@ public struct ChromeTracerReporter: LogReporter {
                                 pid: 1,
                                 tid: index,
                                 cat: target.title,
-                                ts: Double(step.startTimestamp) * microSecondsPerSecond,
+                                ts: step.startTimestamp * microSecondsPerSecond,
                                 id: index,
-                                dur: Double(step.duration) * microSecondsPerSecond)
+                                dur: step.duration * microSecondsPerSecond)
         event.args["signature"] = step.signature
         event.args["type"] = step.detailStepType.rawValue
         return event
