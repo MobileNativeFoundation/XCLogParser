@@ -4,6 +4,8 @@ import Foundation
 /// It can be visualized with the chrome://tracing tool
 public struct ChromeTracerReporter: LogReporter {
 
+    private let microSecondsPerSecond: Double = 1_000_000
+
     public func report(build: Any, output: ReporterOutput) throws {
         guard let steps = build as? BuildStep else {
             throw Error.errorCreatingReport("Type not supported \(type(of: build))")
@@ -42,7 +44,7 @@ public struct ChromeTracerReporter: LogReporter {
                                     pid: 1,
                                     tid: index,
                                     cat: target.title,
-                                    ts: Double(target.startTimestamp) * 1_000,
+                                    ts: Double(target.startTimestamp) * microSecondsPerSecond,
                                     id: index)
 
         let endEvent = TrackEvent(name: target.title,
@@ -50,7 +52,7 @@ public struct ChromeTracerReporter: LogReporter {
                                   pid: 1,
                                   tid: index,
                                   cat: target.title,
-                                  ts: Double(target.endTimestamp) * 1_000,
+                                  ts: Double(target.endTimestamp) * microSecondsPerSecond,
                                   id: index)
         return [startEvent, endEvent]
     }
@@ -61,9 +63,9 @@ public struct ChromeTracerReporter: LogReporter {
                                 pid: 1,
                                 tid: index,
                                 cat: target.title,
-                                ts: Double(step.startTimestamp) * 1_000,
+                                ts: Double(step.startTimestamp) * microSecondsPerSecond,
                                 id: index,
-                                dur: Double(step.duration) * 1_000)
+                                dur: Double(step.duration) * microSecondsPerSecond)
         event.args["signature"] = step.signature
         event.args["type"] = step.detailStepType.rawValue
         return event
