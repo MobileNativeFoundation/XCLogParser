@@ -216,7 +216,8 @@ public class ActivityParser {
             else {
                 throw Error.parseError("Unexpected token found parsing IDEActivityLogSection \(classRefToken)")
         }
-        if className == String(describing: IDEActivityLogSection.self) {
+        if className == String(describing: IDEActivityLogSection.self)
+        || className == "DBGConsoleLog" {
             return try parseIDEActivityLogSection(iterator: &iterator)
         }
         if className == "IDECommandLineBuildLog" {
