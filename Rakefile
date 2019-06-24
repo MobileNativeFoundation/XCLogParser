@@ -9,8 +9,7 @@ BUILD_DIR = File.join('.build').freeze
 RELEASES_ROOT_DIR = File.join('releases').freeze
 EXECUTABLE_NAME = 'xclogparser'.freeze
 PROJECT_NAME = 'XCLogParser'.freeze
-INSTALLATION_PREFIX = '/usr/local'
-INSTALLATION_BIN_DIR = "#{INSTALLATION_PREFIX}/bin".freeze
+INSTALLATION_PREFIX = '/usr/local'.freeze
 
 
 desc 'Build XCLogParser'
@@ -50,8 +49,11 @@ end
 desc 'Build and install XCLogParser'
 task :install, [:prefix] do |t, args|
   Rake::Task["build"].invoke('release')
-  system("mkdir -p #{INSTALLATION_BIN_DIR}")
-  system("cp -f .build/release/#{EXECUTABLE_NAME} #{INSTALLATION_BIN_DIR}")
+  # install binary in given prefix or fallback to default one
+  installation_prefix = args[:prefix].nil? || args[:prefix].nil? ? INSTALLATION_PREFIX : args[:prefix]
+  bin_dir = installation_bin_dir(installation_prefix)
+  system("mkdir -p #{bin_dir}")
+  system("cp -f .build/release/#{EXECUTABLE_NAME} #{bin_dir}")
 end
 
 desc 'Create a release zip'
@@ -79,6 +81,10 @@ end
 def spm_test()
   spm_cmd = "swift test"
   system(spm_cmd) or abort "Test failure"
+end
+
+def installation_bin_dir(dir)
+  "#{dir}/bin"
 end
 
 def create_release_zip(build_paths)
