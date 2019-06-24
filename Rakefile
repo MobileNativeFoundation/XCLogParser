@@ -9,7 +9,8 @@ BUILD_DIR = File.join('.build').freeze
 RELEASES_ROOT_DIR = File.join('releases').freeze
 EXECUTABLE_NAME = 'xclogparser'.freeze
 PROJECT_NAME = 'XCLogParser'.freeze
-INSTALL_PATH = "/usr/local/bin/#{EXECUTABLE_NAME}".freeze
+INSTALLATION_PREFIX = '/usr/local'
+INSTALLATION_BIN_DIR = "#{INSTALLATION_PREFIX}/bin".freeze
 
 
 desc 'Build XCLogParser'
@@ -47,10 +48,10 @@ task :test => ['gen_resources'] do
 end
 
 desc 'Build and install XCLogParser'
-task :install do
+task :install, [:prefix] do |t, args|
   Rake::Task["build"].invoke('release')
-  system("mkdir -p /usr/local/bin")
-  system("cp -f .build/release/#{EXECUTABLE_NAME} #{INSTALL_PATH}")
+  system("mkdir -p #{INSTALLATION_BIN_DIR}")
+  system("cp -f .build/release/#{EXECUTABLE_NAME} #{INSTALLATION_BIN_DIR}")
 end
 
 desc 'Create a release zip'
