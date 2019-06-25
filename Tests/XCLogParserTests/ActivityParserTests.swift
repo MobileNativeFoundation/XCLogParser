@@ -24,7 +24,7 @@ class ActivityParserTests: XCTestCase {
 
     let parser = ActivityParser()
 
-    lazy var expectedDVTTextDocumentLocation: DVTTextDocumentLocation = {
+    var expectedDVTTextDocumentLocation: DVTTextDocumentLocation = {
         return DVTTextDocumentLocation(documentURLString: "file:///project/EntityComponentView.m",
                                        timestamp: 2.2,
                                        startingLineNumber: 6,
@@ -36,7 +36,7 @@ class ActivityParserTests: XCTestCase {
                                        locationEncoding: 1)
     }()
 
-    lazy var textDocumentLocationTokens: [Token] = {
+    var textDocumentLocationTokens: [Token] = {
         return [Token.string("file:///project/EntityComponentView.m"),
                 Token.double(2.2),
                 Token.int(6),
@@ -101,6 +101,40 @@ class ActivityParserTests: XCTestCase {
         return startTokens + logMessageTokens + endTokens
     }()
 
+    var IDEConsoleItemTokens: [Token] = {
+        return [Token.className("IDEConsoleItem"),
+                Token.classNameRef("IDEConsoleItem"),
+                Token.int(2),
+                Token.string("Internal launch error: process launch failed: Security"),
+                Token.int(10),
+                Token.double(582169311.441566)
+        ]
+    }()
+
+    lazy var DBGConsoleLogTokens: [Token] = {
+        let startTokens = [Token.int(0),
+                           Token.string("Xcode.IDEActivityLogDomainType.DebugLog"),
+                           Token.string("Debug iOSDemo"),
+                           Token.string("Debug iOSDemo"),
+                           Token.double(582169296.793495),
+                           Token.double(582169312.039075),
+                           Token.null,
+                           Token.null,
+                           Token.null,
+                           Token.int(0),
+                           Token.int(0),
+                           Token.int(0),
+                           Token.null,
+                           Token.null,
+                           Token.null,
+                           Token.string("79D9C1DE-F736-4743-A7C6-B08ED42A1DFE"),
+                           Token.null,
+                           Token.null,
+                           Token.list(1)
+        ]
+        return startTokens + IDEConsoleItemTokens
+    }()
+
     func testParseDVTTextDocumentLocation() throws {
         let tokens = textDocumentLocationTokens
         var iterator = tokens.makeIterator()
@@ -162,6 +196,21 @@ class ActivityParserTests: XCTestCase {
     func testParseActivityLog() throws {
         let activityLog = try parser.parseIDEActiviyLogFromTokens(IDEActivityLogTokens)
         XCTAssertEqual(10, activityLog.version)
+    }
+
+    func testParseDBGConsoleLog() throws {
+        let tokens = DBGConsoleLogTokens
+        var iterator = tokens.makeIterator()
+        let DBGConsoleLog = try parser.parseDBGConsoleLog(iterator: &iterator)
+        XCTAssertEqual(1, DBGConsoleLog.logConsoleItems.count)
+        guard let consoleItem = DBGConsoleLog.logConsoleItems.first else {
+            XCTFail("logConsoleItems is empty")
+            return
+        }
+        XCTAssertEqual(2, consoleItem.adaptorType)
+        XCTAssertEqual("Internal launch error: process launch failed: Security", consoleItem.content)
+        XCTAssertEqual(10, consoleItem.kind)
+        XCTAssertEqual(582169311.441566, consoleItem.timestamp)
     }
 
 }

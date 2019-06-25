@@ -250,3 +250,66 @@ public class DVTTextDocumentLocation: DVTDocumentLocation {
         try container.encode(locationEncoding, forKey: .locationEncoding)
     }
 }
+
+public struct IDEConsoleItem: Encodable {
+    public let adaptorType: UInt64
+    public let content: String
+    public let kind: UInt64
+    public let timestamp: Double
+}
+
+public class DBGConsoleLog: IDEActivityLogSection {
+    public let logConsoleItems: [IDEConsoleItem]
+
+    public init(sectionType: Int8,
+                domainType: String,
+                title: String,
+                signature: String,
+                timeStartedRecording: Double,
+                timeStoppedRecording: Double,
+                subSections: [IDEActivityLogSection],
+                text: String,
+                messages: [IDEActivityLogMessage],
+                wasCancelled: Bool,
+                isQuiet: Bool,
+                wasFetchedFromCache: Bool,
+                subtitle: String,
+                location: DVTDocumentLocation,
+                commandDetailDesc: String,
+                uniqueIdentifier: String,
+                localizedResultString: String,
+                xcbuildSignature: String,
+                unknown: Int,
+                logConsoleItems: [IDEConsoleItem]) {
+        self.logConsoleItems = logConsoleItems
+        super.init(sectionType: sectionType,
+                   domainType: domainType,
+                   title: title,
+                   signature: signature,
+                   timeStartedRecording: timeStartedRecording,
+                   timeStoppedRecording: timeStoppedRecording,
+                   subSections: subSections,
+                   text: text,
+                   messages: messages,
+                   wasCancelled: wasCancelled,
+                   isQuiet: isQuiet,
+                   wasFetchedFromCache: wasFetchedFromCache,
+                   subtitle: subtitle,
+                   location: location,
+                   commandDetailDesc: commandDetailDesc,
+                   uniqueIdentifier: uniqueIdentifier,
+                   localizedResultString: localizedResultString,
+                   xcbuildSignature: xcbuildSignature,
+                   unknown: unknown)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case logConsoleItems
+    }
+
+    override public func encode(to encoder: Encoder) throws {
+        try super.encode(to: encoder)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(logConsoleItems, forKey: .logConsoleItems)
+    }
+}
