@@ -159,11 +159,11 @@ public final class ParserBuildSteps {
         return dateFormatter.string(from: Date(timeIntervalSinceReferenceDate: timeInterval))
     }
 
-    private func toTimestampSince1970(timeInterval: Double) -> Int64 {
-        return Int64(round(Date(timeIntervalSinceReferenceDate: timeInterval).timeIntervalSince1970))
+    private func toTimestampSince1970(timeInterval: Double) -> Double {
+        return Date(timeIntervalSinceReferenceDate: timeInterval).timeIntervalSince1970
     }
 
-    private func getDuration(startTimeInterval: Double, endTimeInterval: Double) -> Int64 {
+    private func getDuration(startTimeInterval: Double, endTimeInterval: Double) -> Double {
         var duration = endTimeInterval - startTimeInterval
         //If the endtime is almost the same as the endtime, we got a constant
         //in the tokens and a date in the future (year 4001). Here we normalize it to 0.0 secs
@@ -171,7 +171,7 @@ public final class ParserBuildSteps {
             duration = 0.0
         }
         duration = duration >= 0 ? duration : 0.0
-        return Int64(round(duration))
+        return duration
     }
 
     private func getSchema(title: String) -> String {
