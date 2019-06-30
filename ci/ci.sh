@@ -25,7 +25,7 @@ swiftlint lint --no-cache --strict || \
 # Build in release mode
 #
 heading "Building"
-rake build[release] | xcpretty || \
+set -o pipefail && rake build[release] | xcpretty || \
   fail "Release Build Failed"
 
 #
@@ -33,6 +33,5 @@ rake build[release] | xcpretty || \
 #
 heading "Running Tests"
 
-rake test | xcpretty || \
+set -o pipefail && rake test | xcpretty || \
   fail "Test Run failed"
-
