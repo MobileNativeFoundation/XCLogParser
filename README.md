@@ -363,7 +363,7 @@ XCLogParser is currently in alpha status. We are using it internally and tested 
 
 ## Development and Contributing
 
-1. Clone the repo with `git clone git@github.com/spotify/xclogparser.git`.
+1. Clone the repo with `git clone git@github.com:spotify/XCLogParser.git`.
 2. Run `rake gen_resources` to generate a static resource Swift file that is needed to compile the app.
 3. Run `swift package generate-xcodeproj` to generate an Xcode project (or use any text editor).
 4. Run tests in Xcode directly (CMD + U) or using `rake test`.

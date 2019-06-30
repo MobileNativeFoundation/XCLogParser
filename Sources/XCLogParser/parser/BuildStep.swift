@@ -167,15 +167,15 @@ public struct BuildStep: Encodable {
     /// - Some subSteps may have a startTimestamp before the main's startTimestamp.
     /// That behaviour has been found in steps of `DetailStepType.copyResourceFile`.
     /// Probably meaning that the file was cached
-    public let startTimestamp: Int64
+    public let startTimestamp: Double
 
     /// The timestap in which the step ended represented as Unix epoch
     /// For steps of type BuildStepType.main this is the date in which the build ended
-    public let endTimestamp: Int64
+    public let endTimestamp: Double
 
     /// The number of seconds the step lasted.
     /// For steps of type BuildStepType.main this is the total duration of the build.
-    public let duration: Int64
+    public let duration: Double
 
     /// For builds of type
     public let detailStepType: DetailStepType

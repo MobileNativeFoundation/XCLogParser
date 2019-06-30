@@ -94,7 +94,7 @@ function drawHeaders(target) {
   if (duration.minutes() > 0) {
     durationText += duration.minutes() + ' mins, ';
   }
-  durationText += duration.seconds() + ' secs';
+  durationText += Math.round(duration.seconds()) + ' secs';
   document.getElementById('build-time').innerHTML = durationText;
   document.getElementById('targets').innerHTML = targets.length.toLocaleString('en');
   document.getElementById('c-files').innerHTML = cFiles.length.toLocaleString('en');
@@ -240,11 +240,10 @@ function drawTimeline(target) {
         const serie = dataSeries[dataPointIndex];
         const start = serie.start;
         const end = serie.end;
-        const duration = end - start;
-        const seconds = duration === 1 ? " second" : " seconds";
+        const duration = (end - start).toFixed(3);
         return '<div class="arrow_box">' +
           '<span>' + serie.x + ' </span><br>' +
-          '<span>' + duration + seconds + '</span>' +
+          '<span>' + duration + ' seconds</span>' +
           '</div>'
       },
       y: {
@@ -283,7 +282,7 @@ function drawSlowestTargets(target) {
   const top = Math.min(20, targetsData.length);
   const topTargets = targetsData.slice(0, top);
   const durations = topTargets.map(function (target) {
-    return target.duration;
+    return target.duration.toFixed(3);
   });
   const names = topTargets.map(function (step) {
     if (target === 'main') {
@@ -349,7 +348,7 @@ function drawSlowestFiles(collection, element) {
   const top = Math.min(20, sortedData.length);
   const topTargets = sortedData.slice(0, top);
   const durations = topTargets.map(function (target) {
-    return target.duration;
+    return target.duration.toFixed(3);
   });
   const names = topTargets.map(function (step) {
     return getShortFilename(step.title, step.architecture);
