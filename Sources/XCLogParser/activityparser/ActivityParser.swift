@@ -135,13 +135,39 @@ public class ActivityParser {
                                          performanceTestOutputString: try parseAsString(token: iterator.next()))
     }
 
+    public func parseDBGConsoleLog(iterator: inout IndexingIterator<[Token]>)
+        throws -> DBGConsoleLog {
+            return DBGConsoleLog(sectionType: Int8(try parseAsInt(token: iterator.next())),
+                                                 domainType: try parseAsString(token: iterator.next()),
+                                                 title: try parseAsString(token: iterator.next()),
+                                                 signature: try parseAsString(token: iterator.next()),
+                                                 timeStartedRecording: try parseAsDouble(token: iterator.next()),
+                                                 timeStoppedRecording: try parseAsDouble(token: iterator.next()),
+                                                 subSections: try parseIDEActivityLogSections(iterator: &iterator),
+                                                 text: try parseAsString(token: iterator.next()),
+                                                 messages: try parseMessages(iterator: &iterator),
+                                                 wasCancelled: try parseBoolean(token: iterator.next()),
+                                                 isQuiet: try parseBoolean(token: iterator.next()),
+                                                 wasFetchedFromCache: try parseBoolean(token: iterator.next()),
+                                                 subtitle: try parseAsString(token: iterator.next()),
+                                                 location: try parseDocumentLocation(iterator: &iterator),
+                                                 commandDetailDesc: try parseAsString(token: iterator.next()),
+                                                 uniqueIdentifier: try parseAsString(token: iterator.next()),
+                                                 localizedResultString: try parseAsString(token: iterator.next()),
+                                                 xcbuildSignature: try parseAsString(token: iterator.next()),
+                                                 // swiftlint:disable:next line_length
+                                                 unknown: isCommandLineLog ? Int(try parseAsInt(token: iterator.next())) : 0,
+                                                 logConsoleItems: try parseIDEConsoleItems(iterator: &iterator)
+                                                 )
+    }
+
     private func parseMessages(iterator: inout IndexingIterator<[Token]>) throws -> [IDEActivityLogMessage] {
         guard let listToken = iterator.next() else {
             throw Error.parseError("Parsing [IDEActivityLogMessage]")
         }
         switch listToken {
         case .null:
-            return [IDEActivityLogMessage]()
+            return []
         case .list(let count):
             var messages = [IDEActivityLogMessage]()
             for _ in 0..<count {
@@ -160,7 +186,7 @@ public class ActivityParser {
         }
         switch listToken {
         case .null:
-            return [DVTDocumentLocation]()
+            return []
         case .list(let count):
             var locations = [DVTDocumentLocation]()
             for _ in 0..<count {
@@ -225,7 +251,10 @@ public class ActivityParser {
         if className == "IDEActivityLogUnitTestSection" {
             return try parseIDEActivityLogUnitTestSection(iterator: &iterator)
         }
-        throw Error.parseError("Unexpected className found parsi3ng IDEActivityLogSection \(className)")
+        if className == String(describing: DBGConsoleLog.self) {
+            return try parseDBGConsoleLog(iterator: &iterator)
+        }
+        throw Error.parseError("Unexpected className found parsing IDEActivityLogSection \(className)")
     }
 
     private func getClassRefToken(iterator: inout IndexingIterator<[Token]>) throws -> Token {
@@ -255,7 +284,7 @@ public class ActivityParser {
             }
             switch listToken {
             case .null:
-                return [IDEActivityLogSection]()
+                return []
             case .list(let count):
                 var sections = [IDEActivityLogSection]()
                 for _ in 0..<count {
@@ -265,6 +294,46 @@ public class ActivityParser {
                 return sections
             default:
                 throw Error.parseError("Unexpected token parsing array of IDEActivityLogSection: \(listToken)")
+            }
+    }
+
+    private func parseIDEConsoleItem(iterator: inout IndexingIterator<[Token]>)
+        throws -> IDEConsoleItem? {
+            let classRefToken = try getClassRefToken(iterator: &iterator)
+            if case Token.null = classRefToken {
+               return nil
+            }
+            guard case Token.classNameRef(let className) = classRefToken else {
+                throw Error.parseError("Unexpected token found parsing IDEConsoleItem \(classRefToken)")
+            }
+
+            if className == String(describing: IDEConsoleItem.self) {
+                return IDEConsoleItem(adaptorType: try parseAsInt(token: iterator.next()),
+                                      content: try parseAsString(token: iterator.next()),
+                                      kind: try parseAsInt(token: iterator.next()),
+                                      timestamp: try parseAsDouble(token: iterator.next()))
+            }
+            throw Error.parseError("Unexpected className found parsing IDEConsoleItem \(className)")
+    }
+
+    private func parseIDEConsoleItems(iterator: inout IndexingIterator<[Token]>)
+        throws -> [IDEConsoleItem] {
+            guard let listToken = iterator.next() else {
+                throw Error.parseError("Unexpected EOF parsing array of IDEConsoleItem")
+            }
+            switch listToken {
+            case .null:
+                return []
+            case .list(let count):
+                var items = [IDEConsoleItem]()
+                for _ in 0..<count {
+                    if let item = try parseIDEConsoleItem(iterator: &iterator) {
+                        items.append(item)
+                    }
+                }
+                return items
+            default:
+                throw Error.parseError("Unexpected token parsing array of IDEConsoleItem: \(listToken)")
             }
     }
 
