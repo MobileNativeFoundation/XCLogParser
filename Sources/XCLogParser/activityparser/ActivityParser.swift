@@ -167,7 +167,7 @@ public class ActivityParser {
         }
         switch listToken {
         case .null:
-            return [IDEActivityLogMessage]()
+            return []
         case .list(let count):
             var messages = [IDEActivityLogMessage]()
             for _ in 0..<count {
@@ -186,7 +186,7 @@ public class ActivityParser {
         }
         switch listToken {
         case .null:
-            return [DVTDocumentLocation]()
+            return []
         case .list(let count):
             var locations = [DVTDocumentLocation]()
             for _ in 0..<count {
@@ -284,7 +284,7 @@ public class ActivityParser {
             }
             switch listToken {
             case .null:
-                return [IDEActivityLogSection]()
+                return []
             case .list(let count):
                 var sections = [IDEActivityLogSection]()
                 for _ in 0..<count {
@@ -323,7 +323,7 @@ public class ActivityParser {
             }
             switch listToken {
             case .null:
-                return [IDEConsoleItem]()
+                return []
             case .list(let count):
                 var items = [IDEConsoleItem]()
                 for _ in 0..<count {
