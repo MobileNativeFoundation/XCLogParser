@@ -245,7 +245,9 @@ public class ActivityParser {
         if className == String(describing: IDEActivityLogSection.self) {
             return try parseIDEActivityLogSection(iterator: &iterator)
         }
-        if className == "IDECommandLineBuildLog" {
+        if className == "IDECommandLineBuildLog" ||
+            className == "IDEActivityLogMajorGroupSection" ||
+            className == "IDEActivityLogCommandInvocationSection" {
             return try parseIDEActivityLogSection(iterator: &iterator)
         }
         if className == "IDEActivityLogUnitTestSection" {
