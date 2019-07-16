@@ -6,7 +6,7 @@ Xcode logs are stored in files with the extension `.xcactivitylog`. Those files 
 
 This information was first documented by Vincent Isambart in this [blog post](https://techlife.cookpad.com/entry/2017/12/08/124532).
 
-An `SLF` document starts with the header `SLF0`. After the header, the document has a collection of encoded values. The SLF encoding format supports these types:
+A `SLF` document starts with the header `SLF0`. After the header, the document has a collection of encoded values. The SLF encoding format supports these types:
 
 - Integer
 - Double
@@ -57,7 +57,7 @@ In the `xcactivitylog`'s files, this type of value is used to encode timestamps.
 - Left hand side value: An `Integer` with the number of characters that are part of the `String`.
 - Right hand side value: The characters that are part of the `String`
 
-The number of characters count works as in `NSString` rather than in `String`: it counts the 16-bit code units within the string’s UTF-16 representation and not the number of Unicode extended grapheme clusters within the string like in Swift's `String`.
+The number of characters works as in `NSString` rather than in `String`: it counts the 16-bit code units within the string’s UTF-16 representation and not the number of Unicode extended grapheme clusters within the string like in Swift's `String`.
 
 So you have to be careful to load the file not as an UTF-8 String, because it will give you a mismatch with the count in the `SLF` Format. Currently, we load the content of the file as an ASCII String to avoid that problem:
 
@@ -127,7 +127,7 @@ You can get these tokens:
 [type: "string", value: "Prepare build"],
 ```
 
-The first integer  is the version of the `SLF` format used. In Xcode 10.x and 11 Beta, the version is 10. The values after the version are the actual content of the log.
+The first integer is the version of the `SLF` format used. In Xcode 10.x and 11 Beta, the version is 10. The values after the version are the actual content of the log.
 
 ## Parsing an xcactivitylog
 
