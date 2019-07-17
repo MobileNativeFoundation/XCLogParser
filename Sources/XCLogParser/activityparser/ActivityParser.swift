@@ -29,6 +29,8 @@ public class ActivityParser {
     /// that into account
     var isCommandLineLog = false
 
+    public init() {}
+
     /// Parses the xcacticitylog argument into a `IDEActivityLog`
     /// - parameter logURL: `URL` of the xcactivitylog
     /// - parameter redacted: If true, the username will be replaced
