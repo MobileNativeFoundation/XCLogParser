@@ -6,7 +6,8 @@ import PackageDescription
 let package = Package(
     name: "XCLogParser",
     products: [
-    	.executable(name: "xclogparser", targets: ["XCLogParserApp"])
+    	.executable(name: "xclogparser", targets: ["XCLogParserApp"]),
+        .library(name: "XCLogParser", targets: ["XCLogParser"])
     ],
     dependencies: [
         .package(url: "https://github.com/1024jp/GzipSwift", from: "4.0.4"),
@@ -14,6 +15,7 @@ let package = Package(
         .package(url: "https://github.com/Carthage/Commandant.git", from: "0.16.0"),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.0.0"),
         .package(url: "https://github.com/mxcl/Path.swift.git", from: "0.13.0"),
+        .package(url: "https://github.com/antitypical/Result.git", from: "5.0.0"),
     ],
     targets: [
         .target(
@@ -26,7 +28,7 @@ let package = Package(
         ),
         .target(
             name: "XCLogParserApp",
-            dependencies: ["XCLogParser", "Commandant"]
+            dependencies: ["XCLogParser", "Commandant", "Result"]
         ),
         .testTarget(
             name: "XCLogParserTests",

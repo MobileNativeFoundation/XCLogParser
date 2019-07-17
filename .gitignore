@@ -12,5 +12,5 @@ DerivedData/
 
 .vscode
 
-## Generated files created by rake gen_resources
-Sources/XCLogParser/generated/
+# Xcode 11
+.swiftpm/
