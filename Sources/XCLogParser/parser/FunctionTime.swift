@@ -22,17 +22,17 @@ import Foundation
 /// Represents the time it took to the Swift Compiler to compile a function
 public struct FunctionTime: Encodable {
     /// URL of the file where the function is
-    let file: String
+    public let file: String
 
     /// Duration in Miliseconds
-    let durationMS: Double
+    public let durationMS: Double
 
     /// Line number where the function is declared
-    let startingLine: Int
+    public let startingLine: Int
 
     /// Column number where the function is declared
-    let startingColumn: Int
+    public let startingColumn: Int
 
     /// function signature
-    let signature: String
+    public let signature: String
 }
