@@ -70,15 +70,15 @@ public enum NoticeType: String, Encodable {
 /// wraps that data
 public class Notice: Encodable {
 
-    let type: NoticeType
-    let title: String
-    let clangFlag: String?
-    let documentURL: String
-    let severity: Int
-    let startingLineNumber: UInt64
-    let endingLineNumber: UInt64
-    let startingColumnNumber: UInt64
-    let endingColumnNumber: UInt64
+    public let type: NoticeType
+    public let title: String
+    public let clangFlag: String?
+    public let documentURL: String
+    public let severity: Int
+    public let startingLineNumber: UInt64
+    public let endingLineNumber: UInt64
+    public let startingColumnNumber: UInt64
+    public let endingColumnNumber: UInt64
     public let characterRangeEnd: UInt64
     public let characterRangeStart: UInt64
 

@@ -44,6 +44,8 @@ public struct LogFinder {
         return homeDirURL.appendingPathComponent("Library/Developer/Xcode/DerivedData", isDirectory: true)
     }
 
+    public init() {}
+
     public func findLatestLogWithLogOptions(_ logOptions: LogOptions) throws -> URL {
         guard logOptions.xcactivitylogPath.isEmpty else {
             return URL(fileURLWithPath: Path(logOptions.xcactivitylogPath).absolute().string)
