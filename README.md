@@ -81,7 +81,7 @@ An example output has been omitted for brevity since it can contain a lot of inf
   |-----|---|-----|
   | `--file`  | The path to the `xcactivitylog`.  | No * |
   | `--project`  | The name of the project if you don't know the path to the log. The tool will try to find the latest Build log in a folder that starts with that name inside the `DerivedData` directory.  | No * |
-  | `--worskapce`  | The path to the `xcworkspace` file if you don't know the path to the log. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
+  | `--workspace`  | The path to the `xcworkspace` file if you don't know the path to the log. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
   | `--xcodeproj`  | The path to the `xcodeproj` file if you don't know the path to the log and if the project doesn't have a `xcworkspace` file. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
   | `--derived_data`  | The path to the derived data folder if you are using `xcodebuild` to build your project with the `-derivedDataPath` option.  | No |
   | `--output`  | If specified, the JSON file will be written to the given path. If not defined, the command will output to the standard output.  | No |
@@ -113,7 +113,7 @@ Example output available in the [reporters](#reporters) section.
   | `--reporter`  | The reporter used to transform the logs. It can be either `json`, `flatJson`, `chromeTracer` or `html`. (required)  | Yes |
   | `--file`  | The path to the `xcactivitylog`.  | No * |
   | `--project`  | The name of the project if you don't know the path to the log. The tool will try to find the latest Build log in a folder that starts with that name inside the `DerivedData` directory.  | No * |
-  | `--worskapce`  | The path to the `xcworkspace` file if you don't know the path to the log. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
+  | `--workspace`  | The path to the `xcworkspace` file if you don't know the path to the log. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
   | `--xcodeproj`  | The path to the `xcodeproj` file if you don't know the path to the log and if the project doesn't have a `xcworkspace` file. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
   | `--derived_data`  | The path to the derived data folder if you are using `xcodebuild` to build your project with the `-derivedDataPath` option.  | No |
   | `--output`  | If specified, the JSON file will be written to the given path. If not defined, the command will output to the standard output.  | No |
