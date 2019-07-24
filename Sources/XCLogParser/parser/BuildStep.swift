@@ -257,4 +257,11 @@ public extension BuildStep {
         return details
     }
 
+    func summarize() -> [BuildStep] {
+        var steps = [BuildStep]()
+        var noSubSteps = self
+        noSubSteps.subSteps = [BuildStep]()
+        steps.append(noSubSteps)
+        return steps
+    }
 }
