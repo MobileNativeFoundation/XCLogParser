@@ -15,7 +15,7 @@ This is an example of a report created from the Build Log of the [Kickstarter iO
 `XCLogParser` is written as a [SPM](https://github.com/apple/swift-package-manager/) executable and it supports three commands:
 
 1. [Dump](#dump-command) the contents of an `xcactivitylog` into a `JSON` document.
-2. [Parse](#parse-command) the contents of an `xcactivitylog` into different kind of reports (`flatJson`, `chromeTracer` and `html`).
+2. [Parse](#parse-command) the contents of an `xcactivitylog` into different kind of reports (`json`, `flatJson`, `chromeTracer` and `html`).
 3. Dump the [Manifest](#manifest-command) contents of a `LogStoreManifest.plist` file into a `JSON` document.
 
 Depending on your needs, there are various use-cases where `XCLogParser` can help you:
