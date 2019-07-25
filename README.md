@@ -15,7 +15,7 @@ This is an example of a report created from the Build Log of the [Kickstarter iO
 `XCLogParser` is written as a [SPM](https://github.com/apple/swift-package-manager/) executable and it supports three commands:
 
 1. [Dump](#dump-command) the contents of an `xcactivitylog` into a `JSON` document.
-2. [Parse](#parse-command) the contents of an `xcactivitylog` into different kind of reports (`json`, `flatJson`, `chromeTracer` and `html`).
+2. [Parse](#parse-command) the contents of an `xcactivitylog` into different kind of reports (`json`, `flatJson`, `summaryJson`, `chromeTracer` and `html`).
 3. Dump the [Manifest](#manifest-command) contents of a `LogStoreManifest.plist` file into a `JSON` document.
 
 Depending on your needs, there are various use-cases where `XCLogParser` can help you:
@@ -93,7 +93,7 @@ An example output has been omitted for brevity since it can contain a lot of inf
 
 ### Parse Command
 
-Parses the build information from a `xcactivitylog` and converts it into different representations such as a [JSON file](#JSON-Reporter), [flat JSON file](#FlatJson-Reporter), [Chrome Tracer file](#ChromeTracer-Reporter) or a static [HTML page](#HTML-Reporter).
+Parses the build information from a `xcactivitylog` and converts it into different representations such as a [JSON file](#JSON-Reporter), [flat JSON file](#FlatJson-Reporter), [summary JSON file](#SummaryJson-Reporter), [Chrome Tracer file](#ChromeTracer-Reporter) or a static [HTML page](#HTML-Reporter).
 
 Examples:
 
@@ -110,7 +110,7 @@ Example output available in the [reporters](#reporters) section.
 
   | Parameter Name | Description | Required |
   |-----|---|-----|
-  | `--reporter`  | The reporter used to transform the logs. It can be either `json`, `flatJson`, `chromeTracer` or `html`. (required)  | Yes |
+  | `--reporter`  | The reporter used to transform the logs. It can be either `json`, `flatJson`, `summaryJson`, `chromeTracer` or `html`. (required)  | Yes |
   | `--file`  | The path to the `xcactivitylog`.  | No * |
   | `--project`  | The name of the project if you don't know the path to the log. The tool will try to find the latest Build log in a folder that starts with that name inside the `DerivedData` directory.  | No * |
   | `--workspace`  | The path to the `xcworkspace` file if you don't know the path to the log. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
@@ -169,6 +169,7 @@ The [parse command](#parse-command) has different types of reporters built-in th
 
 - [JSON](#json-reporter)
 - [Flat JSON](#flatojson-reporter)
+- [Summary JSON](#summaryjson-reporter)
 - [Chrome Tracer](#chrometracer-reporter)
 - [HTML](#html-reporter)
 
@@ -314,6 +315,50 @@ xclogparser parse --file path/to/log.xcactivitylog --reporter flatJson
     },
     ...
   ]
+  ```
+</details>
+
+For more information regarding each field, check out the [JSON format documentation](https://github.com/spotify/XCLogParser/blob/master/docs/JSON%20Format.md).
+
+### SummaryJson Reporter
+
+Parses the log as a JSON object, with no nested steps (the field `subSteps` is always empty). Useful to get a high level summary of the build.
+
+Example:
+
+```bash
+xclogparser parse --file path/to/log.xcactivitylog --reporter summaryJson
+```
+
+<details>
+  <summary>Example Output</summary>
+
+  ```json
+    {
+      "parentIdentifier" : "",
+      "title" : "Build MobiusCore",
+      "warningCount" : 0,
+      "duration" : 0,
+      "startTimestamp" : 1558590748,
+      "signature" : "Build MobiusCore",
+      "endDate" : "2019-05-23T05:52:28.274000Z",
+      "errorCount" : 0,
+      "domain" : "Xcode.IDEActivityLogDomainType.BuildLog",
+      "type" : "main",
+      "identifier" : "68a2bbd0048a454d91b3734b5d5dc45e_1558640253_1",
+      "buildStatus" : "succeeded",
+      "schema" : "MobiusCore",
+      "subSteps" : [
+
+      ],
+      "endTimestamp" : 1558590748,
+      "architecture" : "",
+      "machineName" : "68a2bbd0048a454d91b3734b5d5dc45e",
+      "buildIdentifier" : "68a2bbd0048a454d91b3734b5d5dc45e_1558640253",
+      "startDate" : "2019-05-23T05:52:28.244000Z",
+      "documentURL" : "",
+      "detailStepType" : "none"
+    }
   ```
 </details>
 

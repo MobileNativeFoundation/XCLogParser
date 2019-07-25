@@ -3,6 +3,7 @@ import Foundation
 public enum Reporter: String {
     case json
     case flatJson
+    case summaryJson
     case chromeTracer
     case html
 
@@ -14,6 +15,8 @@ public enum Reporter: String {
             return JsonReporter()
         case .flatJson:
             return FlatJsonReporter()
+        case .summaryJson:
+            return SummaryJsonReporter()
         case .html:
             return HtmlReporter()
         }
