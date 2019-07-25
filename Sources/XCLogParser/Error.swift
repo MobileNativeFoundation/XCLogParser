@@ -19,12 +19,14 @@
 
 import Foundation
 
-public enum Error: Swift.Error {
+public enum Error: LocalizedError {
     case invalidLogHeader(String)
     case invalidLine(String)
     case errorCreatingReport(String)
     case wrongLogManifestFile(String, String)
     case parseError(String)
+
+    public var errorDescription: String? { return description }
 }
 
 extension Error: CustomStringConvertible {
