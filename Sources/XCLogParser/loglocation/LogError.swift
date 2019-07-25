@@ -20,7 +20,7 @@
 import Foundation
 
 /// Errors thrown by the LogFinder
-public enum LogError: Swift.Error {
+public enum LogError: LocalizedError {
     case noDerivedDataFound
     case noLogFound(dir: String)
     case xcodeBuildError(String)
@@ -28,4 +28,34 @@ public enum LogError: Swift.Error {
     case invalidFile(String)
     case noLogManifestFound(dir: String)
     case invalidLogManifest(String)
+
+    public var errorDescription: String? { return description }
+
+}
+
+extension LogError: CustomStringConvertible {
+
+    public var description: String {
+        switch self {
+        case .noDerivedDataFound:
+            return "We couldn't find a the derivedData directory. " +
+            "If you use a custom derivedData dir, use the --derivedData option to pass it. "
+        case .noLogFound(let dir):
+            return "We couldn't find a log in the directory \(dir). " +
+                "If the log is in a custom derivedData dir, use the --derivedData option. " +
+            "You can also pass the full path to the xcactivity log with the --file option"
+        case .xcodeBuildError(let error):
+            return error
+        case .readingFile(let path):
+            return "Can't read file \(path)"
+        case .invalidFile(let path):
+            return "\(path) is not a valid xcactivitylog file"
+        case .noLogManifestFound(let path):
+            return "We couldn't find a logManiifest in the path \(path). " +
+            "If the logManifest is in a custom derivedData dir, use the --derivedData option."
+        case .invalidLogManifest(let path):
+            return "\(path) is not a valid LogManifest file"
+        }
+    }
+
 }
