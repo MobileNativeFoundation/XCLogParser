@@ -36,7 +36,7 @@ The `type` field can assume three different values:
 - `detail`: a step inside the target. Usually a script that was run during a Pre build phase, the compilation of a single file inside the target or other Build Rule.
 
 Other fields:
-- `buildIdentifier`: a unique identifier for the given build. It uses the machine name plus the IDEActivityLog's unique identifiers so it should be unique across different hosts.
+- `buildIdentifier`: a unique identifier for the given build. It uses the machine name plus the IDEActivityLog's unique identifier so it should be unique across different hosts.
 - `duration`: duration in seconds for the given step.
 - `subSteps`: an array of build steps that belong to the given one.
 - `parentIdentifier`: identifier of the step to which the given step belongs to.
