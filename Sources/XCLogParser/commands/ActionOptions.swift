@@ -34,9 +34,14 @@ public struct ActionOptions {
     /// Used to protect the privacy of the users.
     let redacted: Bool
 
-    public init(reporter: Reporter, outputPath: String, redacted: Bool) {
+    /// Used in Parse actions. The current parsers use the host name to create a unique build identifier
+    /// With this option, a user can override it and provide a name that will be used in that identifier.
+    let machineName: String?
+
+    public init(reporter: Reporter, outputPath: String, redacted: Bool, machineName: String? = nil) {
         self.reporter = reporter
         self.outputPath = outputPath
         self.redacted = redacted
+        self.machineName = machineName
     }
 }

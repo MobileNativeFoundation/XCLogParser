@@ -23,7 +23,7 @@ import Foundation
 public final class ParserBuildSteps {
 
     let machineName: String
-    let buildIdentifier: String
+    var buildIdentifier = ""
     var buildStatus = ""
     var currentIndex = 0
     var totalErrors = 0
@@ -65,15 +65,21 @@ public final class ParserBuildSteps {
         return NSRegularExpression.fromPattern(pattern)
     }()
 
-    public init() {
-        self.machineName = MacOSMachineNameReader().machineName ?? "unknown"
-        self.buildIdentifier = "\(self.machineName)_\(Int(Date().timeIntervalSince1970))"
+    /// - parameter machineName: The name of the machine. It will be used to create a unique identifier
+    /// for the log. If `nil`, the host name will be used instead.
+    public init(machineName: String? = nil) {
+        if let machineName = machineName {
+            self.machineName = machineName
+        } else {
+            self.machineName = MacOSMachineNameReader().machineName ?? "unknown"
+        }
     }
 
     /// Parses the content from an Xcode log into a `BuildStep`
     /// - parameter activityLog: An `IDEActivityLog`
     /// - returns: A `BuildStep` with the parsed content from the log.
     public func parse(activityLog: IDEActivityLog) throws -> BuildStep {
+        self.buildIdentifier = "\(machineName)_\(activityLog.mainSection.uniqueIdentifier)"
         buildStatus = activityLog.mainSection.localizedResultString.replacingOccurrences(of: "Build ", with: "")
         var mainBuildStep = try parseLogSection(logSection: activityLog.mainSection, type: .main, parentSection: nil)
         mainBuildStep.errorCount = totalErrors
