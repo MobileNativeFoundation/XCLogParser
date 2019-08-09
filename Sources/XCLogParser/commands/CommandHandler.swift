@@ -24,9 +24,7 @@ public struct CommandHandler {
     let logFinder = LogFinder()
     let activityLogParser = ActivityParser()
 
-    public init() {
-
-    }
+    public init() { }
 
     public func handle(command: Command) throws {
         switch command.action {
@@ -59,7 +57,7 @@ public struct CommandHandler {
 
     func handleParse(fromLogURL logURL: URL, options: ActionOptions) throws {
         let activityLog = try activityLogParser.parseActivityLogInURL(logURL, redacted: options.redacted)
-        let buildParser = ParserBuildSteps()
+        let buildParser = ParserBuildSteps(machineName: options.machineName)
         let buildSteps = try buildParser.parse(activityLog: activityLog)
         let reporterOutput = ReporterOutputFactory.makeReporterOutput(path: options.outputPath)
         let logReporter = options.reporter.makeLogReporter()

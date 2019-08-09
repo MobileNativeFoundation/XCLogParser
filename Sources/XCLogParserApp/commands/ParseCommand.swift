@@ -57,7 +57,8 @@ struct ParseCommand: CommandProtocol {
                                     xcactivitylogPath: options.logFile)
         let actionOptions = ActionOptions(reporter: reporter,
                                           outputPath: options.output,
-                                          redacted: options.redacted)
+                                          redacted: options.redacted,
+                                          machineName: options.machineName.isEmpty ? nil : options.machineName)
         let action = Action.parse(options: actionOptions)
         let command = Command(logOptions: logOptions, action: action)
         do {
@@ -77,6 +78,7 @@ struct ParseOptions: OptionsProtocol {
     let workspace: String
     let xcodeproj: String
     let reporter: String
+    let machineName: String
     let redacted: Bool
     let output: String
 
@@ -86,9 +88,11 @@ struct ParseOptions: OptionsProtocol {
         -> (_ workspace: String)
         -> (_ xcodeproj: String)
         -> (_ reporter: String)
+        -> (_ machineName: String)
         -> (_ redacted: Bool)
         -> (_ output: String) -> ParseOptions {
-        return { derivedData in { projectName in { workspace in { xcodeproj in { reporter in { redacted in {
+            return { derivedData in { projectName in { workspace in { xcodeproj in { reporter in { machineName
+                in { redacted in {
             output in
             self.init(logFile: logFile,
                       derivedData: derivedData,
@@ -96,9 +100,10 @@ struct ParseOptions: OptionsProtocol {
                       workspace: workspace,
                       xcodeproj: xcodeproj,
                       reporter: reporter,
+                      machineName: machineName,
                       redacted: redacted,
                       output: output)
-            }}}}}}}
+                }}}}}}}}
     }
 
     static func evaluate(_ mode: CommandMode) -> Result<ParseOptions, CommandantError<CommandantError<Swift.Error>>> {
@@ -112,6 +117,11 @@ struct ParseOptions: OptionsProtocol {
                 key: "reporter",
                 defaultValue: "",
                 usage: "The reporter to use. It could be `json`, `flatJson`, `chromeTracer`, `html` or `btr`")
+            <*> mode <| Option(
+                key: "machine_name",
+                defaultValue: "",
+                usage: "Optional. The name of the machine." +
+                "If not specified, the host name will be used.")
             <*> mode <| redactedSwitch
             <*> mode <| outputOption
     }

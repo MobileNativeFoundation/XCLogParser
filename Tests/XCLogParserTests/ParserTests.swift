@@ -32,7 +32,42 @@ class ParserTests: XCTestCase {
             let formattedDate = parser.dateFormatter.string(from: date)
             XCTAssertEqual(jsonDateString, formattedDate)
         }
+    }
 
+    func testBuildIdentifierShouldUseMachineName() throws {
+        let machineName = UUID.init().uuidString
+        let uniqueIdentifier = "uniqueIdentifier"
+        let timestamp = Date().timeIntervalSinceNow
+        let parser = ParserBuildSteps(machineName: machineName)
+        let fakeMainSection = IDEActivityLogSection(sectionType: 1,
+                                                    domainType: "",
+                                                    title: "Main",
+                                                    signature: "",
+                                                    timeStartedRecording: timestamp,
+                                                    timeStoppedRecording: timestamp,
+                                                    subSections: [],
+                                                    text: "",
+                                                    messages: [],
+                                                    wasCancelled: false,
+                                                    isQuiet: false,
+                                                    wasFetchedFromCache: false,
+                                                    subtitle: "",
+                                                    location: DVTDocumentLocation(documentURLString: "",
+                                                                                  timestamp: timestamp),
+                                                    commandDetailDesc: "",
+                                                    uniqueIdentifier: uniqueIdentifier,
+                                                    localizedResultString: "",
+                                                    xcbuildSignature: "",
+                                                    unknown: 0)
+        let fakeActivityLog = IDEActivityLog(version: 10, mainSection: fakeMainSection)
+        let buildStep = try parser.parse(activityLog: fakeActivityLog)
+        XCTAssertEqual("\(machineName)_\(uniqueIdentifier)", buildStep.buildIdentifier)
+
+        if let hostName = Host.current().localizedName {
+            let parserNoMachineName = ParserBuildSteps(machineName: nil)
+            let buildStepNoMachineName = try parserNoMachineName.parse(activityLog: fakeActivityLog)
+            XCTAssertEqual("\(hostName)_\(uniqueIdentifier)", buildStepNoMachineName.buildIdentifier)
+        }
     }
 
 }
