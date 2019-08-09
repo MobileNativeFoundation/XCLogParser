@@ -72,7 +72,6 @@ class ParserTests: XCTestCase {
 
     func testParseNote() throws {
         let timestamp = Date().timeIntervalSinceReferenceDate
-
         let noteMessage = IDEActivityLogMessage(title: "Using legacy build system",
             shortTitle: "",
             timeEmitted: timestamp,
@@ -98,7 +97,6 @@ class ParserTests: XCTestCase {
 
     func testParseWarning() throws {
         let timestamp = Date().timeIntervalSinceReferenceDate
-
         let textDocumentLocation = DVTTextDocumentLocation(documentURLString: "file://project/file.m",
                                                            timestamp: timestamp,
                                                            startingLineNumber: 10,
