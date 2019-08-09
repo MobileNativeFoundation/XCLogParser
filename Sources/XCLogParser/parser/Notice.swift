@@ -61,7 +61,7 @@ public enum NoticeType: String, Encodable {
         case Suffix("Notice"):
             return .note
         default:
-            return nil
+            return .note
         }
     }
 }
@@ -127,7 +127,7 @@ public class Notice: Encodable {
     /// - returns: An Array of `Notice`
     public static func parseFromLogSection(_ logSection: IDEActivityLogSection) -> [Notice] {
         // we look for clangWarnings parsing the text of the logSection
-        // is it possible to have errors and clang warning in the same step?
+        // is it possible to have errors and clang warnings in the same step?
         if let clangWarningsFlags = self.parseClangWarningFlags(text: logSection.text),
             clangWarningsFlags.count > 0 {
             return zip(logSection.messages, clangWarningsFlags).compactMap { (message, warningFlag) -> Notice? in
