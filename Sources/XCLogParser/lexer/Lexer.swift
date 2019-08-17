@@ -49,13 +49,13 @@ public final class Lexer {
     public func tokenize(contents: String, redacted: Bool) throws -> [Token] {
         let scanner = Scanner(string: contents)
         guard scanSLFHeader(scanner: scanner) else {
-            throw Error.invalidLogHeader(filePath)
+            throw XCLogParserError.invalidLogHeader(filePath)
         }
         var tokens = [Token]()
         while !scanner.isAtEnd {
             guard let logTokens = scanSLFType(scanner: scanner, redacted: redacted), logTokens.isEmpty == false else {
                 print(tokens)
-                throw Error.invalidLine(scanner.approximateLine)
+                throw XCLogParserError.invalidLine(scanner.approximateLine)
             }
             tokens.append(contentsOf: logTokens)
         }

@@ -165,7 +165,7 @@ public class ActivityParser {
 
     private func parseMessages(iterator: inout IndexingIterator<[Token]>) throws -> [IDEActivityLogMessage] {
         guard let listToken = iterator.next() else {
-            throw Error.parseError("Parsing [IDEActivityLogMessage]")
+            throw XCLogParserError.parseError("Parsing [IDEActivityLogMessage]")
         }
         switch listToken {
         case .null:
@@ -178,13 +178,13 @@ public class ActivityParser {
             }
             return messages
         default:
-            throw Error.parseError("Unexpected token parsing array of IDEActivityLogMessage \(listToken)")
+            throw XCLogParserError.parseError("Unexpected token parsing array of IDEActivityLogMessage \(listToken)")
         }
     }
 
     private func parseDocumentLocations(iterator: inout IndexingIterator<[Token]>) throws -> [DVTDocumentLocation] {
         guard let listToken = iterator.next() else {
-            throw Error.parseError("Unexpected EOF parsing [DocumentLocation]")
+            throw XCLogParserError.parseError("Unexpected EOF parsing [DocumentLocation]")
         }
         switch listToken {
         case .null:
@@ -197,7 +197,7 @@ public class ActivityParser {
             }
             return locations
         default:
-            throw Error.parseError("Unexpected token parsing array of DocumentLocation \(listToken)")
+            throw XCLogParserError.parseError("Unexpected token parsing array of DocumentLocation \(listToken)")
         }
     }
 
@@ -207,14 +207,14 @@ public class ActivityParser {
             return DVTDocumentLocation(documentURLString: "", timestamp: 0.0)
         }
         guard case Token.classNameRef(let className) = classRefToken else {
-            throw Error.parseError("Unexpected token found parsing DocumentLocation \(classRefToken)")
+            throw XCLogParserError.parseError("Unexpected token found parsing DocumentLocation \(classRefToken)")
         }
         if className == String(describing: DVTTextDocumentLocation.self) {
             return try parseDVTTextDocumentLocation(iterator: &iterator)
         } else if className == String(describing: DVTDocumentLocation.self) {
             return try parseDVTDocumentLocation(iterator: &iterator)
         }
-        throw Error.parseError("Unexpected className found parsing DocumentLocation \(className)")
+        throw XCLogParserError.parseError("Unexpected className found parsing DocumentLocation \(className)")
     }
 
     private func parseLogMessage(iterator: inout IndexingIterator<[Token]>) throws -> IDEActivityLogMessage {
@@ -222,13 +222,13 @@ public class ActivityParser {
         guard
             case Token.classNameRef(let className) = classRefToken
         else {
-            throw Error.parseError("Unexpected token found parsing IDEActivityLogMessage \(classRefToken)")
+            throw XCLogParserError.parseError("Unexpected token found parsing IDEActivityLogMessage \(classRefToken)")
         }
         if className == String(describing: IDEActivityLogMessage.self) ||
            className == "IDEClangDiagnosticActivityLogMessage" {
             return try parseIDEActivityLogMessage(iterator: &iterator)
         }
-        throw Error.parseError("Unexpected className found parsing IDEActivityLogMessage \(className)")
+        throw XCLogParserError.parseError("Unexpected className found parsing IDEActivityLogMessage \(className)")
     }
 
     private func parseLogSection(iterator: inout IndexingIterator<[Token]>)
@@ -242,7 +242,7 @@ public class ActivityParser {
         guard
             case Token.classNameRef(let className) = classRefToken
             else {
-                throw Error.parseError("Unexpected token found parsing IDEActivityLogSection \(classRefToken)")
+                throw XCLogParserError.parseError("Unexpected token found parsing IDEActivityLogSection \(classRefToken)")
         }
         if className == String(describing: IDEActivityLogSection.self) {
             return try parseIDEActivityLogSection(iterator: &iterator)
@@ -258,23 +258,23 @@ public class ActivityParser {
         if className == String(describing: DBGConsoleLog.self) {
             return try parseDBGConsoleLog(iterator: &iterator)
         }
-        throw Error.parseError("Unexpected className found parsing IDEActivityLogSection \(className)")
+        throw XCLogParserError.parseError("Unexpected className found parsing IDEActivityLogSection \(className)")
     }
 
     private func getClassRefToken(iterator: inout IndexingIterator<[Token]>) throws -> Token {
         guard let classRefToken = iterator.next() else {
-            throw Error.parseError("Unexpected EOF parsing ClassRef")
+            throw XCLogParserError.parseError("Unexpected EOF parsing ClassRef")
         }
         //The first time there is a classRef of an specific Type,
         //There is a className before that defines the Type
         if case Token.className = classRefToken {
             guard let classRefToken = iterator.next() else {
-                throw Error.parseError("Unexpected EOF parsing ClassRef")
+                throw XCLogParserError.parseError("Unexpected EOF parsing ClassRef")
             }
             if case Token.classNameRef = classRefToken {
                 return classRefToken
             } else {
-                throw Error.parseError("Unexpected EOF parsing ClassRef: \(classRefToken)")
+                throw XCLogParserError.parseError("Unexpected EOF parsing ClassRef: \(classRefToken)")
             }
 
         }
@@ -284,7 +284,7 @@ public class ActivityParser {
     private func parseIDEActivityLogSections(iterator: inout IndexingIterator<[Token]>)
         throws -> [IDEActivityLogSection] {
             guard let listToken = iterator.next() else {
-                throw Error.parseError("Unexpected EOF parsing array of IDEActivityLogSection")
+                throw XCLogParserError.parseError("Unexpected EOF parsing array of IDEActivityLogSection")
             }
             switch listToken {
             case .null:
@@ -297,7 +297,7 @@ public class ActivityParser {
                 }
                 return sections
             default:
-                throw Error.parseError("Unexpected token parsing array of IDEActivityLogSection: \(listToken)")
+                throw XCLogParserError.parseError("Unexpected token parsing array of IDEActivityLogSection: \(listToken)")
             }
     }
 
@@ -308,7 +308,7 @@ public class ActivityParser {
                return nil
             }
             guard case Token.classNameRef(let className) = classRefToken else {
-                throw Error.parseError("Unexpected token found parsing IDEConsoleItem \(classRefToken)")
+                throw XCLogParserError.parseError("Unexpected token found parsing IDEConsoleItem \(classRefToken)")
             }
 
             if className == String(describing: IDEConsoleItem.self) {
@@ -317,13 +317,13 @@ public class ActivityParser {
                                       kind: try parseAsInt(token: iterator.next()),
                                       timestamp: try parseAsDouble(token: iterator.next()))
             }
-            throw Error.parseError("Unexpected className found parsing IDEConsoleItem \(className)")
+            throw XCLogParserError.parseError("Unexpected className found parsing IDEConsoleItem \(className)")
     }
 
     private func parseIDEConsoleItems(iterator: inout IndexingIterator<[Token]>)
         throws -> [IDEConsoleItem] {
             guard let listToken = iterator.next() else {
-                throw Error.parseError("Unexpected EOF parsing array of IDEConsoleItem")
+                throw XCLogParserError.parseError("Unexpected EOF parsing array of IDEConsoleItem")
             }
             switch listToken {
             case .null:
@@ -337,13 +337,13 @@ public class ActivityParser {
                 }
                 return items
             default:
-                throw Error.parseError("Unexpected token parsing array of IDEConsoleItem: \(listToken)")
+                throw XCLogParserError.parseError("Unexpected token parsing array of IDEConsoleItem: \(listToken)")
             }
     }
 
     private func parseAsString(token: Token?) throws -> String {
         guard let token = token else {
-            throw Error.parseError("Unexpected EOF parsing String")
+            throw XCLogParserError.parseError("Unexpected EOF parsing String")
         }
         switch token {
         case .string(let string):
@@ -351,41 +351,41 @@ public class ActivityParser {
         case .null:
             return ""
         default:
-            throw Error.parseError("Unexpected token parsing String: \(token)")
+            throw XCLogParserError.parseError("Unexpected token parsing String: \(token)")
         }
     }
 
     private func parseAsInt(token: Token?) throws -> UInt64 {
         guard let token = token else {
-            throw Error.parseError("Unexpected EOF parsing Int")
+            throw XCLogParserError.parseError("Unexpected EOF parsing Int")
         }
         if case Token.int(let value) = token {
             return value
         }
-        throw Error.parseError("Unexpected token parsing Int: \(token))")
+        throw XCLogParserError.parseError("Unexpected token parsing Int: \(token))")
     }
 
     private func parseAsDouble(token: Token?) throws -> Double {
         guard let token = token else {
-            throw Error.parseError("Unexpected EOF parsing Double")
+            throw XCLogParserError.parseError("Unexpected EOF parsing Double")
         }
         if case Token.double(let value) = token {
             return value
         }
-        throw Error.parseError("Unexpected token parsing Double: \(token)")
+        throw XCLogParserError.parseError("Unexpected token parsing Double: \(token)")
     }
 
     private func parseBoolean(token: Token?) throws -> Bool {
         guard let token = token else {
-            throw Error.parseError("Unexpected EOF parsing Bool")
+            throw XCLogParserError.parseError("Unexpected EOF parsing Bool")
         }
         if case Token.int(let value) = token {
             if value > 1 {
-                throw Error.parseError("Unexpected value parsing Bool: \(value)")
+                throw XCLogParserError.parseError("Unexpected value parsing Bool: \(value)")
             }
             return value == 1
         }
-        throw Error.parseError("Unexpected token parsing Bool: \(token)")
+        throw XCLogParserError.parseError("Unexpected token parsing Bool: \(token)")
     }
 
 }

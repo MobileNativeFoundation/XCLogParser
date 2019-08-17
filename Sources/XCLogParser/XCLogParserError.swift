@@ -19,7 +19,7 @@
 
 import Foundation
 
-public enum Error: LocalizedError {
+public enum XCLogParserError: LocalizedError {
     case invalidLogHeader(String)
     case invalidLine(String)
     case errorCreatingReport(String)
@@ -29,7 +29,7 @@ public enum Error: LocalizedError {
     public var errorDescription: String? { return description }
 }
 
-extension Error: CustomStringConvertible {
+extension XCLogParserError: CustomStringConvertible {
     public var description: String {
         switch self {
         case .invalidLogHeader(let path):
