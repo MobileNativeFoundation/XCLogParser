@@ -36,7 +36,8 @@ public final class FileOutput: ReporterOutput {
         case let tokens as [Token]:
             try write(tokens: tokens)
         default:
-            throw XCLogParserError.errorCreatingReport("Can't write the report. Type not supported \(type(of: report)).")
+            throw XCLogParserError.errorCreatingReport("Can't write the report. Type not supported: " +
+                                                       "\(type(of: report)).")
         }
     }
 

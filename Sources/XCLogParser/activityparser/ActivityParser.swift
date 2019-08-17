@@ -242,7 +242,8 @@ public class ActivityParser {
         guard
             case Token.classNameRef(let className) = classRefToken
             else {
-                throw XCLogParserError.parseError("Unexpected token found parsing IDEActivityLogSection \(classRefToken)")
+                throw XCLogParserError.parseError("Unexpected token found parsing " +
+                                                  "IDEActivityLogSection \(classRefToken)")
         }
         if className == String(describing: IDEActivityLogSection.self) {
             return try parseIDEActivityLogSection(iterator: &iterator)
@@ -297,7 +298,8 @@ public class ActivityParser {
                 }
                 return sections
             default:
-                throw XCLogParserError.parseError("Unexpected token parsing array of IDEActivityLogSection: \(listToken)")
+                throw XCLogParserError.parseError("Unexpected token parsing array of " +
+                                                  "IDEActivityLogSection: \(listToken)")
             }
     }
 
