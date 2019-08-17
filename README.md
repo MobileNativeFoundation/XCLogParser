@@ -1,5 +1,9 @@
 # XCLogParser
 
+[![Build Status](https://api.travis-ci.com/spotify/XCLogParser.svg?branch=master)](https://travis-ci.com/spotify/XCLogParser.swift)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
+
 XCLogParser is a CLI tool that parses the `SLF` serialization format used by Xcode and `xcodebuild` to store its Build and Test logs (`xcactivitylog` files).
 
 You can find more information about the format used in the logs [here](/docs/Xcactivitylog Format.md). You can also check Erick Camacho's [talk at AltConf 2019](https://www.youtube.com/watch?v=QVwOzfJIDCc) about it.

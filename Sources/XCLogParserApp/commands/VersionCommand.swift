@@ -18,17 +18,17 @@
 // under the License.
 
 import Foundation
+import Commandant
+import XCLogParser
 
-public struct FlatJsonReporter: LogReporter {
+struct VersionCommand: CommandProtocol {
 
-    public func report(build: Any, output: ReporterOutput) throws {
-        guard let steps = build as? BuildStep else {
-            throw XCLogParserError.errorCreatingReport("Type not supported \(type(of: build))")
-        }
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
-        let json = try encoder.encode(steps.flatten())
-        try output.write(report: json)
+    let verb = "version"
+    let function = "Displays the version of XCLogParser."
+
+    func run(_ options: NoOptions<CommandantError<Swift.Error>>) -> Result<(), CommandantError<Swift.Error>> {
+        print("XCLogParser \(Version.current)")
+        return .success(())
     }
 
 }

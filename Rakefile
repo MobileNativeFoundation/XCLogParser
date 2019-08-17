@@ -89,13 +89,18 @@ end
 
 def create_release_zip(build_paths)
   release_dir = RELEASES_ROOT_DIR
-  library_file = File.join(release_dir, EXECUTABLE_NAME)
 
   # Create and move files into the release directory
   mkdir_p release_dir
   cp_r build_paths[0], release_dir
 
-  output_artifact_basename = "#{PROJECT_NAME}.zip"
+  # Get the current version from the Swift Version file
+  version = get_version
+  unless version
+    fail("Version not found")
+  end
+
+  output_artifact_basename = "#{PROJECT_NAME}-#{version}.zip"
 
   Dir.chdir(release_dir) do
     # -X: no extras (uid, gid, file times, ...)
@@ -104,6 +109,12 @@ def create_release_zip(build_paths)
     # List contents of zip file
     system("unzip -l #{output_artifact_basename}") or abort "unzip failure"
   end
+end
+
+def get_version
+  version_file = File.open('Sources/XCLogParser/commands/Version.swift').read
+  /let current = "(?<version>[\d.]*)"/ =~ version_file
+  version
 end
 
 def gen_fake_resources

@@ -25,6 +25,7 @@ let registry = CommandRegistry<CommandantError<Swift.Error>>()
 registry.register(ParseCommand())
 registry.register(ManifestCommand())
 registry.register(DumpCommand())
+registry.register(VersionCommand())
 registry.register(HelpCommand(registry: registry))
 registry.main(defaultVerb: HelpCommand(registry: registry).verb) { error in
     print(error)

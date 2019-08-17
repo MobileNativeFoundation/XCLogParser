@@ -36,14 +36,15 @@ public final class FileOutput: ReporterOutput {
         case let tokens as [Token]:
             try write(tokens: tokens)
         default:
-            throw Error.errorCreatingReport("Can't write the report. Type not supported \(type(of: report)).")
+            throw XCLogParserError.errorCreatingReport("Can't write the report. Type not supported: " +
+                                                       "\(type(of: report)).")
         }
     }
 
     private func write(data: Data) throws {
         let fileManager = FileManager.default
         if fileManager.fileExists(atPath: path) {
-            throw Error.errorCreatingReport("Can't write the report to \(path). A file already exists.")
+            throw XCLogParserError.errorCreatingReport("Can't write the report to \(path). A file already exists.")
         }
         let url = URL(fileURLWithPath: path)
         try data.write(to: url)
@@ -54,19 +55,19 @@ public final class FileOutput: ReporterOutput {
         let fileManager = FileManager.default
         guard fileManager.fileExists(atPath: path) == false
              else {
-            throw Error.errorCreatingReport("Can't write the report to \(path). A file already exists.")
+            throw XCLogParserError.errorCreatingReport("Can't write the report to \(path). A file already exists.")
         }
         fileManager.createFile(atPath: path, contents: nil, attributes: nil)
         guard let fileHandle = FileHandle.init(forWritingAtPath: path) else {
-            throw Error.errorCreatingReport("Can't write the report to \(path). File can't be created.")
+            throw XCLogParserError.errorCreatingReport("Can't write the report to \(path). File can't be created.")
         }
         defer {
             fileHandle.closeFile()
         }
         for token in tokens {
             guard let data = "\(token)\n".data(using: .utf8) else {
-                throw Error.errorCreatingReport("Can't write the report to \(path)." +
-                                                "Token can't be serialized \(token).")
+                throw XCLogParserError.errorCreatingReport("Can't write the report to \(path)." +
+                                                            "Token can't be serialized \(token).")
             }
             fileHandle.write(data)
         }

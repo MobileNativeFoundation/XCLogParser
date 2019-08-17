@@ -30,7 +30,7 @@ public struct JsonReporter: LogReporter {
         case let activityLog as IDEActivityLog:
             try report(encodable: activityLog, output: output)
         default:
-            throw Error.errorCreatingReport("Type not supported \(type(of: build))")
+            throw XCLogParserError.errorCreatingReport("Type not supported \(type(of: build))")
         }
     }
 
