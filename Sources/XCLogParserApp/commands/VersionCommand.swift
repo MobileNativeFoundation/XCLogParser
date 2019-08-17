@@ -19,14 +19,16 @@
 
 import Foundation
 import Commandant
-import Result
+import XCLogParser
 
-let registry = CommandRegistry<CommandantError<Swift.Error>>()
-registry.register(ParseCommand())
-registry.register(ManifestCommand())
-registry.register(DumpCommand())
-registry.register(VersionCommand())
-registry.register(HelpCommand(registry: registry))
-registry.main(defaultVerb: HelpCommand(registry: registry).verb) { error in
-    print(error)
+struct VersionCommand: CommandProtocol {
+
+    let verb = "version"
+    let function = "Displays the version of XCLogParser."
+
+    func run(_ options: NoOptions<CommandantError<Swift.Error>>) -> Result<(), CommandantError<Swift.Error>> {
+        print("XCLogParser \(Version.current)")
+        return .success(())
+    }
+
 }

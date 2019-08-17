@@ -18,15 +18,9 @@
 // under the License.
 
 import Foundation
-import Commandant
-import Result
 
-let registry = CommandRegistry<CommandantError<Swift.Error>>()
-registry.register(ParseCommand())
-registry.register(ManifestCommand())
-registry.register(DumpCommand())
-registry.register(VersionCommand())
-registry.register(HelpCommand(registry: registry))
-registry.main(defaultVerb: HelpCommand(registry: registry).verb) { error in
-    print(error)
+public struct Version {
+
+    public static let current = "0.1.3"
+
 }
