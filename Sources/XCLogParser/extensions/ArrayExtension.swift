@@ -34,7 +34,10 @@ extension Array where Element: Notice {
 
     func getWarnings() -> [Notice] {
         return filter {
-            $0.type == .swiftWarning || $0.type == .clangWarning || $0.type == .projectWarning
+            $0.type == .swiftWarning ||
+            $0.type == .clangWarning ||
+            $0.type == .projectWarning ||
+            $0.type == .analyzerWarning
         }
     }
 

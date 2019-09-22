@@ -44,6 +44,9 @@ public enum NoticeType: String, Encodable {
     /// An error thrown by the C compiler
     case clangError
 
+    /// A warning returned by Xcode static analyzer
+    case analyzerWarning
+
     public static func fromTitle(_ title: String) -> NoticeType? {
         switch title {
         case "Swift Compiler Warning":
@@ -55,6 +58,8 @@ public enum NoticeType: String, Encodable {
         case "ARC Semantic Issue":
             return .clangError
         case "Warning":
+            return .projectWarning
+        case "Apple Mach-O Linker Warning":
             return .projectWarning
         case Suffix("Error"):
             return .error
@@ -95,7 +100,11 @@ public class Notice: Encodable {
         }
         if let location = logMessage.location as? DVTTextDocumentLocation {
             self.type = type
-            self.title = logMessage.title
+            if let analyzerMessage = logMessage as? IDEActivityLogAnalyzerEventStepMessage {
+                self.title = analyzerMessage.description
+            } else {
+                self.title = logMessage.title
+            }
             self.documentURL = location.documentURLString
             self.severity = logMessage.severity
             self.startingLineNumber = location.startingLineNumber
@@ -107,7 +116,11 @@ public class Notice: Encodable {
             self.clangFlag = clangFlag
         } else {
             self.type = type
-            self.title = logMessage.title
+            if let analyzerMessage = logMessage as? IDEActivityLogAnalyzerEventStepMessage {
+                self.title = analyzerMessage.description
+            } else {
+                self.title = logMessage.title
+            }
             self.documentURL = logMessage.location.documentURLString
             self.severity = logMessage.severity
             self.startingLineNumber = 0
@@ -118,6 +131,7 @@ public class Notice: Encodable {
             self.characterRangeStart = 0
             self.clangFlag = clangFlag
         }
+
     }
 
     /// Parses an `IDEActivityLogSection` looking for Warnings, Errors and Notes in its `IDEActivityLogMessage`.
@@ -134,9 +148,22 @@ public class Notice: Encodable {
                 Notice(withType: .clangWarning, logMessage: message, andClangFlag: warningFlag)
             }
         }
-        // we look for commong swift warnings, notes and errors
-        return logSection.messages.compactMap {
-            Notice(withType: NoticeType.fromTitle($0.categoryIdent), logMessage: $0)
+        // we look for analyzer warnings, swift warnings, notes and errors
+        return logSection.messages.compactMap { message -> [Notice]? in
+            if let resultMessage = message as? IDEActivityLogAnalyzerResultMessage {
+                return resultMessage.subMessages.compactMap {
+                    if let stepMessage = $0 as? IDEActivityLogAnalyzerEventStepMessage {
+                        return Notice(withType: .analyzerWarning, logMessage: stepMessage)
+                    }
+                    return nil
+                }
+            }
+            if let notice = Notice(withType: NoticeType.fromTitle(message.categoryIdent), logMessage: message) {
+                return [notice]
+            }
+            return nil
+        }.reduce([Notice]()) { flatten, notices -> [Notice] in
+            flatten + notices
         }
     }
 
