@@ -163,6 +163,74 @@ public class ActivityParser {
                                                  )
     }
 
+    public func parseIDEActivityLogAnalyzerResultMessage(iterator: inout IndexingIterator<[Token]>) throws
+        -> IDEActivityLogAnalyzerResultMessage {
+        return IDEActivityLogAnalyzerResultMessage(
+                                     title: try parseAsString(token: iterator.next()),
+                                     shortTitle: try parseAsString(token: iterator.next()),
+                                     timeEmitted: try Double(parseAsInt(token: iterator.next())),
+                                     rangeEndInSectionText: try parseAsInt(token: iterator.next()),
+                                     rangeStartInSectionText: try parseAsInt(token: iterator.next()),
+                                     subMessages: try parseMessages(iterator: &iterator),
+                                     severity: Int(try parseAsInt(token: iterator.next())),
+                                     type: try parseAsString(token: iterator.next()),
+                                     location: try parseDocumentLocation(iterator: &iterator),
+                                     categoryIdent: try parseAsString(token: iterator.next()),
+                                     secondaryLocations: try parseDocumentLocations(iterator: &iterator),
+                                     additionalDescription: try parseAsString(token: iterator.next()),
+                                     resultType: try parseAsString(token: iterator.next()),
+                                     keyEventIndex: try parseAsInt(token: iterator.next()))
+    }
+
+    public func parseIDEActivityLogAnalyzerEventStepMessage(iterator: inout IndexingIterator<[Token]>) throws
+        -> IDEActivityLogAnalyzerEventStepMessage {
+        return IDEActivityLogAnalyzerEventStepMessage(
+                                     title: try parseAsString(token: iterator.next()),
+                                     shortTitle: try parseAsString(token: iterator.next()),
+                                     timeEmitted: try Double(parseAsInt(token: iterator.next())),
+                                     rangeEndInSectionText: try parseAsInt(token: iterator.next()),
+                                     rangeStartInSectionText: try parseAsInt(token: iterator.next()),
+                                     subMessages: try parseMessages(iterator: &iterator),
+                                     severity: Int(try parseAsInt(token: iterator.next())),
+                                     type: try parseAsString(token: iterator.next()),
+                                     location: try parseDocumentLocation(iterator: &iterator),
+                                     categoryIdent: try parseAsString(token: iterator.next()),
+                                     secondaryLocations: try parseDocumentLocations(iterator: &iterator),
+                                     additionalDescription: try parseAsString(token: iterator.next()),
+                                     parentIndex: try parseAsInt(token: iterator.next()),
+                                     description: try parseAsString(token: iterator.next()),
+                                     callDepth: try parseAsInt(token: iterator.next()))
+    }
+
+    public func parseIDEActivityLogAnalyzerControlFlowStepMessage(iterator: inout IndexingIterator<[Token]>) throws
+        -> IDEActivityLogAnalyzerControlFlowStepMessage {
+        return IDEActivityLogAnalyzerControlFlowStepMessage(
+                                     title: try parseAsString(token: iterator.next()),
+                                     shortTitle: try parseAsString(token: iterator.next()),
+                                     timeEmitted: try Double(parseAsInt(token: iterator.next())),
+                                     rangeEndInSectionText: try parseAsInt(token: iterator.next()),
+                                     rangeStartInSectionText: try parseAsInt(token: iterator.next()),
+                                     subMessages: try parseMessages(iterator: &iterator),
+                                     severity: Int(try parseAsInt(token: iterator.next())),
+                                     type: try parseAsString(token: iterator.next()),
+                                     location: try parseDocumentLocation(iterator: &iterator),
+                                     categoryIdent: try parseAsString(token: iterator.next()),
+                                     secondaryLocations: try parseDocumentLocations(iterator: &iterator),
+                                     additionalDescription: try parseAsString(token: iterator.next()),
+                                     parentIndex: try parseAsInt(token: iterator.next()),
+                                     endLocation: try parseDocumentLocation(iterator: &iterator),
+                                     edges: try parseStepEdges(iterator: &iterator))
+    }
+
+    //
+
+    public func parseIDEActivityLogAnalyzerControlFlowStepEdge(iterator: inout IndexingIterator<[Token]>) throws
+        -> IDEActivityLogAnalyzerControlFlowStepEdge {
+        return IDEActivityLogAnalyzerControlFlowStepEdge(
+                                     startLocation: try parseDocumentLocation(iterator: &iterator),
+                                     endLocation: try parseDocumentLocation(iterator: &iterator))
+    }
+
     private func parseMessages(iterator: inout IndexingIterator<[Token]>) throws -> [IDEActivityLogMessage] {
         guard let listToken = iterator.next() else {
             throw XCLogParserError.parseError("Parsing [IDEActivityLogMessage]")
@@ -225,8 +293,17 @@ public class ActivityParser {
             throw XCLogParserError.parseError("Unexpected token found parsing IDEActivityLogMessage \(classRefToken)")
         }
         if className == String(describing: IDEActivityLogMessage.self) ||
-           className == "IDEClangDiagnosticActivityLogMessage" {
+            className == "IDEClangDiagnosticActivityLogMessage" {
             return try parseIDEActivityLogMessage(iterator: &iterator)
+        }
+        if className ==  String(describing: IDEActivityLogAnalyzerResultMessage.self) {
+            return try parseIDEActivityLogAnalyzerResultMessage(iterator: &iterator)
+        }
+        if className ==  String(describing: IDEActivityLogAnalyzerControlFlowStepMessage.self) {
+            return try parseIDEActivityLogAnalyzerControlFlowStepMessage(iterator: &iterator)
+        }
+        if className == String(describing: IDEActivityLogAnalyzerEventStepMessage.self) {
+            return try parseIDEActivityLogAnalyzerEventStepMessage(iterator: &iterator)
         }
         throw XCLogParserError.parseError("Unexpected className found parsing IDEActivityLogMessage \(className)")
     }
@@ -322,25 +399,56 @@ public class ActivityParser {
             throw XCLogParserError.parseError("Unexpected className found parsing IDEConsoleItem \(className)")
     }
 
-    private func parseIDEConsoleItems(iterator: inout IndexingIterator<[Token]>)
-        throws -> [IDEConsoleItem] {
-            guard let listToken = iterator.next() else {
-                throw XCLogParserError.parseError("Unexpected EOF parsing array of IDEConsoleItem")
-            }
-            switch listToken {
-            case .null:
-                return []
-            case .list(let count):
-                var items = [IDEConsoleItem]()
-                for _ in 0..<count {
-                    if let item = try parseIDEConsoleItem(iterator: &iterator) {
-                        items.append(item)
-                    }
+    private func parseIDEConsoleItems(iterator: inout IndexingIterator<[Token]>) throws -> [IDEConsoleItem] {
+        guard let listToken = iterator.next() else {
+            throw XCLogParserError.parseError("Unexpected EOF parsing array of IDEConsoleItem")
+        }
+        switch listToken {
+        case .null:
+            return []
+        case .list(let count):
+            var items = [IDEConsoleItem]()
+            for _ in 0..<count {
+                if let item = try parseIDEConsoleItem(iterator: &iterator) {
+                    items.append(item)
                 }
-                return items
-            default:
-                throw XCLogParserError.parseError("Unexpected token parsing array of IDEConsoleItem: \(listToken)")
             }
+            return items
+        default:
+            throw XCLogParserError.parseError("Unexpected token parsing array of IDEConsoleItem: \(listToken)")
+        }
+    }
+
+    private func parseStepEdge(iterator: inout IndexingIterator<[Token]>)
+        throws -> IDEActivityLogAnalyzerControlFlowStepEdge {
+        let classRefToken = try getClassRefToken(iterator: &iterator)
+        guard case Token.classNameRef(let className) = classRefToken else {
+            throw XCLogParserError.parseError("Unexpected token found parsing IDEActivityLogAnalyzerControlFlowStepEdge \(classRefToken)")
+        }
+
+        if className == String(describing: IDEActivityLogAnalyzerControlFlowStepEdge.self) {
+            return try parseIDEActivityLogAnalyzerControlFlowStepEdge(iterator: &iterator)
+        }
+        throw XCLogParserError.parseError("Unexpected className found parsing IDEActivityLogAnalyzerControlFlowStepEdge \(className)")
+    }
+
+    private func parseStepEdges(iterator: inout IndexingIterator<[Token]>)
+        throws -> [IDEActivityLogAnalyzerControlFlowStepEdge] {
+        guard let listToken = iterator.next() else {
+            throw XCLogParserError.parseError("Unexpected EOF parsing array of IDEConsoleItem")
+        }
+        switch listToken {
+        case .null:
+            return []
+        case .list(let count):
+            var items = [IDEActivityLogAnalyzerControlFlowStepEdge]()
+            for _ in 0..<count {
+                items.append(try parseStepEdge(iterator: &iterator))
+            }
+            return items
+        default:
+            throw XCLogParserError.parseError("Unexpected token parsing array of IDEConsoleItem: \(listToken)")
+        }
     }
 
     private func parseAsString(token: Token?) throws -> String {
