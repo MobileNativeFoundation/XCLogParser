@@ -24,19 +24,18 @@ class ActivityParserTests: XCTestCase {
 
     let parser = ActivityParser()
 
-    var expectedDVTTextDocumentLocation: DVTTextDocumentLocation = {
-        return DVTTextDocumentLocation(documentURLString: "file:///project/EntityComponentView.m",
-                                       timestamp: 2.2,
-                                       startingLineNumber: 6,
-                                       startingColumnNumber: 7,
-                                       endingLineNumber: 8,
-                                       endingColumnNumber: 9,
-                                       characterRangeEnd: 10,
-                                       characterRangeStart: 0,
-                                       locationEncoding: 1)
-    }()
+    let expectedDVTTextDocumentLocation: DVTTextDocumentLocation = DVTTextDocumentLocation(
+        documentURLString: "file:///project/EntityComponentView.m",
+        timestamp: 2.2,
+        startingLineNumber: 6,
+        startingColumnNumber: 7,
+        endingLineNumber: 8,
+        endingColumnNumber: 9,
+        characterRangeEnd: 10,
+        characterRangeStart: 0,
+        locationEncoding: 1)
 
-    var textDocumentLocationTokens: [Token] = {
+    let textDocumentLocationTokens: [Token] = {
         return [Token.string("file:///project/EntityComponentView.m"),
                 Token.double(2.2),
                 Token.int(6),
@@ -101,15 +100,13 @@ class ActivityParserTests: XCTestCase {
         return startTokens + logMessageTokens + endTokens
     }()
 
-    var IDEConsoleItemTokens: [Token] = {
-        return [Token.className("IDEConsoleItem"),
-                Token.classNameRef("IDEConsoleItem"),
-                Token.int(2),
-                Token.string("Internal launch error: process launch failed: Security"),
-                Token.int(10),
-                Token.double(582169311.441566)
-        ]
-    }()
+    let IDEConsoleItemTokens: [Token] = [
+        Token.className("IDEConsoleItem"),
+        Token.classNameRef("IDEConsoleItem"),
+        Token.int(2),
+        Token.string("Internal launch error: process launch failed: Security"),
+        Token.int(10),
+        Token.double(582169311.441566)]
 
     lazy var DBGConsoleLogTokens: [Token] = {
         let startTokens = [Token.int(0),
@@ -134,6 +131,81 @@ class ActivityParserTests: XCTestCase {
         ]
         return startTokens + IDEConsoleItemTokens
     }()
+
+    let IDEActivityLogAnalyzerResultMessageTokens: [Token] = [
+        Token.string("Localized string macro should include a non-empty comment for translators"),
+        Token.null,
+        Token.int(590842212),
+        Token.int(18446744073709551615),
+        Token.int(0),
+        Token.list(1),
+        Token.classNameRef("IDEActivityLogAnalyzerEventStepMessage"),
+        Token.string("Localized string macro should include a non-empty comment for translators"),
+        Token.null,
+        Token.int(590842212),
+        Token.int(18446744073709551615),
+        Token.int(0),
+        Token.null,
+        Token.int(1),
+        Token.string("com.apple.dt.IDE.analyzer.result"),
+        Token.classNameRef("DVTTextDocumentLocation"),
+        Token.string("file:///MyClass.m"),
+        Token.double(0.0),
+        Token.int(196),
+        Token.int(11),
+        Token.int(196),
+        Token.int(11),
+        Token.int(18446744073709551615),
+        Token.int(0),
+        Token.int(0),
+        Token.null,
+        Token.list(1),
+        Token.classNameRef("DVTTextDocumentLocation"),
+        Token.string("file:///MyClass.m"),
+        Token.double(0.0),
+        Token.int(196),
+        Token.int(11),
+        Token.int(196),
+        Token.int(11),
+        Token.int(18446744073709551615),
+        Token.int(0),
+        Token.int(0),
+        Token.null,
+        Token.int(18446744073709551615),
+        Token.string("Localized string macro should include a non-empty comment for translators"),
+        Token.int(0),
+        Token.int(1),
+        Token.string("com.apple.dt.IDE.analyzer.result"),
+        Token.classNameRef("DVTTextDocumentLocation"),
+        Token.string("file:///MyClass.m"),
+        Token.double(0.0),
+        Token.int(196),
+        Token.int(11),
+        Token.int(196),
+        Token.int(11),
+        Token.int(18446744073709551615),
+        Token.int(0),
+        Token.int(0),
+        Token.string("Localizability Issue (Apple)"),
+        Token.list(1),
+        Token.classNameRef("DVTTextDocumentLocation"),
+        Token.string("file:///MyClass.m"),
+        Token.double(0.0),
+        Token.int(196),
+        Token.int(11),
+        Token.int(196),
+        Token.int(11),
+        Token.int(18446744073709551615),
+        Token.int(0),
+        Token.int(0),
+        Token.null,
+        Token.string("Context Missing"),
+        Token.int(18446744073709551615),
+        Token.int(0),
+        Token.int(0),
+        Token.int(0),
+        Token.null]
+
 
     func testParseDVTTextDocumentLocation() throws {
         let tokens = textDocumentLocationTokens
@@ -211,6 +283,20 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual("Internal launch error: process launch failed: Security", consoleItem.content)
         XCTAssertEqual(10, consoleItem.kind)
         XCTAssertEqual(582169311.441566, consoleItem.timestamp)
+    }
+
+    func testParseIDEActivityLogAnalyzerResultMessage() throws {
+        var iterator = IDEActivityLogAnalyzerResultMessageTokens.makeIterator()
+        let logAnalyzerResultMessage = try parser.parseIDEActivityLogAnalyzerResultMessage(iterator: &iterator)
+        XCTAssertEqual("Context Missing", logAnalyzerResultMessage.resultType)
+        XCTAssertEqual(1, logAnalyzerResultMessage.subMessages.count)
+        if let stepMessage = logAnalyzerResultMessage.subMessages.first as?
+            IDEActivityLogAnalyzerEventStepMessage {
+            XCTAssertEqual("Localized string macro should include a non-empty comment for translators",
+                           stepMessage.description)
+        } else {
+            XCTFail("IDEActivityLogAnalyzerEventStepMessage not parsed")
+        }
     }
 
 }
