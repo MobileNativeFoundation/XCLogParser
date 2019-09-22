@@ -20,6 +20,7 @@
 import XCTest
 @testable import XCLogParser
 
+// swiftlint:disable type_body_length
 class ActivityParserTests: XCTestCase {
 
     let parser = ActivityParser()
@@ -205,7 +206,6 @@ class ActivityParserTests: XCTestCase {
         Token.int(0),
         Token.int(0),
         Token.null]
-
 
     func testParseDVTTextDocumentLocation() throws {
         let tokens = textDocumentLocationTokens

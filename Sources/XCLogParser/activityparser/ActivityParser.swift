@@ -22,6 +22,7 @@ import Foundation
 /// Parses an xcactivitylog into a Swift representation
 /// Used by the Dump command
 // swiftlint:disable type_body_length
+// swiftlint:disable file_length
 public class ActivityParser {
 
     /// Some IDEActivitlyLog have an extra int at the end
@@ -423,13 +424,15 @@ public class ActivityParser {
         throws -> IDEActivityLogAnalyzerControlFlowStepEdge {
         let classRefToken = try getClassRefToken(iterator: &iterator)
         guard case Token.classNameRef(let className) = classRefToken else {
-            throw XCLogParserError.parseError("Unexpected token found parsing IDEActivityLogAnalyzerControlFlowStepEdge \(classRefToken)")
+            throw XCLogParserError.parseError("Unexpected token found parsing " + "
+                IDEActivityLogAnalyzerControlFlowStepEdge \(classRefToken)")
         }
 
         if className == String(describing: IDEActivityLogAnalyzerControlFlowStepEdge.self) {
             return try parseIDEActivityLogAnalyzerControlFlowStepEdge(iterator: &iterator)
         }
-        throw XCLogParserError.parseError("Unexpected className found parsing IDEActivityLogAnalyzerControlFlowStepEdge \(className)")
+        throw XCLogParserError.parseError("Unexpected className found parsing " +
+            "IDEActivityLogAnalyzerControlFlowStepEdge \(className)")
     }
 
     private func parseStepEdges(iterator: inout IndexingIterator<[Token]>)

@@ -19,6 +19,7 @@
 
 import Foundation
 
+// swiftlint:disable file_length
 public class IDEActivityLog: Encodable {
     public let version: Int8
     public let mainSection: IDEActivityLogSection
@@ -267,7 +268,6 @@ public class IDEActivityLogAnalyzerResultMessage: IDEActivityLogMessage {
         try container.encode(keyEventIndex, forKey: .keyEventIndex)
     }
 }
-
 
 public class IDEActivityLogAnalyzerControlFlowStepMessage: IDEActivityLogMessage {
 
