@@ -424,8 +424,8 @@ public class ActivityParser {
         throws -> IDEActivityLogAnalyzerControlFlowStepEdge {
         let classRefToken = try getClassRefToken(iterator: &iterator)
         guard case Token.classNameRef(let className) = classRefToken else {
-            throw XCLogParserError.parseError("Unexpected token found parsing " + "
-                IDEActivityLogAnalyzerControlFlowStepEdge \(classRefToken)")
+            throw XCLogParserError.parseError("Unexpected token found parsing " +
+                "IDEActivityLogAnalyzerControlFlowStepEdge \(classRefToken)")
         }
 
         if className == String(describing: IDEActivityLogAnalyzerControlFlowStepEdge.self) {
