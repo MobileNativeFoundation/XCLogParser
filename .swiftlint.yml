@@ -7,3 +7,11 @@ excluded:
 
 disabled_rules:
   - trailing_comma
+
+type_name:
+  min_length: 4
+  max_length: 60
+
+identifier_name:
+  min_length: 3
+  max_length: 60

@@ -19,9 +19,15 @@
 
 import Foundation
 
-public struct IDEActivityLog: Encodable {
+// swiftlint:disable file_length
+public class IDEActivityLog: Encodable {
     public let version: Int8
     public let mainSection: IDEActivityLogSection
+
+    public init(version: Int8, mainSection: IDEActivityLogSection) {
+        self.version = version
+        self.mainSection = mainSection
+    }
 }
 
 public class IDEActivityLogSection: Encodable {
@@ -172,7 +178,7 @@ public class IDEActivityLogUnitTestSection: IDEActivityLogSection {
 
 }
 
-public struct IDEActivityLogMessage: Encodable {
+public class IDEActivityLogMessage: Encodable {
     public let title: String
     public let shortTitle: String
     public let timeEmitted: Double
@@ -185,6 +191,135 @@ public struct IDEActivityLogMessage: Encodable {
     public let categoryIdent: String
     public let secondaryLocations: [DVTDocumentLocation]
     public let additionalDescription: String
+
+    public init(title: String,
+                shortTitle: String,
+                timeEmitted: Double,
+                rangeEndInSectionText: UInt64,
+                rangeStartInSectionText: UInt64,
+                subMessages: [IDEActivityLogMessage],
+                severity: Int,
+                type: String,
+                location: DVTDocumentLocation,
+                categoryIdent: String,
+                secondaryLocations: [DVTDocumentLocation],
+                additionalDescription: String) {
+        self.title = title
+        self.shortTitle = shortTitle
+        self.timeEmitted = timeEmitted
+        self.rangeEndInSectionText = rangeEndInSectionText
+        self.rangeStartInSectionText = rangeStartInSectionText
+        self.subMessages = subMessages
+        self.severity = severity
+        self.type = type
+        self.location = location
+        self.categoryIdent = categoryIdent
+        self.secondaryLocations = secondaryLocations
+        self.additionalDescription = additionalDescription
+    }
+}
+
+public class IDEActivityLogAnalyzerResultMessage: IDEActivityLogMessage {
+
+    public let resultType: String
+    public let keyEventIndex: UInt64
+
+    public init(title: String,
+                shortTitle: String,
+                timeEmitted: Double,
+                rangeEndInSectionText: UInt64,
+                rangeStartInSectionText: UInt64,
+                subMessages: [IDEActivityLogMessage],
+                severity: Int,
+                type: String,
+                location: DVTDocumentLocation,
+                categoryIdent: String,
+                secondaryLocations: [DVTDocumentLocation],
+                additionalDescription: String,
+                resultType: String,
+                keyEventIndex: UInt64) {
+
+        self.resultType = resultType
+        self.keyEventIndex = keyEventIndex
+
+        super.init(title: title,
+                   shortTitle: shortTitle,
+                   timeEmitted: timeEmitted,
+                   rangeEndInSectionText: rangeEndInSectionText,
+                   rangeStartInSectionText: rangeStartInSectionText,
+                   subMessages: subMessages,
+                   severity: severity,
+                   type: type,
+                   location: location,
+                   categoryIdent: categoryIdent,
+                   secondaryLocations: secondaryLocations,
+                   additionalDescription: additionalDescription)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case resultType
+        case keyEventIndex
+    }
+
+    override public func encode(to encoder: Encoder) throws {
+        try super.encode(to: encoder)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(resultType, forKey: .resultType)
+        try container.encode(keyEventIndex, forKey: .keyEventIndex)
+    }
+}
+
+public class IDEActivityLogAnalyzerControlFlowStepMessage: IDEActivityLogMessage {
+
+    public let parentIndex: UInt64
+    public let endLocation: DVTDocumentLocation
+    public let edges: [IDEActivityLogAnalyzerControlFlowStepEdge]
+
+    public init(title: String,
+                shortTitle: String,
+                timeEmitted: Double,
+                rangeEndInSectionText: UInt64,
+                rangeStartInSectionText: UInt64,
+                subMessages: [IDEActivityLogMessage],
+                severity: Int,
+                type: String,
+                location: DVTDocumentLocation,
+                categoryIdent: String,
+                secondaryLocations: [DVTDocumentLocation],
+                additionalDescription: String,
+                parentIndex: UInt64,
+                endLocation: DVTDocumentLocation,
+                edges: [IDEActivityLogAnalyzerControlFlowStepEdge]) {
+
+        self.parentIndex = parentIndex
+        self.endLocation = endLocation
+        self.edges = edges
+
+        super.init(title: title,
+                   shortTitle: shortTitle,
+                   timeEmitted: timeEmitted,
+                   rangeEndInSectionText: rangeEndInSectionText,
+                   rangeStartInSectionText: rangeStartInSectionText,
+                   subMessages: subMessages,
+                   severity: severity,
+                   type: type,
+                   location: location,
+                   categoryIdent: categoryIdent,
+                   secondaryLocations: secondaryLocations,
+                   additionalDescription: additionalDescription)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case parentIndex
+        case endLocation
+    }
+
+    override public func encode(to encoder: Encoder) throws {
+        try super.encode(to: encoder)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(parentIndex, forKey: .parentIndex)
+        try container.encode(endLocation, forKey: .endLocation)
+    }
 }
 
 public class DVTDocumentLocation: Encodable {
@@ -251,11 +386,18 @@ public class DVTTextDocumentLocation: DVTDocumentLocation {
     }
 }
 
-public struct IDEConsoleItem: Encodable {
+public class IDEConsoleItem: Encodable {
     public let adaptorType: UInt64
     public let content: String
     public let kind: UInt64
     public let timestamp: Double
+
+    public init(adaptorType: UInt64, content: String, kind: UInt64, timestamp: Double) {
+        self.adaptorType = adaptorType
+        self.content = content
+        self.kind = kind
+        self.timestamp = timestamp
+    }
 }
 
 public class DBGConsoleLog: IDEActivityLogSection {
@@ -311,5 +453,70 @@ public class DBGConsoleLog: IDEActivityLogSection {
         try super.encode(to: encoder)
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(logConsoleItems, forKey: .logConsoleItems)
+    }
+}
+
+public class IDEActivityLogAnalyzerControlFlowStepEdge: Encodable {
+    let startLocation: DVTDocumentLocation
+    let endLocation: DVTDocumentLocation
+
+    public init(startLocation: DVTDocumentLocation, endLocation: DVTDocumentLocation) {
+        self.startLocation = startLocation
+        self.endLocation = endLocation
+    }
+}
+
+public class IDEActivityLogAnalyzerEventStepMessage: IDEActivityLogMessage {
+
+    let parentIndex: UInt64
+    let description: String
+    let callDepth: UInt64
+
+    public init(title: String,
+                shortTitle: String,
+                timeEmitted: Double,
+                rangeEndInSectionText: UInt64,
+                rangeStartInSectionText: UInt64,
+                subMessages: [IDEActivityLogMessage],
+                severity: Int,
+                type: String,
+                location: DVTDocumentLocation,
+                categoryIdent: String,
+                secondaryLocations: [DVTDocumentLocation],
+                additionalDescription: String,
+                parentIndex: UInt64,
+                description: String,
+                callDepth: UInt64) {
+
+        self.parentIndex = parentIndex
+        self.description = description
+        self.callDepth = callDepth
+
+        super.init(title: title,
+                   shortTitle: shortTitle,
+                   timeEmitted: timeEmitted,
+                   rangeEndInSectionText: rangeEndInSectionText,
+                   rangeStartInSectionText: rangeStartInSectionText,
+                   subMessages: subMessages,
+                   severity: severity,
+                   type: type,
+                   location: location,
+                   categoryIdent: categoryIdent,
+                   secondaryLocations: secondaryLocations,
+                   additionalDescription: additionalDescription)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case parentIndex
+        case description
+        case callDepth
+    }
+
+    override public func encode(to encoder: Encoder) throws {
+        try super.encode(to: encoder)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(description, forKey: .description)
+        try container.encode(parentIndex, forKey: .parentIndex)
+        try container.encode(callDepth, forKey: .callDepth)
     }
 }
