@@ -63,7 +63,11 @@ public final class Lexer {
     }
 
     private func scanSLFHeader(scanner: Scanner) -> Bool {
+        #if os(Linux)
+        var format: String?
+        #else
         var format: NSString?
+        #endif
         return scanner.scanString(Lexer.SLFHeader, into: &format)
     }
 
@@ -83,7 +87,11 @@ public final class Lexer {
 
     private func scanPayload(scanner: Scanner) -> String? {
         var payload: String = ""
+        #if os(Linux)
+        var char: String?
+        #else
         var char: NSString?
+        #endif
         let hexChars = "abcdef0123456789"
         while scanner.scanCharacters(from: CharacterSet(charactersIn: hexChars), into: &char),
               let char = char as String? {
@@ -93,7 +101,11 @@ public final class Lexer {
     }
 
     private func scanTypeDelimiter(scanner: Scanner) -> [TokenType]? {
+        #if os(Linux)
+        var delimiters: String?
+        #else
         var delimiters: NSString?
+        #endif
         if scanner.scanCharacters(from: typeDelimiters, into: &delimiters), let delimiters = delimiters {
             let delimiters = String(delimiters)
             if delimiters.count > 1 {
