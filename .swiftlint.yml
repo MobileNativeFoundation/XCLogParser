@@ -4,6 +4,7 @@ included:
 
 excluded:
   - Sources/XCLogParser/generated
+  - Tests/XCLogParserTests/XCTestManifests.swift
 
 disabled_rules:
   - trailing_comma
