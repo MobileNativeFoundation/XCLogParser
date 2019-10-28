@@ -18,7 +18,6 @@
 // under the License.
 
 import Foundation
-import Stencil
 
 /// Reporter that creates an HTML report.
 /// It uses the html and javascript files from the Resources folder as templates
@@ -34,10 +33,10 @@ public struct HtmlReporter: LogReporter {
         guard let jsonString = String(data: json, encoding: .utf8) else {
             throw  XCLogParserError.errorCreatingReport("Can't generate the JSON file.")
         }
-        try writeHtmlReport(for: steps, context: ["build": jsonString], output: output)
+        try writeHtmlReport(for: steps, jsonString: jsonString, output: output)
     }
 
-    private func writeHtmlReport(for build: BuildStep, context: [String: String], output: ReporterOutput) throws {
+    private func writeHtmlReport(for build: BuildStep, jsonString: String, output: ReporterOutput) throws {
         var path = "build/xclogparser/reports"
         if let output = output as? FileOutput {
             path = output.path
@@ -57,9 +56,11 @@ public struct HtmlReporter: LogReporter {
         try HtmlReporterResources.indexHTML.write(toFile: "\(buildDir)/index.html", atomically: true, encoding: .utf8)
         try HtmlReporterResources.stepJS.write(toFile: "\(buildDir)/js/step.js", atomically: true, encoding: .utf8)
         try HtmlReporterResources.stepHTML.write(toFile: "\(buildDir)/step.html", atomically: true, encoding: .utf8)
-        let template = Template(templateString: HtmlReporterResources.buildJS)
-        let rendered = try template.render(context)
-        try rendered.write(toFile: "\(buildDir)/js/build.js", atomically: true, encoding: .utf8)
+        // let template = Template(templateString: HtmlReporterResources.buildJS)
+        // let rendered = try template.render(context)
+        let jsContent = HtmlReporterResources.buildJS.replacingOccurrences(of: "{{build}}", with: jsonString)
+        try jsContent.write(toFile: "\(buildDir)/js/build.js", atomically: true, encoding: .utf8)
+        // try rendered.write(toFile: "\(buildDir)/js/build.js", atomically: true, encoding: .utf8)
         print("Report written to \(buildDir)/index.html")
     }
 

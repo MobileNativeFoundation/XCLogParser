@@ -19,7 +19,9 @@
 
 import Foundation
 import Commandant
+#if !swift(>=5.0)
 import Result
+#endif
 
 let registry = CommandRegistry<CommandantError<Swift.Error>>()
 registry.register(ParseCommand())

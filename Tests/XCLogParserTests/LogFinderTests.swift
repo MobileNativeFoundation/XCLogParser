@@ -75,7 +75,7 @@ class LogFinderTests: XCTestCase {
         let projectFolder = try logFinder.getProjectFolderWithHash("/Users/user/projects/MyProject.xcworkspace")
         let logsFolder = projectFolder.appending("/Logs/Build")
         let projectLogFolder = derivedDataDir.appendingPathComponent(logsFolder, isDirectory: true)
-        let url = try TestUtils.createSubdir(logsFolder, in: derivedDataDir)
+        _ = try TestUtils.createSubdir(logsFolder, in: derivedDataDir)
         let now = Date()
         let olderDate = now.addingTimeInterval(-10)
         try TestUtils.createSubdir("anolder.xcactivitylog", in: projectLogFolder,

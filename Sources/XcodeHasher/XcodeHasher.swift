@@ -43,7 +43,11 @@ public class XcodeHasher {
         guard let secondHalf = partitions.last else { throw HashingError.invalidPartitioning }
 
         // We would need to reverse the bytes, so we just read them in big endian.
+        #if swift(>=5.0)
+        var startValue = UInt64(bigEndian: Data(firstHalf).withUnsafeBytes { $0.load(as: UInt64.self) })
+        #else
         var startValue = UInt64(bigEndian: Data(firstHalf).withUnsafeBytes { $0.pointee })
+        #endif
         for index in stride(from: 13, through: 0, by: -1) {
             // Take the startValue % 26 to restrict to alphabetic characters and add 'a' scalar value (97).
             let char = String(UnicodeScalar(Int(startValue % 26) + 97)!)
@@ -51,7 +55,11 @@ public class XcodeHasher {
             startValue /= 26
         }
         // We would need to reverse the bytes, so we just read them in big endian.
-        startValue = UInt64(bigEndian: Data(bytes: secondHalf).withUnsafeBytes { $0.pointee })
+        #if swift(>=5.0)
+        startValue = UInt64(bigEndian: Data(secondHalf).withUnsafeBytes { $0.load(as: UInt64.self) })
+        #else
+        startValue = UInt64(bigEndian: Data(secondHalf).withUnsafeBytes { $0.pointee })
+        #endif
         for index in stride(from: 27, through: 14, by: -1) {
             // Take the startValue % 26 to restrict to alphabetic characters and add 'a' scalar value (97).
             let char = String(UnicodeScalar(Int(startValue % 26) + 97)!)
