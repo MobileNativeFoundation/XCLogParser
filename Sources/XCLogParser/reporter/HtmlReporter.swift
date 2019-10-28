@@ -56,11 +56,8 @@ public struct HtmlReporter: LogReporter {
         try HtmlReporterResources.indexHTML.write(toFile: "\(buildDir)/index.html", atomically: true, encoding: .utf8)
         try HtmlReporterResources.stepJS.write(toFile: "\(buildDir)/js/step.js", atomically: true, encoding: .utf8)
         try HtmlReporterResources.stepHTML.write(toFile: "\(buildDir)/step.html", atomically: true, encoding: .utf8)
-        // let template = Template(templateString: HtmlReporterResources.buildJS)
-        // let rendered = try template.render(context)
         let jsContent = HtmlReporterResources.buildJS.replacingOccurrences(of: "{{build}}", with: jsonString)
         try jsContent.write(toFile: "\(buildDir)/js/build.js", atomically: true, encoding: .utf8)
-        // try rendered.write(toFile: "\(buildDir)/js/build.js", atomically: true, encoding: .utf8)
         print("Report written to \(buildDir)/index.html")
     }
 
