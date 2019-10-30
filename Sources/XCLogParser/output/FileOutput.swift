@@ -18,14 +18,14 @@
 // under the License.
 
 import Foundation
-import Path
+import PathKit
 
 public final class FileOutput: ReporterOutput {
 
     let path: String
 
     public init(path: String) {
-        let absolutePath = Path(path) ?? Path.cwd/path
+        let absolutePath = Path(path).absolute()
         self.path = absolutePath.string
     }
 

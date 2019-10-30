@@ -19,8 +19,10 @@
 
 import Foundation
 import Commandant
-import Result
 import XCLogParser
+#if !swift(>=5.0)
+import Result
+#endif
 
 struct ManifestCommand: CommandProtocol {
     typealias Options = ManifestOptions

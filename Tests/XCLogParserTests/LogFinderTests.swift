@@ -67,6 +67,8 @@ class LogFinderTests: XCTestCase {
         }
     }
 
+    //Swift is crashing in Linux when trying to create a temp directory with a modificationDate
+    #if !os(Linux)
     func testGetLatestLogForProjectFolder() throws {
         guard let derivedDataDir = derivedDataDir else {
             XCTFail("Unable to create test directories.")
@@ -75,7 +77,7 @@ class LogFinderTests: XCTestCase {
         let projectFolder = try logFinder.getProjectFolderWithHash("/Users/user/projects/MyProject.xcworkspace")
         let logsFolder = projectFolder.appending("/Logs/Build")
         let projectLogFolder = derivedDataDir.appendingPathComponent(logsFolder, isDirectory: true)
-        let url = try TestUtils.createSubdir(logsFolder, in: derivedDataDir)
+        _ = try TestUtils.createSubdir(logsFolder, in: derivedDataDir)
         let now = Date()
         let olderDate = now.addingTimeInterval(-10)
         try TestUtils.createSubdir("anolder.xcactivitylog", in: projectLogFolder,
@@ -87,6 +89,7 @@ class LogFinderTests: XCTestCase {
         XCTAssertTrue(latestLog.contains(xcactivitylogName),
                       "latestLog \(latestLog) doesn't contains \(xcactivitylogName)")
     }
+    #endif
 
     func testLogsDirectoryForXcodeProject() throws {
         guard let dirWithProject = self.dirWithProject else {

@@ -120,7 +120,7 @@ public class SwiftFunctionTimesParser {
     }
 
     private func parseFunctionLocation(_ function: String) -> (String, String)? {
-        guard let colonIndex = function.index(of: ":") else {
+        guard let colonIndex = function.firstIndex(of: ":") else {
             return nil
         }
         let functionName = function[..<colonIndex]
@@ -131,7 +131,7 @@ public class SwiftFunctionTimesParser {
     }
 
     private func parseLocation(_ location: String) -> (Int, Int)? {
-        guard let colonIndex = location.index(of: ":") else {
+        guard let colonIndex = location.firstIndex(of: ":") else {
             return nil
         }
         let line = location[..<colonIndex]

@@ -406,8 +406,8 @@ xclogparser parse --file path/to/log.xcactivitylog --reporter html --output buil
 
 | Environment | Version     |
 | ----------- |-------------|
-| 🛠 Xcode    | 10.2        |
-| 🐦 Language | Swift 4.2   |
+| 🛠 Xcode    | 11.0        |
+| 🐦 Language | Swift 5.0   |
 
 ## Status
 
@@ -415,12 +415,19 @@ XCLogParser is currently in alpha status. We are using it internally and tested 
 
 ## Development and Contributing
 
+MacOS:
+
 1. Clone the repo with `git clone git@github.com:spotify/XCLogParser.git`.
 2. Run `rake gen_resources` to generate a static resource Swift file that is needed to compile the app.
 3. Run `swift package generate-xcodeproj` to generate an Xcode project (or use any text editor).
 4. Run tests in Xcode directly (CMD + U) or using `rake test`.
 5. Create issue and discuss a possible solution or improvement.
 6. Create a PR.
+
+Linux:
+
+1. A Dockerfile is provided, you can create an image with the tag xlogparser: `docker build --tag xclogparser .`
+2. To compile the app in Linux, just run the shell script: `./run-in-docker.sh`
 
 If you find a bug or you would like to propose an improvement, you're welcome to create an [issue](https://github.com/spotify/xclogparser/issues/new).
 

@@ -63,7 +63,11 @@ public final class Lexer {
     }
 
     private func scanSLFHeader(scanner: Scanner) -> Bool {
+        #if os(Linux)
+        var format: String?
+        #else
         var format: NSString?
+        #endif
         return scanner.scanString(Lexer.SLFHeader, into: &format)
     }
 
@@ -83,7 +87,11 @@ public final class Lexer {
 
     private func scanPayload(scanner: Scanner) -> String? {
         var payload: String = ""
+        #if os(Linux)
+        var char: String?
+        #else
         var char: NSString?
+        #endif
         let hexChars = "abcdef0123456789"
         while scanner.scanCharacters(from: CharacterSet(charactersIn: hexChars), into: &char),
               let char = char as String? {
@@ -93,7 +101,11 @@ public final class Lexer {
     }
 
     private func scanTypeDelimiter(scanner: Scanner) -> [TokenType]? {
+        #if os(Linux)
+        var delimiters: String?
+        #else
         var delimiters: NSString?
+        #endif
         if scanner.scanCharacters(from: typeDelimiters, into: &delimiters), let delimiters = delimiters {
             let delimiters = String(delimiters)
             if delimiters.count > 1 {
@@ -165,9 +177,13 @@ public final class Lexer {
             print("error parsing string")
             return nil
         }
-
+        #if swift(>=5.0)
+        let start = String.Index(utf16Offset: scanner.scanLocation, in: scanner.string)
+        let end = String.Index(utf16Offset: scanner.scanLocation + value, in: scanner.string)
+        #else
         let start = String.Index(encodedOffset: scanner.scanLocation)
         let end = String.Index(encodedOffset: scanner.scanLocation + value)
+        #endif
         scanner.scanLocation += value
         if redacted {
             return redactUserDir(string: String(scanner.string[start..<end]))
@@ -198,9 +214,14 @@ public final class Lexer {
 
 extension Scanner {
     var approximateLine: String {
-        let start = String.Index(encodedOffset: scanLocation)
         let endCount = string.count - scanLocation > 21 ? scanLocation + 21 : string.count - scanLocation
+        #if swift(>=5.0)
+        let start = String.Index(utf16Offset: scanLocation, in: self.string)
+        let end = String.Index(utf16Offset: endCount, in: self.string)
+        #else
+        let start = String.Index(encodedOffset: scanLocation)
         let end = String.Index(encodedOffset: endCount)
+        #endif
         if end <= start {
             return String(string[start..<string.endIndex])
         }

@@ -19,8 +19,9 @@
 
 import XCTest
 
-import XcodeLogParserTests
+import XCLogParserTests
 
 var tests = [XCTestCaseEntry]()
-tests += XcodeLogParserTests.allTests()
+tests += XCLogParserTests.__allTests()
+
 XCTMain(tests)

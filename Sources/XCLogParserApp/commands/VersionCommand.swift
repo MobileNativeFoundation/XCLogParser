@@ -20,6 +20,9 @@
 import Foundation
 import Commandant
 import XCLogParser
+#if !swift(>=5.0)
+import Result
+#endif
 
 struct VersionCommand: CommandProtocol {
 

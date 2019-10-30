@@ -30,7 +30,7 @@ public enum TokenType: String, CaseIterable {
 
     static func all() -> String {
         return TokenType.allCases.reduce(String()) {
-            return String(format: "%@%@", $0, $1.rawValue)
+            return "\($0)\($1.rawValue)"
         }
     }
 }
