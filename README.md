@@ -6,7 +6,7 @@
 
 XCLogParser is a CLI tool that parses the `SLF` serialization format used by Xcode and `xcodebuild` to store its Build and Test logs (`xcactivitylog` files).
 
-You can find more information about the format used in the logs [here](/docs/Xcactivitylog Format.md). You can also check Erick Camacho's [talk at AltConf 2019](https://www.youtube.com/watch?v=QVwOzfJIDCc) about it.
+You can find more information about the format used in the logs [here](/docs/Xcactivitylog%20Format.md). You can also check Erick Camacho's [talk at AltConf 2019](https://www.youtube.com/watch?v=QVwOzfJIDCc) about it.
 
 The tool supports creating reports of different kinds to analyze the content of the logs. XCLogParser can give a lot of insights in regards to **build times** for every module and file in your project, **warnings**, **errors** and **unit tests** results.
 
