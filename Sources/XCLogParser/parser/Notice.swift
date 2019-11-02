@@ -47,6 +47,9 @@ public enum NoticeType: String, Encodable {
     /// A warning returned by Xcode static analyzer
     case analyzerWarning
 
+    /// A warning inside an Interface Builder file
+    case interfaceBuilderWarning
+
     public static func fromTitle(_ title: String) -> NoticeType? {
         switch title {
         case "Swift Compiler Warning":
@@ -65,6 +68,8 @@ public enum NoticeType: String, Encodable {
             return .error
         case Suffix("Notice"):
             return .note
+        case Prefix("/* com.apple.ibtool.document.warnings */"):
+            return .interfaceBuilderWarning
         default:
             return .note
         }
@@ -86,6 +91,7 @@ public class Notice: Encodable {
     public let endingColumnNumber: UInt64
     public let characterRangeEnd: UInt64
     public let characterRangeStart: UInt64
+    public let interfaceBuilderIdentifier: String?
 
     static var clangWarningRegexp: NSRegularExpression? = {
         let pattern = "\\[(-W[\\w-]*)\\]+"
@@ -97,6 +103,11 @@ public class Notice: Encodable {
                  andClangFlag clangFlag: String? = nil) {
         guard let type = type else {
             return nil
+        }
+        if let location = logMessage.location as? IBDocumentMemberLocation {
+            self.interfaceBuilderIdentifier = location.memberIdentifier.memberIdentifier
+        } else {
+            self.interfaceBuilderIdentifier = nil
         }
         if let location = logMessage.location as? DVTTextDocumentLocation {
             self.type = type
@@ -158,7 +169,10 @@ public class Notice: Encodable {
                     return nil
                 }
             }
-            if let notice = Notice(withType: NoticeType.fromTitle(message.categoryIdent), logMessage: message) {
+            // Special case, Interface builder warning can only be spotted by checking the whole text of the
+            // log section
+            let noticeTypeTitle = message.categoryIdent.isEmpty ? logSection.text : message.categoryIdent
+            if let notice = Notice(withType: NoticeType.fromTitle(noticeTypeTitle), logMessage: message) {
                 return [notice]
             }
             return nil

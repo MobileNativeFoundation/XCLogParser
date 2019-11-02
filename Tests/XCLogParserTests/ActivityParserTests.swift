@@ -207,6 +207,17 @@ class ActivityParserTests: XCTestCase {
         Token.int(0),
         Token.null]
 
+    let IBDocumentMemberLocationTokens: [Token] = [
+        Token.className("IBDocumentMemberLocation"),
+        Token.classNameRef("IBDocumentMemberLocation"),
+        Token.string("file:///projects/WarningTest/WarningTest/Base.lproj/Main.storyboard"),
+        Token.double(0.0),
+        Token.className("IBMemberID"),
+        Token.classNameRef("IBMemberID"),
+        Token.string("RgO-vd-uiQ"),
+        Token.null
+    ]
+
     func testParseDVTTextDocumentLocation() throws {
         let tokens = textDocumentLocationTokens
         var iterator = tokens.makeIterator()
@@ -299,4 +310,18 @@ class ActivityParserTests: XCTestCase {
         }
     }
 
+    func testParseIBDocumentMemberLocation() throws {
+        var iterator = IBDocumentMemberLocationTokens.makeIterator()
+        let documentLocation = try parser.parseDocumentLocation(iterator: &iterator)
+        XCTAssert(documentLocation is IBDocumentMemberLocation,
+                  "Document location should be a IBDocumentMemberLocation")
+        XCTAssertEqual("file:///projects/WarningTest/WarningTest/Base.lproj/Main.storyboard",
+                       documentLocation.documentURLString, "The url should be correctly parsed")
+        guard let documentMemberLocation = documentLocation as? IBDocumentMemberLocation else {
+            return
+        }
+        XCTAssertEqual("RgO-vd-uiQ",
+                       documentMemberLocation.memberIdentifier.memberIdentifier,
+                       "IBMember's identifier should be parsed")
+    }
 }
