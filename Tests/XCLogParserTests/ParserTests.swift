@@ -128,6 +128,41 @@ class ParserTests: XCTestCase {
         }
         XCTAssertEqual(warningMessage.title, warning.title)
         XCTAssertEqual("[-Wdeprecated-declarations]", warning.clangFlag ?? "empty")
+        XCTAssertNil(warning.interfaceBuilderIdentifier)
+    }
+
+    func testParseInterfaceBuilderWarning() throws {
+        let timestamp = Date().timeIntervalSinceReferenceDate
+        let memberId = IBMemberID(memberIdentifier: "ABC")
+        let ibDocumentLocation = IBDocumentMemberLocation(
+            documentURLString: "file://project/Base.lproj/Main.storyboard",
+            timestamp: timestamp,
+            memberIdentifier: memberId,
+            attributeSearchLocation: nil)
+        let warningMessage = IDEActivityLogMessage(title: "Automatically Adjusts Font requires using a Dynamic Type",
+                                                shortTitle: "",
+                                                timeEmitted: timestamp,
+                                                rangeEndInSectionText: 0,
+                                                rangeStartInSectionText: 0,
+                                                subMessages: [],
+                                                severity: 1,
+                                                type: "",
+                                                location: ibDocumentLocation,
+                                                categoryIdent: "",
+                                                secondaryLocations: [],
+                                                additionalDescription: "")
+        let fakeLog = getFakeIDEActivityLogWithMessage(warningMessage,
+                                                       andText: "/* com.apple.ibtool.document.warnings */ " +
+                                                       "/project/Base.lproj/Main.storyboard:ABC: warning:")
+        let build = try parser.parse(activityLog: fakeLog)
+        guard let warning = build.warnings?.first else {
+            XCTFail("Build's warnings are empty")
+            return
+        }
+        XCTAssertEqual(NoticeType.interfaceBuilderWarning, warning.type)
+        XCTAssertEqual(warningMessage.title, warning.title)
+        XCTAssertNil(warning.clangFlag)
+        XCTAssertEqual(memberId.memberIdentifier, warning.interfaceBuilderIdentifier)
     }
 
     private func getFakeIDEActivityLogWithMessage(_ message: IDEActivityLogMessage,

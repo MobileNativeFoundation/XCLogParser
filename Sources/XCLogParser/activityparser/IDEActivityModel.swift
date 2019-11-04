@@ -457,8 +457,8 @@ public class DBGConsoleLog: IDEActivityLogSection {
 }
 
 public class IDEActivityLogAnalyzerControlFlowStepEdge: Encodable {
-    let startLocation: DVTDocumentLocation
-    let endLocation: DVTDocumentLocation
+    public let startLocation: DVTDocumentLocation
+    public let endLocation: DVTDocumentLocation
 
     public init(startLocation: DVTDocumentLocation, endLocation: DVTDocumentLocation) {
         self.startLocation = startLocation
@@ -468,9 +468,9 @@ public class IDEActivityLogAnalyzerControlFlowStepEdge: Encodable {
 
 public class IDEActivityLogAnalyzerEventStepMessage: IDEActivityLogMessage {
 
-    let parentIndex: UInt64
-    let description: String
-    let callDepth: UInt64
+    public let parentIndex: UInt64
+    public let description: String
+    public let callDepth: UInt64
 
     public init(title: String,
                 shortTitle: String,
@@ -518,5 +518,53 @@ public class IDEActivityLogAnalyzerEventStepMessage: IDEActivityLogMessage {
         try container.encode(description, forKey: .description)
         try container.encode(parentIndex, forKey: .parentIndex)
         try container.encode(callDepth, forKey: .callDepth)
+    }
+}
+
+// MARK: IDEInterfaceBuilderKit
+
+public class IBMemberID: Encodable {
+    public let memberIdentifier: String
+
+    public init(memberIdentifier: String) {
+        self.memberIdentifier = memberIdentifier
+    }
+}
+
+public class IBAttributeSearchLocation: Encodable {
+    public let offsetFromStart: UInt64
+    public let offsetFromEnd: UInt64
+    public let keyPath: String
+
+    public init(offsetFromStart: UInt64, offsetFromEnd: UInt64, keyPath: String) {
+        self.offsetFromEnd = offsetFromEnd
+        self.offsetFromStart = offsetFromStart
+        self.keyPath = keyPath
+    }
+}
+
+public class IBDocumentMemberLocation: DVTDocumentLocation {
+    public let memberIdentifier: IBMemberID
+    public let attributeSearchLocation: IBAttributeSearchLocation?
+
+    public init(documentURLString: String,
+                timestamp: Double,
+                memberIdentifier: IBMemberID,
+                attributeSearchLocation: IBAttributeSearchLocation?) {
+        self.memberIdentifier = memberIdentifier
+        self.attributeSearchLocation = attributeSearchLocation
+        super.init(documentURLString: documentURLString, timestamp: timestamp)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case memberIdentifier
+        case attributeSearchLocation
+    }
+
+    override public func encode(to encoder: Encoder) throws {
+        try super.encode(to: encoder)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(memberIdentifier, forKey: .memberIdentifier)
+        try container.encode(attributeSearchLocation, forKey: .attributeSearchLocation)
     }
 }

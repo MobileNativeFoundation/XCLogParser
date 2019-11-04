@@ -223,8 +223,6 @@ public class ActivityParser {
                                      edges: try parseStepEdges(iterator: &iterator))
     }
 
-    //
-
     public func parseIDEActivityLogAnalyzerControlFlowStepEdge(iterator: inout IndexingIterator<[Token]>) throws
         -> IDEActivityLogAnalyzerControlFlowStepEdge {
         return IDEActivityLogAnalyzerControlFlowStepEdge(
@@ -270,7 +268,7 @@ public class ActivityParser {
         }
     }
 
-    private func parseDocumentLocation(iterator: inout IndexingIterator<[Token]>) throws -> DVTDocumentLocation {
+    public func parseDocumentLocation(iterator: inout IndexingIterator<[Token]>) throws -> DVTDocumentLocation {
         let classRefToken = try getClassRefToken(iterator: &iterator)
         if case Token.null = classRefToken {
             return DVTDocumentLocation(documentURLString: "", timestamp: 0.0)
@@ -282,6 +280,8 @@ public class ActivityParser {
             return try parseDVTTextDocumentLocation(iterator: &iterator)
         } else if className == String(describing: DVTDocumentLocation.self) {
             return try parseDVTDocumentLocation(iterator: &iterator)
+        } else if className == String(describing: IBDocumentMemberLocation.self) {
+            return try parseIBDocumentMemberLocation(iterator: &iterator)
         }
         throw XCLogParserError.parseError("Unexpected className found parsing DocumentLocation \(className)")
     }
@@ -452,6 +452,41 @@ public class ActivityParser {
         default:
             throw XCLogParserError.parseError("Unexpected token parsing array of IDEConsoleItem: \(listToken)")
         }
+    }
+
+    private func parseIBDocumentMemberLocation(iterator: inout IndexingIterator<[Token]>)
+        throws -> IBDocumentMemberLocation {
+            return IBDocumentMemberLocation(documentURLString: try parseAsString(token: iterator.next()),
+                                            timestamp: try parseAsDouble(token: iterator.next()),
+                                            memberIdentifier: try parseIBMemberID(iterator: &iterator),
+                                            attributeSearchLocation:
+                                                try parseIBAttributeSearchLocation(iterator: &iterator))
+    }
+
+    private func parseIBMemberID(iterator: inout IndexingIterator<[Token]>)
+        throws -> IBMemberID {
+        let classRefToken = try getClassRefToken(iterator: &iterator)
+        guard case Token.classNameRef(let className) = classRefToken else {
+            throw XCLogParserError.parseError("Unexpected token found parsing " +
+                "IBMemberID \(classRefToken)")
+        }
+
+        if className == String(describing: IBMemberID.self) {
+            return IBMemberID(memberIdentifier: try parseAsString(token: iterator.next()))
+        }
+        throw XCLogParserError.parseError("Unexpected className found parsing " +
+            "IBMemberID \(className)")
+    }
+
+    private func parseIBAttributeSearchLocation(iterator: inout IndexingIterator<[Token]>)
+        throws -> IBAttributeSearchLocation? {
+            guard let nextToken = iterator.next() else {
+                throw XCLogParserError.parseError("Unexpected EOF parsing IBAttributeSearchLocation")
+            }
+            if case Token.null = nextToken {
+                return nil
+            }
+            throw XCLogParserError.parseError("Unexpected Token parsing IBAttributeSearchLocation: \(nextToken)")
     }
 
     private func parseAsString(token: Token?) throws -> String {
