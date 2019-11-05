@@ -21,6 +21,6 @@ import Foundation
 
 public struct Version {
 
-    public static let current = "0.1.7"
+    public static let current = "0.1.8"
 
 }
