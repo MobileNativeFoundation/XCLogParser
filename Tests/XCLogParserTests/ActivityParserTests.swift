@@ -218,6 +218,14 @@ class ActivityParserTests: XCTestCase {
         Token.null
     ]
 
+    let xcode3ProjectDocumentLocationTokens: [Token] = {
+        return [
+            Token.className("Xcode3ProjectDocumentLocation"),
+            Token.classNameRef("Xcode3ProjectDocumentLocation"),
+            Token.string("file:///project/Project.xcodeproj"),
+            Token.double(2.2)]
+    }()
+
     func testParseDVTTextDocumentLocation() throws {
         let tokens = textDocumentLocationTokens
         var iterator = tokens.makeIterator()
@@ -323,5 +331,12 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual("RgO-vd-uiQ",
                        documentMemberLocation.memberIdentifier.memberIdentifier,
                        "IBMember's identifier should be parsed")
+    }
+
+    func testParseXcode3ProjectLocation() throws {
+        var iterator = xcode3ProjectDocumentLocationTokens.makeIterator()
+        let documentLocation = try parser.parseDocumentLocation(iterator: &iterator)
+        XCTAssertEqual("file:///project/Project.xcodeproj", documentLocation.documentURLString)
+        XCTAssertEqual(2.2, documentLocation.timestamp)
     }
 }
