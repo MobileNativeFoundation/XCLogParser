@@ -148,7 +148,6 @@ public final class ParserBuildSteps {
                                  swiftFunctionTimes: nil
                                  )
 
-
             step.subSteps = try logSection.subSections.map { subSection -> BuildStep in
                 let subType: BuildStepType = type == .main ? .target : .detail
                 return try parseLogSection(logSection: subSection, type: subType, parentSection: step)

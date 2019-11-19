@@ -2,7 +2,6 @@ import Foundation
 
 extension IDEActivityLogSection {
 
-
     /// Returns the name of the target inside the `commandDetailDesc`
     /// - returns: The name of the target or nil if there is no target name in `commandDetailDesc`
     func getTargetFromCommand() -> String? {
@@ -30,8 +29,8 @@ extension IDEActivityLogSection {
         }
         if isFlatten {
             let mainTarget = "$MainTarget"
-            let targetsDictionary = subSections.reduce( [String: IDEActivityLogSection]()) {
-                targets, subSection -> [String: IDEActivityLogSection] in
+            let targetsDictionary = subSections.reduce(
+                [String: IDEActivityLogSection]()) { targets, subSection -> [String: IDEActivityLogSection] in
                 // some substeps belong to the root project, we use a fixed name for them
                 let targetName = subSection.getTargetFromCommand() ?? mainTarget
                 let target = getOrBuildTarget(targetName, in: targets, using: subSection)
@@ -68,8 +67,6 @@ extension IDEActivityLogSection {
             }
             return buildTargetSection(name, with: section)
     }
-
-
 
     private func buildTargetSection(_ name: String, with section: IDEActivityLogSection) -> IDEActivityLogSection {
         return IDEActivityLogSection(sectionType: 2,
