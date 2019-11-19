@@ -165,6 +165,53 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(memberId.memberIdentifier, warning.interfaceBuilderIdentifier)
     }
 
+    func testParseTargetName() {
+        let timestamp = Date().timeIntervalSinceReferenceDate
+        let fakeSection = IDEActivityLogSection(sectionType: 1,
+        domainType: "",
+        title: "Run Something",
+        signature: "",
+        timeStartedRecording: timestamp,
+        timeStoppedRecording: timestamp,
+        subSections: [],
+        text: "",
+        messages: [],
+        wasCancelled: false,
+        isQuiet: false,
+        wasFetchedFromCache: false,
+        subtitle: "",
+        location: DVTDocumentLocation(documentURLString: "",
+                                      timestamp: timestamp),
+        commandDetailDesc: command,
+        uniqueIdentifier: "ABC",
+        localizedResultString: "",
+        xcbuildSignature: "",
+        unknown: 0)
+
+        let parsedTarget = fakeSection.getTargetFromCommand()
+
+        XCTAssertEqual(parsedTarget, "ServicesPlist")
+    }
+
+    let command = """
+    PhaseScriptExecution Services.plist /Users/spotify-buildagent/buildAgent/work/6878303d676e66/
+    build/DerivedData/Build/Intermediates.noindex/
+    Spotify.build/Debug-iphonesimulator/GenerateServicesPlist.build/Script-7AD9607C371622036A6BC748.sh
+    (in target 'ServicesPlist' from project 'Services')
+
+    export CLANG_ANALYZER_SECURITY_INSECUREAPI_VFORK=YES
+    export CLANG_ANALYZER_SECURITY_KEYCHAIN_API=YES
+    export CLANG_ANALYZER_USE_AFTER_MOVE=YES_AGGRESSIVE
+    export CLANG_CXX_LANGUAGE_STANDARD=c++17
+    export CLANG_CXX_LIBRARY=libc++
+    export CLANG_ENABLE_MODULES=NO
+    export CLANG_ENABLE_OBJC_ARC=YES
+    export CLANG_ENABLE_OBJC_WEAK=YES
+
+    /bin/sh -c /DerivedData/Build/Intermediates.noindex/Services.build/Debug-iphonesimulator/
+    ServicesPlist.build/Script-7AD9607C371622036A6BC748.sh
+    """
+
     private func getFakeIDEActivityLogWithMessage(_ message: IDEActivityLogMessage,
                                                   andText text: String) -> IDEActivityLog {
         let timestamp = Date().timeIntervalSinceReferenceDate
