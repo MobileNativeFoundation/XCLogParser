@@ -36,8 +36,8 @@ public class IDEActivityLogSection: Encodable {
     public let title: String
     public let signature: String
     public let timeStartedRecording: Double
-    public let timeStoppedRecording: Double
-    public let subSections: [IDEActivityLogSection]
+    public var timeStoppedRecording: Double
+    public var subSections: [IDEActivityLogSection]
     public let text: String
     public let messages: [IDEActivityLogMessage]
     public let wasCancelled: Bool
