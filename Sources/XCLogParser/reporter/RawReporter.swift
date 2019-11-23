@@ -19,28 +19,10 @@
 
 import Foundation
 
-public enum Reporter: String {
-    case json
-    case flatJson
-    case summaryJson
-    case chromeTracer
-    case html
-    case raw
+public struct RawReporter: LogReporter {
 
-    func makeLogReporter() -> LogReporter {
-        switch self {
-        case .chromeTracer:
-            return ChromeTracerReporter()
-        case .json:
-            return JsonReporter()
-        case .flatJson:
-            return FlatJsonReporter()
-        case .summaryJson:
-            return SummaryJsonReporter()
-        case .html:
-            return HtmlReporter()
-        case .raw:
-            return RawReporter()
-        }
+    public func report(build: Any, output: ReporterOutput) throws {
+        try output.write(report: build)
     }
 }
+
