@@ -68,6 +68,8 @@ linkStoryboards | Linking of Storyboards
 copyResourceFile | A Resource file was copied
 mergeSwiftModule | The merge swift module tool was executed
 XIBCompilation | A XIB file was compiled
+swiftAggregatedCompilation | Aggregated swift compilations
+precompileBridgingHeader | Bridging header was precompiled
 other | Neither of the above
 none | For steps that are not of type `detail`
 
