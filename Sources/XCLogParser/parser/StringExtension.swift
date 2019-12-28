@@ -22,9 +22,10 @@ import Foundation
 extension String {
 
     func substring(_ range: NSRange) -> String {
-        let start = index(startIndex, offsetBy: range.location)
-        let end = index(start, offsetBy: range.length)
-        return String(self[start..<end])
+        guard let stringRange = Range(range, in: self) else {
+            return ""
+        }
+        return String(self[stringRange])
     }
 
 }

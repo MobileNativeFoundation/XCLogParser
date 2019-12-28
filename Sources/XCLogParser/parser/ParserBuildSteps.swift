@@ -90,7 +90,7 @@ public final class ParserBuildSteps {
     }
 
     // swiftlint:disable function_body_length
-    private func parseLogSection(logSection: IDEActivityLogSection, type: BuildStepType, parentSection: BuildStep?)
+    public func parseLogSection(logSection: IDEActivityLogSection, type: BuildStepType, parentSection: BuildStep?)
         throws -> BuildStep {
             currentIndex += 1
             let detailType = type == .detail ? DetailStepType.getDetailType(signature: logSection.signature) : .none
@@ -156,8 +156,15 @@ public final class ParserBuildSteps {
                 step.warningCount = targetWarnings
                 step.errorCount = targetErrors
             }
+            if type == .detail {
+                step = step.moveSwiftStepsToRoot()
+            }
             if step.detailStepType == .swiftCompilation {
-                swiftFunctionTimesParser.parseFromLogSection(logSection)
+                swiftFunctionTimesParser.addLogSection(logSection)
+                if let individualSwiftSteps = logSection.getSwiftIndividualSteps(buildStep: step) {
+                    step.subSteps.append(contentsOf: individualSwiftSteps)
+                    step = step.withFilteredNotices()
+                }
             }
             return step
     }
@@ -254,7 +261,7 @@ public final class ParserBuildSteps {
     }
 
     private func decorateWithFunctionSteps(_ mainStep: BuildStep) -> BuildStep {
-        swiftFunctionTimesParser.parseRawTimes()
+        swiftFunctionTimesParser.parse()
         guard swiftFunctionTimesParser.hasFunctionTimes() else {
             return mainStep
         }
@@ -274,6 +281,9 @@ public final class ParserBuildSteps {
                 var mutableSubStep = subStep
                 mutableSubStep.swiftFunctionTimes = swiftFunctionTimesParser.findFunctionTimesForFilePath(
                     subStep.documentURL)
+                if mutableSubStep.subSteps.count > 0 {
+                     mutableSubStep.subSteps = addFunctionSteps(subStep.subSteps)
+                }
                 return mutableSubStep
             case .swiftAggregatedCompilation:
                 var mutableSubStep = subStep

@@ -34,31 +34,42 @@ public class SwiftFunctionTimesParser {
         return NSRegularExpression.fromPattern(pattern)
     }()
 
-    /// Dictionary to store the raw function times indexed by its MD5 hash
-    var rawTimes = [String: String]()
+    /// Array to store the text of the log sections and their commandDetailDesc
+    var commands = [(String, String)]()
 
     /// Dictionary to store the function times found per filepath
     var functionsPerFile: [FilePath: [FunctionTime]]?
 
-    public func parseFromLogSection(_ logSection: IDEActivityLogSection) {
-        // if the swift file was compiled with the time function flag
-        if logSection.commandDetailDesc.contains(SwiftFunctionTimesParser.compilerFlag) {
-            let rawFunctionTimes = logSection.text
-            // the log puts almost the same string in each swift file compilation step
-            // we just check we don't have it already
-            guard rawFunctionTimes.isEmpty == false else {
-                    return
-            }
-            let md5 = rawFunctionTimes.md5()
-            guard rawTimes[md5] == nil else {
-                return
-            }
-            rawTimes[md5] = rawFunctionTimes
-        }
+    public func addLogSection(_ logSection: IDEActivityLogSection) {
+        commands.append((logSection.text, logSection.commandDetailDesc))
     }
 
-    public func parseRawTimes() {
-        functionsPerFile = rawTimes.values.compactMap { rawTime -> [FunctionTime]? in
+    /// Checks the `commandDetailDesc` stored by the function `addLogSection`
+    /// to know if the command `text` contains data about the swift function times.
+    /// If there is data, the `text` wit that raw data is returned as part of a Set.
+    /// 
+    /// - Returns: a Set of Strings with the raw Swift function times data
+    public func findRawSwiftFunctionTimes() -> Set<String> {
+        let insertQueue = DispatchQueue(label: "swift_function_times_queue")
+        var rawTexts = Set<String>()
+        DispatchQueue.concurrentPerform(iterations: commands.count) { index in
+            let (rawFunctionTimes, commandDesc) = commands[index]
+            guard hasCompilerFlag(commandDesc) && rawFunctionTimes.isEmpty == false else {
+
+                return
+            }
+
+            insertQueue.sync {
+                _ = rawTexts.insert(rawFunctionTimes)
+            }
+        }
+        return rawTexts
+    }
+
+    /// Parses the swift function times and store them internally
+    public func parse() {
+        let rawTexts = findRawSwiftFunctionTimes()
+        functionsPerFile = rawTexts.compactMap { rawTime -> [FunctionTime]? in
             parseFunctionTimes(from: rawTime)
         }.joined().reduce([FilePath: [FunctionTime]]()) { (functionsPerFile, functionTime)
         -> [FilePath: [FunctionTime]] in
@@ -117,6 +128,10 @@ public class SwiftFunctionTimesParser {
 
         }
         return functionTimes
+    }
+
+    private func hasCompilerFlag(_ text: String) -> Bool {
+        text.range(of: Self.compilerFlag) != nil
     }
 
     private func parseFunctionLocation(_ function: String) -> (String, String)? {
