@@ -114,7 +114,7 @@ public class SwiftFunctionTimesParser {
                 return nil
             }
             // transform it to a file URL to match the one in IDELogSection.documentURL
-            let fileURL = URL(fileURLWithPath: fileName).absoluteString
+            let fileURL = "file://\(fileName)"
             guard let (line, column) = parseLocation(location) else {
                 return nil
             }
