@@ -118,7 +118,7 @@ struct ParseOptions: OptionsProtocol {
             <*> mode <| Option(
                 key: "reporter",
                 defaultValue: "",
-                usage: "The reporter to use. It could be `json`, `flatJson`, `chromeTracer`, `html` or `btr`")
+                usage: "The reporter to use. It could be `json`, `flatJson`, `summaryJson`, `chromeTracer`, `html` or `btr`")
             <*> mode <| Option(
                 key: "machine_name",
                 defaultValue: "",
