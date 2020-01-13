@@ -22,12 +22,38 @@ import XCTest
 
 class SwiftFunctionTimesParserTests: XCTestCase {
 
+    let parser = SwiftFunctionTimesParser()
+
+    func testFindRawSwiftFunctionTimes() throws {
+        let emptylogSection = getFakeSwiftcSection(text: "text",
+                                              commandDescription: "command")
+
+        let swiftTimesLogSection = getFakeSwiftcSection(text:
+            "0.05ms\t/Users/user/myapp/MyView.swift:9:9\tgetter textLabel\r",
+        commandDescription: "-debug-time-function-bodies")
+
+        let duplicatedSwiftTimeslogSection = getFakeSwiftcSection(text:
+            "0.05ms\t/Users/user/myapp/MyView.swift:9:9\tgetter textLabel\r",
+        commandDescription: "-debug-time-function-bodies")
+
+        parser.addLogSection(emptylogSection)
+        parser.addLogSection(swiftTimesLogSection)
+        parser.addLogSection(duplicatedSwiftTimeslogSection)
+
+        let commandsWithFunctionTimes = parser.findRawSwiftFunctionTimes()
+        XCTAssertEqual(1, commandsWithFunctionTimes.count)
+        guard let command = commandsWithFunctionTimes.first else {
+            XCTFail("The command should have Swift function times")
+            return
+        }
+        XCTAssertEqual(swiftTimesLogSection.text, command)
+    }
+
     func testParseFunctionTimes() {
         let text =
         "0.05ms\t/Users/user/myapp/MyView.swift:9:9\tgetter textLabel\r" +
         "4.96ms\t/Users/user/myapp/MyView.swift:11:14\tinitializer init(frame:)\r" +
         "0.04ms\t<invalid loc>\tgetter None\r"
-        let parser = SwiftFunctionTimesParser()
         guard let functionTimes = parser.parseFunctionTimes(from: text) else {
             XCTFail("Function times should have two elements")
             return
@@ -42,6 +68,28 @@ class SwiftFunctionTimesParserTests: XCTestCase {
         XCTAssertEqual("getter textLabel", getter.signature)
         XCTAssertEqual("initializer init(frame:)", initializer.signature)
 
+    }
+
+    private func getFakeSwiftcSection(text: String, commandDescription: String) -> IDEActivityLogSection {
+        return IDEActivityLogSection(sectionType: 1,
+                                     domainType: "",
+                                     title: "Swiftc Compilation",
+                                     signature: "",
+                                     timeStartedRecording: 0.0,
+                                     timeStoppedRecording: 0.0,
+                                     subSections: [],
+                                     text: text,
+                                     messages: [],
+                                     wasCancelled: false,
+                                     isQuiet: false,
+                                     wasFetchedFromCache: false,
+                                     subtitle: "",
+                                     location: DVTDocumentLocation(documentURLString: "", timestamp: 0.0),
+                                     commandDetailDesc: commandDescription,
+                                     uniqueIdentifier: "",
+                                     localizedResultString: "",
+                                     xcbuildSignature: "",
+                                     unknown: 0)
     }
 
 }

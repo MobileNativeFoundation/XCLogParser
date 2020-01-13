@@ -20,6 +20,7 @@
 import XCTest
 @testable import XCLogParser
 
+// swiftlint:disable type_body_length
 class ParserTests: XCTestCase {
 
     let parser = ParserBuildSteps()
@@ -238,4 +239,45 @@ class ParserTests: XCTestCase {
         return IDEActivityLog(version: 10, mainSection: fakeMainStep)
     }
 
+    func testGetIndividualSteps() throws {
+        let parser = ParserBuildSteps()
+        let buildStep = try parser.parseLogSection(logSection: fakeSwiftCompilation, type: .detail, parentSection: nil)
+        let expectedDocumentURLs = ["file:///test_project/PodsTest/Pods/Alamofire/Source/AFError.swift",
+                                    "file:///test_project/PodsTest/Pods/Alamofire/Source/Alamofire.swift",
+                                    "file:///test_project/PodsTest/Pods/Alamofire/Source/AlamofireExtended.swift",
+                                    "file:///test_project/PodsTest/Pods/Alamofire/Source/CachedResponseHandler.swift",
+                                    "file:///test_project/PodsTest/Pods/Alamofire/Source/DispatchQueue+Alamofire.swift",
+                                    "file:///test_project/PodsTest/Pods/Alamofire/Source/EventMonitor.swift"]
+        let documentURLs = buildStep.subSteps.map { $0.documentURL }
+        XCTAssertEqual(expectedDocumentURLs, documentURLs)
+    }
+
+    // swiftlint:disable line_length
+    let commandDetailSwiftSteps = """
+CompileSwift normal x86_64 (in target 'Alamofire' from project 'Pods')
+ cd /test_project/PodsTest/Pods
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift -frontend -c /test_project/PodsTest/Pods/Alamofire/Source/AFError.swift /test_project/PodsTest/Pods/Alamofire/Source/Alamofire.swift /test_project/PodsTest/Pods/Alamofire/Source/AlamofireExtended.swift /test_project/PodsTest/Pods/Alamofire/Source/CachedResponseHandler.swift /test_project/PodsTest/Pods/Alamofire/Source/DispatchQueue+Alamofire.swift /test_project/PodsTest/Pods/Alamofire/Source/EventMonitor.swift -supplementary-output-file-map /var/folders/yx/4910621d0wn8z3lm16fz0svr0000gp/T/supplementaryOutputs-d0af4e -target x86_64-apple-ios10.0-simulator -enable-objc-interop -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk -I /Library/Developer/Xcode/DerivedData/PodsTest-cdhbxhkhhokztxftsdepcfjhnfqg/Build/Products/Debug-iphonesimulator/Alamofire -F /Library/Developer/Xcode/DerivedData/PodsTest-cdhbxhkhhokztxftsdepcfjhnfqg/Build/Products/Debug-iphonesimulator/Alamofire -enable-testing -g -import-underlying-module -module-cache-path /Library/Developer/Xcode/DerivedData/ModuleCache.noindex -swift-version 5 -enforce-exclusivity=checked -Onone -D DEBUG -D COCOAPODS -serialize-debugging-options -Xcc -working-directory -Xcc
+"""
+    lazy var fakeSwiftCompilation: IDEActivityLogSection = {
+        return IDEActivityLogSection(sectionType: 1,
+                                     domainType: "",
+                                     title: "CompileSwift",
+                                     signature: "CompileSwift normal x86_64",
+                                     timeStartedRecording: 1.0,
+                                     timeStoppedRecording: 2.0,
+                                     subSections: [],
+                                     text: "",
+                                     messages: [],
+                                     wasCancelled: false,
+                                     isQuiet: true,
+                                     wasFetchedFromCache: true,
+                                     subtitle: "",
+                                     location: DVTDocumentLocation(documentURLString: "",
+                                                                   timestamp: 1.0),
+                                     commandDetailDesc: commandDetailSwiftSteps,
+                                     uniqueIdentifier: "uniqueIdentifier",
+                                     localizedResultString: "",
+                                     xcbuildSignature: "",
+                                     unknown: 0)
+    }()
 }
