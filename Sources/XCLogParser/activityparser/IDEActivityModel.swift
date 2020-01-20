@@ -42,7 +42,7 @@ public class IDEActivityLogSection: Encodable {
     public let messages: [IDEActivityLogMessage]
     public let wasCancelled: Bool
     public let isQuiet: Bool
-    public let wasFetchedFromCache: Bool
+    public var wasFetchedFromCache: Bool
     public let subtitle: String
     public let location: DVTDocumentLocation
     public let commandDetailDesc: String

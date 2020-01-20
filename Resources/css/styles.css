@@ -73,3 +73,7 @@ main.main {
   color: gray;
   text-decoration: none;
 }
+
+.xc-card-body {
+  padding: .75em;
+}

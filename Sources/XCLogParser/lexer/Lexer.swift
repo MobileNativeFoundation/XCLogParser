@@ -27,7 +27,7 @@ public final class Lexer {
     let typeDelimiters: CharacterSet
     let filePath: String
     var classNames = [String]()
-    var userDirToRedact: String? = nil
+    var userDirToRedact: String?
 
     lazy var userDirRegex: NSRegularExpression? = {
         do {

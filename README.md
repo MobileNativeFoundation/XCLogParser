@@ -48,6 +48,8 @@ This script assumes that the `xclogparser` executable is installed and present i
 
 >Note: Errors thrown in post-action run scripts are silenced, so it could be hard to notice simple mistakes.
 
+>Note: Since Xcode 11, `xcodebuild` only generates the .xcactivitylog build logs when the option `--resultBundlePath`. If you're compiling with that command and not with Xcode, be sure to set that option to a valid path.
+
 The run script is executed in a temporary directory by Xcode, so you may find it useful to immediately open the generated output with `open MyAppLogs` at the end of the script.
 The Finder will automatically open the output folder after a build completes and you can then view the generated HTML page that contains a nice visualization of your build! ✨
 

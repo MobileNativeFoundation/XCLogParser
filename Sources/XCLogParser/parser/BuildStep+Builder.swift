@@ -46,7 +46,8 @@ extension BuildStep {
                          warnings: warnings,
                          errors: errors,
                          notes: notes,
-                         swiftFunctionTimes: swiftFunctionTimes)
+                         swiftFunctionTimes: swiftFunctionTimes,
+                         fetchedFromCache: fetchedFromCache)
     }
 
     func with(title newTitle: String) -> BuildStep {
@@ -74,7 +75,8 @@ extension BuildStep {
                          warnings: warnings,
                          errors: errors,
                          notes: notes,
-                         swiftFunctionTimes: swiftFunctionTimes)
+                         swiftFunctionTimes: swiftFunctionTimes,
+                         fetchedFromCache: fetchedFromCache)
     }
 
     func with(signature newSignature: String) -> BuildStep {
@@ -102,7 +104,8 @@ extension BuildStep {
                          warnings: warnings,
                          errors: errors,
                          notes: notes,
-                         swiftFunctionTimes: swiftFunctionTimes)
+                         swiftFunctionTimes: swiftFunctionTimes,
+                         fetchedFromCache: fetchedFromCache)
     }
 
     func withFilteredNotices() -> BuildStep {
@@ -133,7 +136,8 @@ extension BuildStep {
                          warnings: filteredWarnings,
                          errors: filtereredErrors,
                          notes: filteredNotes,
-                         swiftFunctionTimes: swiftFunctionTimes)
+                         swiftFunctionTimes: swiftFunctionTimes,
+                         fetchedFromCache: fetchedFromCache)
     }
 
     func with(subSteps newSubSteps: [BuildStep]) -> BuildStep {
@@ -161,7 +165,8 @@ extension BuildStep {
                          warnings: warnings,
                          errors: errors,
                          notes: notes,
-                         swiftFunctionTimes: swiftFunctionTimes)
+                         swiftFunctionTimes: swiftFunctionTimes,
+                         fetchedFromCache: fetchedFromCache)
     }
 
     private func filterNotices(_ notices: [Notice]?) -> [Notice]? {
