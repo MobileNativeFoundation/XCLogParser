@@ -108,6 +108,7 @@ extension IDEActivityLogSection {
         -> IDEActivityLogSection {
             if let target = targets[name] {
                 target.timeStoppedRecording = section.timeStoppedRecording
+                target.wasFetchedFromCache = target.wasFetchedFromCache && section.wasFetchedFromCache
                 return target
             }
             return buildTargetSection(name, with: section)

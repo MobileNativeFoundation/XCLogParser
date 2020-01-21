@@ -36,7 +36,7 @@
             <div class="col-md-2 col-sm-1">
               <div class="card xc-topboxes text-white bg-primary info-box">
                 <div class="card-header" id="schema-title">Schema</div>
-                <div class="card-body">
+                <div class="xc-card-body card-body">
                   <div id="schema" class="card-text"></div>
                 </div> <!-- card body -->
               </div> <!-- card-->
@@ -44,7 +44,7 @@
             <div class="col-md-2 col-sm-1">
               <div id="status-box" class="card xc-topboxes text-white info-box">
                 <div class="card-header">Build status</div>
-                <div class="card-body">
+                <div class="xc-card-body card-body">
                   <div id="build-status" class="card-text"></div>
                 </div> <!-- card body -->
               </div> <!-- card-->
@@ -52,7 +52,7 @@
             <div class="col-md-2 col-sm-1">
               <div class="card text-white xc-topboxes bg-info info-box">
                 <div class="card-header">Build time</div>
-                <div class="card-body">
+                <div class="xc-card-body card-body">
                   <div id="build-time" class="card-text"></div>
                 </div> <!-- card-body -->
               </div> <!-- card -->
@@ -61,7 +61,7 @@
             <div class="col-md-2 col-sm-1">
               <div class="card text-white xc-topboxes bg-info info-box">
                 <div class="card-header" id="targets-title">Number of targets</div>
-                <div class="card-body">
+                <div class="xc-card-body card-body">
                   <div id="targets" class="card-text"></div>
                 </div> <!-- card-body -->
               </div> <!-- card -->
@@ -70,8 +70,19 @@
             <div class="col-md-2 col-sm-1">
               <div class="card text-white xc-topboxes objc info-box">
                 <div class="card-header">C files</div>
-                <div class="card-body">
-                  <div id="c-files" class="card-text"></div>
+                <div class="xc-card-body card-body">
+                  <div class="card-block">
+                    <div class="row">
+                        <div class="col">
+                          <div id="c-files-compiled" class="card-text"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                          <div id="c-files-total" class="card-text"></div>
+                        </div>
+                    </div>
+                  </div> <!-- card-block -->
                 </div> <!-- card-body -->
               </div> <!-- card -->
             </div>
@@ -79,8 +90,19 @@
             <div class="col-md-2 col-sm-1">
               <div class="card text-white xc-topboxes swift info-box">
                   <div class="card-header">Swift files</div>
-                <div class="card-body">
-                  <div id="swift-files" class="card-text"></div>
+                <div class="xc-card-body card-body">
+                  <div class="card-block">
+                    <div class="row">
+                      <div class="col">
+                        <div id="swift-files-compiled" class="card-text"></div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col">
+                        <div id="swift-files-total" class="card-text"></div>
+                      </div>
+                    </div>
+                  </div> <!-- card-block -->
                 </div> <!-- card-body -->
               </div> <!-- card -->
             </div>

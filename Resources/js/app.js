@@ -97,8 +97,16 @@ function drawHeaders(target) {
   durationText += Math.round(duration.seconds()) + ' secs';
   document.getElementById('build-time').innerHTML = durationText;
   document.getElementById('targets').innerHTML = targets.length.toLocaleString('en');
-  document.getElementById('c-files').innerHTML = cFiles.length.toLocaleString('en');
-  document.getElementById('swift-files').innerHTML = swiftFiles.length.toLocaleString('en');
+  const cCompiledFiles = cFiles.filter(function (file) {
+    return file.fetchedFromCache == false;
+  })
+  const swiftCompiledFiles = swiftFiles.filter(function (file) {
+    return file.fetchedFromCache == false;
+  })
+  document.getElementById('c-files-compiled').innerHTML = cCompiledFiles.length.toLocaleString('en') + ' compiled';
+  document.getElementById('c-files-total').innerHTML = cFiles.length.toLocaleString('en') + ' total';
+  document.getElementById('swift-files-compiled').innerHTML = swiftCompiledFiles.length.toLocaleString('en') + ' compiled';
+  document.getElementById('swift-files-total').innerHTML = swiftFiles.length.toLocaleString('en') + ' total';
 
 }
 

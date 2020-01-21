@@ -221,6 +221,11 @@ public struct BuildStep: Encodable {
     /// If the project was compiled with the swift flags `-Xfrontend -debug-time-function-bodies`
     /// This field will be populated
     public var swiftFunctionTimes: [FunctionTime]?
+
+    /// Indicated if the step was actually processed / compiled or just fetched from Xcode's cache.
+    /// In a compilation step this will be false only if the file was actually compiled.
+    /// in a `target` or `main` step it will be false if at least one sub step wasn't fetched from cache.
+    public let fetchedFromCache: Bool
 }
 
 /// Extension used to flatten the three of a `BuildStep`

@@ -22,10 +22,12 @@ import Foundation
 public final class Lexer {
 
     static let SLFHeader = "SLF"
+    static let redactedTemplate = "/Users/<redacted>/"
 
     let typeDelimiters: CharacterSet
     let filePath: String
     var classNames = [String]()
+    var userDirToRedact: String?
 
     lazy var userDirRegex: NSRegularExpression? = {
         do {
@@ -203,13 +205,19 @@ public final class Lexer {
         guard let regex = userDirRegex else {
             return string
         }
-
-        return regex.stringByReplacingMatches(in: string,
-                                              options: .reportProgress,
-                                              range: NSRange(location: 0, length: string.count),
-                                              withTemplate: "/Users/<redacted>/")
+        if let userDirToRedact = userDirToRedact {
+            return string.replacingOccurrences(of: userDirToRedact, with: Self.redactedTemplate)
+        } else {
+            guard let firstMatch = regex.firstMatch(in: string,
+                                                    options: [],
+                                                    range: NSRange(location: 0, length: string.count)) else {
+                return string
+            }
+            let userDir = string.substring(firstMatch.range)
+            userDirToRedact = userDir
+            return string.replacingOccurrences(of: userDir, with: Self.redactedTemplate)
+        }
     }
-
 }
 
 extension Scanner {

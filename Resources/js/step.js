@@ -44,10 +44,15 @@ const timestampFormat = 'MMMM Do YYYY, h:mm:ss a';
 
 showStep();
 
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+});
+
 function showStep() {
   const step = loadStep();
   if (step != null) {
     $('#info-title').html(step.title);
+    $('#info-cache').html(step.fetchedFromCache);
     $('#info-signature').html(step.signature);
     $('#info-arch').html(step.architecture);
     $('#info-url').html(step.documentURL);

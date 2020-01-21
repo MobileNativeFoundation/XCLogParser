@@ -96,4 +96,13 @@ class LexerTests: XCTestCase {
         XCTAssertTrue(tokens.count == 7)
 
     }
+
+    func testTokenizeStringRedacted() throws {
+        let logContents = "SLF09#21%IDEActivityLogSection1@36\"Compile /Users/myuser/project/File.m"
+        let tokens = try lexer.tokenize(contents: logContents, redacted: true)
+        XCTAssertTrue(tokens.count == 4)
+        let stringToken = tokens[3]
+        XCTAssertEqual(stringToken, Token.string("Compile /Users/<redacted>/project/File.m"))
+    }
+
 }

@@ -82,6 +82,10 @@ main.main {
   text-decoration: none;
 }
 
+.xc-card-body {
+  padding: .75em;
+}
+
 """
 
       public static let appJS =
@@ -185,8 +189,16 @@ function drawHeaders(target) {
   durationText += Math.round(duration.seconds()) + ' secs';
   document.getElementById('build-time').innerHTML = durationText;
   document.getElementById('targets').innerHTML = targets.length.toLocaleString('en');
-  document.getElementById('c-files').innerHTML = cFiles.length.toLocaleString('en');
-  document.getElementById('swift-files').innerHTML = swiftFiles.length.toLocaleString('en');
+  const cCompiledFiles = cFiles.filter(function (file) {
+    return file.fetchedFromCache == false;
+  })
+  const swiftCompiledFiles = swiftFiles.filter(function (file) {
+    return file.fetchedFromCache == false;
+  })
+  document.getElementById('c-files-compiled').innerHTML = cCompiledFiles.length.toLocaleString('en') + ' compiled';
+  document.getElementById('c-files-total').innerHTML = cFiles.length.toLocaleString('en') + ' total';
+  document.getElementById('swift-files-compiled').innerHTML = swiftCompiledFiles.length.toLocaleString('en') + ' compiled';
+  document.getElementById('swift-files-total').innerHTML = swiftFiles.length.toLocaleString('en') + ' total';
 
 }
 
@@ -621,7 +633,7 @@ public static let indexHTML =
             <div class="col-md-2 col-sm-1">
               <div class="card xc-topboxes text-white bg-primary info-box">
                 <div class="card-header" id="schema-title">Schema</div>
-                <div class="card-body">
+                <div class="xc-card-body card-body">
                   <div id="schema" class="card-text"></div>
                 </div> <!-- card body -->
               </div> <!-- card-->
@@ -629,7 +641,7 @@ public static let indexHTML =
             <div class="col-md-2 col-sm-1">
               <div id="status-box" class="card xc-topboxes text-white info-box">
                 <div class="card-header">Build status</div>
-                <div class="card-body">
+                <div class="xc-card-body card-body">
                   <div id="build-status" class="card-text"></div>
                 </div> <!-- card body -->
               </div> <!-- card-->
@@ -637,7 +649,7 @@ public static let indexHTML =
             <div class="col-md-2 col-sm-1">
               <div class="card text-white xc-topboxes bg-info info-box">
                 <div class="card-header">Build time</div>
-                <div class="card-body">
+                <div class="xc-card-body card-body">
                   <div id="build-time" class="card-text"></div>
                 </div> <!-- card-body -->
               </div> <!-- card -->
@@ -646,7 +658,7 @@ public static let indexHTML =
             <div class="col-md-2 col-sm-1">
               <div class="card text-white xc-topboxes bg-info info-box">
                 <div class="card-header" id="targets-title">Number of targets</div>
-                <div class="card-body">
+                <div class="xc-card-body card-body">
                   <div id="targets" class="card-text"></div>
                 </div> <!-- card-body -->
               </div> <!-- card -->
@@ -655,8 +667,19 @@ public static let indexHTML =
             <div class="col-md-2 col-sm-1">
               <div class="card text-white xc-topboxes objc info-box">
                 <div class="card-header">C files</div>
-                <div class="card-body">
-                  <div id="c-files" class="card-text"></div>
+                <div class="xc-card-body card-body">
+                  <div class="card-block">
+                    <div class="row">
+                        <div class="col">
+                          <div id="c-files-compiled" class="card-text"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                          <div id="c-files-total" class="card-text"></div>
+                        </div>
+                    </div>
+                  </div> <!-- card-block -->
                 </div> <!-- card-body -->
               </div> <!-- card -->
             </div>
@@ -664,8 +687,19 @@ public static let indexHTML =
             <div class="col-md-2 col-sm-1">
               <div class="card text-white xc-topboxes swift info-box">
                   <div class="card-header">Swift files</div>
-                <div class="card-body">
-                  <div id="swift-files" class="card-text"></div>
+                <div class="xc-card-body card-body">
+                  <div class="card-block">
+                    <div class="row">
+                      <div class="col">
+                        <div id="swift-files-compiled" class="card-text"></div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col">
+                        <div id="swift-files-total" class="card-text"></div>
+                      </div>
+                    </div>
+                  </div> <!-- card-block -->
                 </div> <!-- card-body -->
               </div> <!-- card -->
             </div>
@@ -912,6 +946,17 @@ public static let stepHTML =
                   </div>
                   <div class="row">
                     <div class="col-sm-2">
+                      Fetched from cache
+                    </div>
+                    <div class="col-sm-10">
+                      <button type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="right" title="If true, the target or file wasn't compiled but fetched from Xcode's internal cache">
+                        <div id="info-cache" href=""></div>
+                      </button>
+
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-sm-2">
                       Duration
                     </div>
                     <div class="col-sm-10">
@@ -1118,10 +1163,15 @@ const timestampFormat = 'MMMM Do YYYY, h:mm:ss a';
 
 showStep();
 
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+});
+
 function showStep() {
   const step = loadStep();
   if (step != null) {
     $('#info-title').html(step.title);
+    $('#info-cache').html(step.fetchedFromCache);
     $('#info-signature').html(step.signature);
     $('#info-arch').html(step.architecture);
     $('#info-url').html(step.documentURL);

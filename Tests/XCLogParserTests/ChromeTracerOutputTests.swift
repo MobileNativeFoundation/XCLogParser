@@ -77,7 +77,8 @@ class ChromeTracerOutputTests: XCTestCase {
                              warnings: nil,
                              errors: nil,
                              notes: nil,
-                             swiftFunctionTimes: nil
+                             swiftFunctionTimes: nil,
+                             fetchedFromCache: false
                              )
         return root
     }
@@ -109,7 +110,8 @@ class ChromeTracerOutputTests: XCTestCase {
                              warnings: nil,
                              errors: nil,
                              notes: nil,
-                             swiftFunctionTimes: nil
+                             swiftFunctionTimes: nil,
+                             fetchedFromCache: false
                              )
 
         let end2 = end.addingTimeInterval(50 * 100)
@@ -137,7 +139,8 @@ class ChromeTracerOutputTests: XCTestCase {
                                 warnings: nil,
                                 errors: nil,
                                 notes: nil,
-                                swiftFunctionTimes: nil
+                                swiftFunctionTimes: nil,
+                                fetchedFromCache: false
                                 )
         return [target1, target2]
 

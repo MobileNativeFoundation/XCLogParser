@@ -26,7 +26,8 @@ A typical step is parsed and output as JSON with the following format:
     "warningCount" : 0,
     "errors" : [],
     "warnings" : [],
-    "swiftFunctionTimes" : []
+    "swiftFunctionTimes" : [],
+    "fetchedFromCache" : false
 }
 ```
 
@@ -50,6 +51,7 @@ Other fields:
 - `errorCount`: the number of errors for the given step.
 - `errors`: the list of errors.
 - `swiftFunctionTimes`: Optional. If the step is a `swiftCompilation` and the app was compiled with the flags `-Xfrontend -debug-time-function-bodies` it will show the list of functions and their compilation time.
+- `fetchedFromCache`: For a `detail` step, `true` indicates that the file wasn't processed nor compiled but fetched from Xcode's internal cache. For a `main` or `target` step, `true` indicates that all its sub steps were fetched from cache, `false` that at least one sub step was proccesed or compiled.
 
 When possible, the `signature` content of `detail` steps is parsed to determine its type. This makes it easier to aggregate the data.
 

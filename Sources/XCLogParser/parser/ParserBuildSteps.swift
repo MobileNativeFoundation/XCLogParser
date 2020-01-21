@@ -20,6 +20,7 @@
 import Foundation
 
 /// Parses the .xcactivitylog into a tree of `BuildStep`
+// swiftlint:disable type_body_length
 public final class ParserBuildSteps {
 
     let machineName: String
@@ -145,7 +146,9 @@ public final class ParserBuildSteps {
                                  warnings: warnings,
                                  errors: errors,
                                  notes: notes,
-                                 swiftFunctionTimes: nil
+                                 swiftFunctionTimes: nil,
+                                 fetchedFromCache: wasFetchedFromCache(parent:
+                                    parentSection, section: logSection)
                                  )
 
             step.subSteps = try logSection.subSections.map { subSection -> BuildStep in
@@ -293,6 +296,13 @@ public final class ParserBuildSteps {
                 return subStep
             }
         }
+    }
+
+    private func wasFetchedFromCache(parent: BuildStep?, section: IDEActivityLogSection) -> Bool {
+        if section.wasFetchedFromCache {
+            return section.wasFetchedFromCache
+        }
+        return parent?.fetchedFromCache ?? false
     }
 
 }
