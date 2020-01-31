@@ -22,24 +22,25 @@ import Foundation
 public final class Lexer {
 
     static let SLFHeader = "SLF"
-    static let redactedTemplate = "/Users/<redacted>/"
 
     let typeDelimiters: CharacterSet
     let filePath: String
     var classNames = [String]()
-    var userDirToRedact: String?
-
-    lazy var userDirRegex: NSRegularExpression? = {
-        do {
-            return try NSRegularExpression(pattern: "\\/Users\\/(\\w*)\\/")
-        } catch {
-            return nil
+    var userDirToRedact: String? {
+        set {
+            redactor.userDirToRedact = newValue
         }
-    }()
+        get {
+            redactor.userDirToRedact
+        }
+    }
+    private let redactor: StringRedactor
+
 
     public init(filePath: String) {
         self.filePath = filePath
         self.typeDelimiters = CharacterSet(charactersIn: TokenType.all())
+        self.redactor = StringRedactor()
     }
 
     /// Tokenizes an xcactivitylog serialized in the `SLF` format
@@ -188,7 +189,7 @@ public final class Lexer {
         #endif
         scanner.scanLocation += value
         if redacted {
-            return redactUserDir(string: String(scanner.string[start..<end]))
+            return redactor.redactUserDir(string: String(scanner.string[start..<end]))
         }
         return String(scanner.string[start..<end])
     }
@@ -199,24 +200,6 @@ public final class Lexer {
         }
         let result =  Double(bitPattern: beValue.byteSwapped)
         return result
-    }
-
-    private func redactUserDir(string: String) -> String {
-        guard let regex = userDirRegex else {
-            return string
-        }
-        if let userDirToRedact = userDirToRedact {
-            return string.replacingOccurrences(of: userDirToRedact, with: Self.redactedTemplate)
-        } else {
-            guard let firstMatch = regex.firstMatch(in: string,
-                                                    options: [],
-                                                    range: NSRange(location: 0, length: string.count)) else {
-                return string
-            }
-            let userDir = string.substring(firstMatch.range)
-            userDirToRedact = userDir
-            return string.replacingOccurrences(of: userDir, with: Self.redactedTemplate)
-        }
     }
 }
 
