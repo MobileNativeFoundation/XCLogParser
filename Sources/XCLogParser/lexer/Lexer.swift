@@ -34,7 +34,7 @@ public final class Lexer {
             redactor.userDirToRedact
         }
     }
-    private let redactor: StringRedactor
+    private var redactor: LogRedactor
 
 
     public init(filePath: String) {
