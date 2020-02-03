@@ -36,7 +36,6 @@ public final class Lexer {
     }
     private var redactor: LogRedactor
 
-
     public init(filePath: String) {
         self.filePath = filePath
         self.typeDelimiters = CharacterSet(charactersIn: TokenType.all())

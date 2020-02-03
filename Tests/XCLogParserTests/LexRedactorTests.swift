@@ -21,7 +21,6 @@ import Foundation
 import XCTest
 @testable import XCLogParser
 
-
 class LexRedactorTests: XCTestCase {
     let redactor = LexRedactor()
 
