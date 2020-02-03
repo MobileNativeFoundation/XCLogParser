@@ -40,7 +40,7 @@ public final class Lexer {
     public init(filePath: String) {
         self.filePath = filePath
         self.typeDelimiters = CharacterSet(charactersIn: TokenType.all())
-        self.redactor = StringRedactor()
+        self.redactor = LexRedactor()
     }
 
     /// Tokenizes an xcactivitylog serialized in the `SLF` format

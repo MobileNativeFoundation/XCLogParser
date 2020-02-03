@@ -19,7 +19,7 @@
 
 import Foundation
 
-public class StringRedactor {
+public class LexRedactor: LogRedactor {
     private static let redactedTemplate = "/Users/<redacted>/"
     private lazy var userDirRegex: NSRegularExpression? = {
         do {
@@ -28,11 +28,8 @@ public class StringRedactor {
             return nil
         }
     }()
-    var userDirToRedact: String?
+    public var userDirToRedact: String?
 
-    /// Redacts a string by replacing sensitive username path with a template
-    /// - parameter string: The string to redact
-    /// - returns: Redacted text with
     public func redactUserDir(string: String) -> String {
         guard let regex = userDirRegex else {
             return string
