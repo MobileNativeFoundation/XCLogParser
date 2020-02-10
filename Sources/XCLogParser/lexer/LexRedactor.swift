@@ -30,6 +30,9 @@ public class LexRedactor: LogRedactor {
     }()
     public var userDirToRedact: String?
 
+    public init() {
+    }
+
     public func redactUserDir(string: String) -> String {
         guard let regex = userDirRegex else {
             return string
