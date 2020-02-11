@@ -69,5 +69,4 @@ class LexRedactorTests: XCTestCase {
 
         XCTAssertEqual(redactedText, "Some /Users/private/path")
     }
-    
 }
