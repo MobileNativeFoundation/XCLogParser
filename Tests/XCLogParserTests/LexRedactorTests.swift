@@ -25,14 +25,24 @@ class LexRedactorTests: XCTestCase {
     let redactor = LexRedactor()
 
     func testRedacting() {
-
         let redactedText = redactor.redactUserDir(string: "Some /Users/private/path")
 
         XCTAssertEqual(redactedText, "Some /Users/<redacted>/path")
     }
 
-    func testMultiplePathsRedacting() {
+    func testRedactingComplexUsername() {
+        let redactedText = redactor.redactUserDir(string: "Some /Users/private-user/path")
 
+        XCTAssertEqual(redactedText, "Some /Users/<redacted>/path")
+    }
+
+    func testRedactingHomePath() {
+        let redactedText = redactor.redactUserDir(string: "/Users/private-user")
+
+        XCTAssertEqual(redactedText, "/Users/<redacted>/")
+    }
+
+    func testMultiplePathsRedacting() {
         let redactedText = redactor.redactUserDir(string: "Some /Users/private/path and other /Users/private/path2")
 
         XCTAssertEqual(redactedText, "Some /Users/<redacted>/path and other /Users/<redacted>/path2")
