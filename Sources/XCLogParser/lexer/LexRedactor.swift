@@ -23,7 +23,7 @@ public class LexRedactor: LogRedactor {
     private static let redactedTemplate = "/Users/<redacted>/"
     private lazy var userDirRegex: NSRegularExpression? = {
         do {
-            return try NSRegularExpression(pattern: "\\/Users\\/(\\w*)\\/")
+            return try NSRegularExpression(pattern: "/Users/([^/]+)/")
         } catch {
             return nil
         }
