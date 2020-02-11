@@ -4,6 +4,7 @@ language: swift
 branches:
   only:
   - master
+  - /^\d+\.\d+\.\d+.*$/
 cache:
   directories:
   - ".build"
