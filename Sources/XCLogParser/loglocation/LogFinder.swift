@@ -54,7 +54,9 @@ public struct LogFinder {
         let projectDir = try getProjectDirWithLogOptions(logOptions)
 
         // get latestLog
+
         return try URL(fileURLWithPath: getLatestLogInDir(projectDir))
+
     }
 
     public func findLogManifestWithLogOptions(_ logOptions: LogOptions) throws -> URL {
@@ -106,6 +108,13 @@ public struct LogFinder {
 
     private func getProjectDir(withLogOptions logOptions: LogOptions,
                                andDerivedDataDir derivedData: URL) throws -> URL {
+        // when xcodebuild is run with -derivedDataPath the logs are at the root level
+        if logOptions.derivedDataPath.isEmpty == false {
+            if FileManager.default.fileExists(atPath:
+                derivedData.appendingPathComponent(logsDir).path) {
+                return derivedData.appendingPathComponent(logsDir)
+            }
+        }
         if logOptions.projectLocation.isEmpty == false {
             let folderName = try getProjectFolderWithHash(logOptions.projectLocation)
             return derivedData.appendingPathComponent(folderName)

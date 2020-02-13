@@ -144,4 +144,21 @@ class LogFinderTests: XCTestCase {
         XCTAssertThrowsError(try logFinder.findLogManifestWithLogOptions(logOptions))
     }
 
+    func testGetLogsFromCustomDerivedData() throws {
+        let customDerivedDataDir = try TestUtils.createRandomTestDir()
+        let logsFolder = customDerivedDataDir.appendingPathComponent("/Logs/Build", isDirectory: true)
+        _ = try TestUtils.createSubdir(logsFolder.path, in: customDerivedDataDir)
+        _ = try TestUtils.createSubdir(xcactivitylogName, in: logsFolder,
+                      attributes: [:])
+        let logOptions = LogOptions(projectName: "",
+                                    xcworkspacePath: "",
+                                    xcodeprojPath: "/tmp/MyApp.xcodeproj",
+                                    derivedDataPath: customDerivedDataDir.path,
+                                    logManifestPath: "")
+
+        let latestLog = try logFinder.findLatestLogWithLogOptions(logOptions)
+        XCTAssertTrue(latestLog.path.contains(xcactivitylogName),
+                      "latestLog \(latestLog) doesn't contains \(xcactivitylogName)")
+    }
+
 }
