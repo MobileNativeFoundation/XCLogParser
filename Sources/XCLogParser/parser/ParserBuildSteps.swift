@@ -148,7 +148,9 @@ public final class ParserBuildSteps {
                                  notes: notes,
                                  swiftFunctionTimes: nil,
                                  fetchedFromCache: wasFetchedFromCache(parent:
-                                    parentSection, section: logSection)
+                                    parentSection, section: logSection),
+                                 compilationEndTimestamp: 0,
+                                 compilationDuration: 0
                                  )
 
             step.subSteps = try logSection.subSections.map { subSection -> BuildStep in
@@ -169,6 +171,7 @@ public final class ParserBuildSteps {
                     step = step.withFilteredNotices()
                 }
             }
+            step = addCompilationTimes(step: step)
             return step
     }
 
@@ -219,7 +222,7 @@ public final class ParserBuildSteps {
 
     /// In CLI logs, the target name is enclosed in a string like
     /// === BUILD TARGET TargetName OF PROJECT ProjectName WITH CONFIGURATION config ===
-    // This functions extracts the target name of it.
+    /// This function extracts the target name of it.
     private func getTargetName(_ text: String) -> String {
         guard let targetRegexp = targetRegexp else {
             return text
@@ -303,6 +306,40 @@ public final class ParserBuildSteps {
             return section.wasFetchedFromCache
         }
         return parent?.fetchedFromCache ?? false
+    }
+
+    func addCompilationTimes(step: BuildStep) -> BuildStep {
+        switch step.type {
+        case .detail:
+            return step.with(newCompilationEndTimestamp: step.endTimestamp,
+                             andCompilationDuration: step.duration)
+        case .target:
+            return addCompilationTimesToTarget(step)
+        case .main:
+            return addCompilationTimesToApp(step)
+        }
+    }
+
+    private func addCompilationTimesToTarget(_ target: BuildStep) -> BuildStep {
+        let lastCompilationStep = target.subSteps
+            .filter { $0.isCompilationStep() }
+            .max { $0.compilationEndTimestamp < $1.compilationEndTimestamp }
+        guard let lastStep = lastCompilationStep else {
+            return target
+        }
+        return target.with(newCompilationEndTimestamp: lastStep.compilationEndTimestamp,
+                         andCompilationDuration: lastStep.compilationEndTimestamp - target.startTimestamp)
+    }
+
+    private func addCompilationTimesToApp(_ app: BuildStep) -> BuildStep {
+        let lastCompilationStep = app.subSteps
+            .filter { $0.compilationEndTimestamp > 0 }
+            .max { $0.compilationEndTimestamp < $1.compilationEndTimestamp }
+        guard let lastStep = lastCompilationStep else {
+            return app
+        }
+        return app.with(newCompilationEndTimestamp: lastStep.compilationEndTimestamp,
+                         andCompilationDuration: lastStep.compilationEndTimestamp - app.startTimestamp)
     }
 
 }

@@ -1,0 +1,36 @@
+import Foundation
+@testable import XCLogParser
+
+func makeFakeBuildStep(title: String,
+                       type: BuildStepType,
+                       detailStepType: DetailStepType,
+                       startTimestamp: Double) -> BuildStep {
+    return BuildStep(type: type,
+                     machineName: "",
+                     buildIdentifier: "",
+                     identifier: "",
+                     parentIdentifier: "",
+                     domain: "",
+                     title: title,
+                     signature: "",
+                     startDate: "",
+                     endDate: "",
+                     startTimestamp: startTimestamp,
+                     endTimestamp: 0,
+                     duration: 0,
+                     detailStepType: detailStepType,
+                     buildStatus: "",
+                     schema: "",
+                     subSteps: [],
+                     warningCount: 0,
+                     errorCount: 0,
+                     architecture: "",
+                     documentURL: "",
+                     warnings: nil,
+                     errors: nil,
+                     notes: nil,
+                     swiftFunctionTimes: nil,
+                     fetchedFromCache: false,
+                     compilationEndTimestamp: 0,
+                     compilationDuration: 0)
+}

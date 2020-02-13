@@ -226,6 +226,15 @@ public struct BuildStep: Encodable {
     /// In a compilation step this will be false only if the file was actually compiled.
     /// in a `target` or `main` step it will be false if at least one sub step wasn't fetched from cache.
     public let fetchedFromCache: Bool
+
+    /// Actual compilation end time of the Step. With the new Build System, sometimes linking happens minutes
+    /// after compilation finishes. This is specially visible in Targets, where the files can be compiled
+    /// in seconds but the linking being done a couple of minutes after.
+    public var compilationEndTimestamp: Double
+
+    /// Actual compilation time of the Step. For Targets, this can be less than the `buildTime`
+    /// For steps that are't compilation steps such as `.scriptExecution` this will be 0
+    public var compilationDuration: Double
 }
 
 /// Extension used to flatten the three of a `BuildStep`
@@ -266,5 +275,13 @@ public extension BuildStep {
         var noSubSteps = self
         noSubSteps.subSteps = [BuildStep]()
         return noSubSteps
+    }
+
+    func isCompilationStep() -> Bool {
+        return detailStepType == .cCompilation
+        || detailStepType == .swiftCompilation
+        || detailStepType == .compileStoryboard
+        || detailStepType == .compileAssetsCatalog
+        || detailStepType == .swiftAggregatedCompilation
     }
 }
