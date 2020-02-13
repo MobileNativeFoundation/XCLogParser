@@ -29,7 +29,7 @@ A typical step is parsed and output as JSON with the following format:
     "swiftFunctionTimes" : [],
     "fetchedFromCache" : false,
     "compilationEndTimestamp": 1545143336.649699,
-    `compilationDuration`: 5.5941859483718872
+    "compilationDuration": 5.5941859483718872
 }
 ```
 
