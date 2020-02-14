@@ -163,7 +163,7 @@ public struct LogFinder {
             throw LogError.xcodeBuildError("""
                 Error. There is no directory for the project \(name) in the DerivedData
                 folder in \(derivedDataDir.path). Please specify the path to the xcactivitylog
-                with --file or the right DerivedData folder with --derived-data
+                with --file or the right DerivedData folder with --derived_data
                 """)
         }
         return match.appendingPathComponent(logsDir)

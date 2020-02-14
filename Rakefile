@@ -119,12 +119,13 @@ end
 
 def gen_fake_resources
   swift_dir = 'Sources/XCLogParser/generated'
-  css = File.read("Resources/css/styles.css")
-  app_js = File.read("Resources/js/app.js")
-  build_js = File.read("Resources/js/build.js")
-  index_html = File.read("Resources/index.html")
-  step_html = File.read("Resources/step.html")
-  step_js = File.read("Resources/js/step.js")
+
+  css = File.open('Resources/css/styles.css', 'r:UTF-8', &:read)
+  app_js = File.open('Resources/js/app.js', 'r:UTF-8', &:read)
+  build_js = File.open('Resources/js/build.js', 'r:UTF-8', &:read)
+  index_html = File.open('Resources/index.html', 'r:UTF-8', &:read)
+  step_html = File.open('Resources/step.html', 'r:UTF-8', &:read)
+  step_js = File.open('Resources/js/step.js', 'r:UTF-8', &:read)
   swift_content = <<-eos
 import Foundation
 
