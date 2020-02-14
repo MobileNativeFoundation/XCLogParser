@@ -108,17 +108,17 @@ class ParserTests: XCTestCase {
                                                            characterRangeStart: 15,
                                                            locationEncoding: 16)
         let warningMessage = IDEActivityLogMessage(title: "ABC is deprecated",
-                                                shortTitle: "",
-                                                timeEmitted: timestamp,
-                                                rangeEndInSectionText: 18446744073709551615,
-                                                rangeStartInSectionText: 0,
-                                                subMessages: [],
-                                                severity: 1,
-                                                type: "com.apple.dt.IDE.diagnostic",
-                                                location: textDocumentLocation,
-                                                categoryIdent: "",
-                                                secondaryLocations: [],
-                                                additionalDescription: "")
+                                                   shortTitle: "",
+                                                   timeEmitted: timestamp,
+                                                   rangeEndInSectionText: 18446744073709551615,
+                                                   rangeStartInSectionText: 0,
+                                                   subMessages: [],
+                                                   severity: 1,
+                                                   type: "com.apple.dt.IDE.diagnostic",
+                                                   location: textDocumentLocation,
+                                                   categoryIdent: "",
+                                                   secondaryLocations: [],
+                                                   additionalDescription: "")
         let fakeLog = getFakeIDEActivityLogWithMessage(warningMessage,
                                                        andText: "This is deprecated, [-Wdeprecated-declarations]")
         let build = try parser.parse(activityLog: fakeLog)
@@ -141,20 +141,20 @@ class ParserTests: XCTestCase {
             memberIdentifier: memberId,
             attributeSearchLocation: nil)
         let warningMessage = IDEActivityLogMessage(title: "Automatically Adjusts Font requires using a Dynamic Type",
-                                                shortTitle: "",
-                                                timeEmitted: timestamp,
-                                                rangeEndInSectionText: 0,
-                                                rangeStartInSectionText: 0,
-                                                subMessages: [],
-                                                severity: 1,
-                                                type: "",
-                                                location: ibDocumentLocation,
-                                                categoryIdent: "",
-                                                secondaryLocations: [],
-                                                additionalDescription: "")
+                                                   shortTitle: "",
+                                                   timeEmitted: timestamp,
+                                                   rangeEndInSectionText: 0,
+                                                   rangeStartInSectionText: 0,
+                                                   subMessages: [],
+                                                   severity: 1,
+                                                   type: "",
+                                                   location: ibDocumentLocation,
+                                                   categoryIdent: "",
+                                                   secondaryLocations: [],
+                                                   additionalDescription: "")
         let fakeLog = getFakeIDEActivityLogWithMessage(warningMessage,
                                                        andText: "/* com.apple.ibtool.document.warnings */ " +
-                                                       "/project/Base.lproj/Main.storyboard:ABC: warning:")
+            "/project/Base.lproj/Main.storyboard:ABC: warning:")
         let build = try parser.parse(activityLog: fakeLog)
         guard let warning = build.warnings?.first else {
             XCTFail("Build's warnings are empty")
@@ -169,25 +169,25 @@ class ParserTests: XCTestCase {
     func testParseTargetName() {
         let timestamp = Date().timeIntervalSinceReferenceDate
         let fakeSection = IDEActivityLogSection(sectionType: 1,
-        domainType: "",
-        title: "Run Something",
-        signature: "",
-        timeStartedRecording: timestamp,
-        timeStoppedRecording: timestamp,
-        subSections: [],
-        text: "",
-        messages: [],
-        wasCancelled: false,
-        isQuiet: false,
-        wasFetchedFromCache: false,
-        subtitle: "",
-        location: DVTDocumentLocation(documentURLString: "",
-                                      timestamp: timestamp),
-        commandDetailDesc: command,
-        uniqueIdentifier: "ABC",
-        localizedResultString: "",
-        xcbuildSignature: "",
-        unknown: 0)
+                                                domainType: "",
+                                                title: "Run Something",
+                                                signature: "",
+                                                timeStartedRecording: timestamp,
+                                                timeStoppedRecording: timestamp,
+                                                subSections: [],
+                                                text: "",
+                                                messages: [],
+                                                wasCancelled: false,
+                                                isQuiet: false,
+                                                wasFetchedFromCache: false,
+                                                subtitle: "",
+                                                location: DVTDocumentLocation(documentURLString: "",
+                                                                              timestamp: timestamp),
+                                                commandDetailDesc: command,
+                                                uniqueIdentifier: "ABC",
+                                                localizedResultString: "",
+                                                xcbuildSignature: "",
+                                                unknown: 0)
 
         let parsedTarget = fakeSection.getTargetFromCommand()
 
@@ -237,6 +237,58 @@ class ParserTests: XCTestCase {
                                                  xcbuildSignature: "",
                                                  unknown: 0)
         return IDEActivityLog(version: 10, mainSection: fakeMainStep)
+    }
+
+    func testParseTargetCompilationTimes() {
+        let expectedCompilationDuration = 10.0
+        let now = Date().timeIntervalSince1970
+        let compilationTime = now + expectedCompilationDuration
+        let linkingTime = now + expectedCompilationDuration + 20
+
+        let compilationStep = makeFakeBuildStep(title: "Compilation",
+                                                type: .detail,
+                                                detailStepType: .cCompilation,
+                                                startTimestamp: now)
+            .with(newCompilationEndTimestamp: compilationTime, andCompilationDuration: expectedCompilationDuration)
+        let linkingStep = makeFakeBuildStep(title: "Linking",
+                                            type: .detail,
+                                            detailStepType: .linker,
+                                            startTimestamp: now + expectedCompilationDuration)
+            .with(newCompilationEndTimestamp: linkingTime, andCompilationDuration: 20)
+        var targetStep = makeFakeBuildStep(title: "Build Target",
+                                           type: .target,
+                                           detailStepType: .none,
+                                           startTimestamp: now).with(subSteps: [compilationStep, linkingStep])
+        let parser = ParserBuildSteps()
+        targetStep = parser.addCompilationTimes(step: targetStep)
+        XCTAssertEqual(compilationTime, targetStep.compilationEndTimestamp)
+        XCTAssertEqual(expectedCompilationDuration, targetStep.compilationDuration)
+    }
+
+    func testParseAppCompilationTimes() {
+        let expectedCompilationDuration = 50.0
+        let now = Date().timeIntervalSince1970
+
+        let target1 = makeFakeBuildStep(title: "Target1",
+                                                type: .target,
+                                                detailStepType: .none,
+                                                startTimestamp: now)
+            .with(newCompilationEndTimestamp: now + 25.0,
+                  andCompilationDuration: 25.0)
+        let target2 = makeFakeBuildStep(title: "Target2",
+                                            type: .target,
+                                            detailStepType: .none,
+                                            startTimestamp: now + 25.0)
+        .with(newCompilationEndTimestamp: now + 50.0,
+              andCompilationDuration: 25.0)
+        var app = makeFakeBuildStep(title: "My App",
+                                           type: .main,
+                                           detailStepType: .none,
+                                           startTimestamp: now).with(subSteps: [target1, target2])
+        let parser = ParserBuildSteps()
+        app = parser.addCompilationTimes(step: app)
+        XCTAssertEqual(now + expectedCompilationDuration, app.compilationEndTimestamp)
+        XCTAssertEqual(expectedCompilationDuration, app.compilationDuration)
     }
 
     func testGetIndividualSteps() throws {

@@ -47,7 +47,10 @@ extension BuildStep {
                          errors: errors,
                          notes: notes,
                          swiftFunctionTimes: swiftFunctionTimes,
-                         fetchedFromCache: fetchedFromCache)
+                         fetchedFromCache: fetchedFromCache,
+                         compilationEndTimestamp: compilationEndTimestamp,
+                         compilationDuration: compilationDuration
+        )
     }
 
     func with(title newTitle: String) -> BuildStep {
@@ -76,7 +79,9 @@ extension BuildStep {
                          errors: errors,
                          notes: notes,
                          swiftFunctionTimes: swiftFunctionTimes,
-                         fetchedFromCache: fetchedFromCache)
+                         fetchedFromCache: fetchedFromCache,
+                         compilationEndTimestamp: compilationEndTimestamp,
+                         compilationDuration: compilationDuration)
     }
 
     func with(signature newSignature: String) -> BuildStep {
@@ -105,7 +110,9 @@ extension BuildStep {
                          errors: errors,
                          notes: notes,
                          swiftFunctionTimes: swiftFunctionTimes,
-                         fetchedFromCache: fetchedFromCache)
+                         fetchedFromCache: fetchedFromCache,
+                         compilationEndTimestamp: compilationEndTimestamp,
+                         compilationDuration: compilationDuration)
     }
 
     func withFilteredNotices() -> BuildStep {
@@ -137,7 +144,9 @@ extension BuildStep {
                          errors: filtereredErrors,
                          notes: filteredNotes,
                          swiftFunctionTimes: swiftFunctionTimes,
-                         fetchedFromCache: fetchedFromCache)
+                         fetchedFromCache: fetchedFromCache,
+                         compilationEndTimestamp: compilationEndTimestamp,
+                         compilationDuration: compilationDuration)
     }
 
     func with(subSteps newSubSteps: [BuildStep]) -> BuildStep {
@@ -166,7 +175,41 @@ extension BuildStep {
                          errors: errors,
                          notes: notes,
                          swiftFunctionTimes: swiftFunctionTimes,
-                         fetchedFromCache: fetchedFromCache)
+                         fetchedFromCache: fetchedFromCache,
+                         compilationEndTimestamp: compilationEndTimestamp,
+                         compilationDuration: compilationDuration)
+    }
+
+    func with(newCompilationEndTimestamp: Double,
+              andCompilationDuration newCompilationDuration: Double) -> BuildStep {
+        return BuildStep(type: type,
+                         machineName: machineName,
+                         buildIdentifier: buildIdentifier,
+                         identifier: identifier,
+                         parentIdentifier: parentIdentifier,
+                         domain: domain,
+                         title: title,
+                         signature: signature,
+                         startDate: startDate,
+                         endDate: endDate,
+                         startTimestamp: startTimestamp,
+                         endTimestamp: endTimestamp,
+                         duration: duration,
+                         detailStepType: detailStepType,
+                         buildStatus: buildStatus,
+                         schema: schema,
+                         subSteps: subSteps,
+                         warningCount: warningCount,
+                         errorCount: errorCount,
+                         architecture: architecture,
+                         documentURL: documentURL,
+                         warnings: warnings,
+                         errors: errors,
+                         notes: notes,
+                         swiftFunctionTimes: swiftFunctionTimes,
+                         fetchedFromCache: fetchedFromCache,
+                         compilationEndTimestamp: newCompilationEndTimestamp,
+                         compilationDuration: newCompilationDuration)
     }
 
     private func filterNotices(_ notices: [Notice]?) -> [Notice]? {

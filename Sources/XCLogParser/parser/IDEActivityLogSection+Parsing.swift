@@ -117,8 +117,8 @@ extension IDEActivityLogSection {
     private func buildTargetSection(_ name: String, with section: IDEActivityLogSection) -> IDEActivityLogSection {
         return IDEActivityLogSection(sectionType: 2,
                                      domainType: section.domainType,
-                                     title: "Target \(name)",
-            signature: "",
+                                     title: "Build target \(name)",
+            signature: name,
             timeStartedRecording: section.timeStartedRecording,
             timeStoppedRecording: section.timeStoppedRecording,
             subSections: [IDEActivityLogSection](),
