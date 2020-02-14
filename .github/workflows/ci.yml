@@ -1,0 +1,42 @@
+name: CI
+
+on: [pull_request]
+
+jobs:
+  SwiftLint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: SwiftLint
+        uses: norio-nomura/action-swiftlint@3.1.0
+
+  macos:
+    runs-on: macOS-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Build and Run
+        run: rake build[release]
+      - name: Test
+        run: rake test
+
+  linux:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        swift: ["5.1"]
+
+    container:
+      image: swift:${{ matrix.swift }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Install Ruby
+        run: apt-get update && apt-get install -y ruby zlib1g-dev
+      - name: Build and Run
+        run: LANG=en_US.UTF-8 LC_CTYPE=UTF-8 rake build[release]
+      - name: Test
+        run: LANG=en_US.UTF-8 LC_CTYPE=UTF-8 rake test
