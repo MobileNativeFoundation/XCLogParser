@@ -1,6 +1,6 @@
 # XCLogParser
 
-[![Build Status](https://api.travis-ci.com/spotify/XCLogParser.svg?branch=master)](https://travis-ci.com/spotify/XCLogParser.swift)
+[![Build Status](https://github.com/spotify/XCLogParser/workflows/CI/badge.svg)](https://github.com/spotify/XCLogParser/workflows/CI/badge.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 
