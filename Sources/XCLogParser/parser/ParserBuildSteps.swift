@@ -166,7 +166,8 @@ public final class ParserBuildSteps {
             }
             if step.detailStepType == .swiftCompilation {
                 swiftFunctionTimesParser.addLogSection(logSection)
-                if let individualSwiftSteps = logSection.getSwiftIndividualSteps(buildStep: step) {
+                if let individualSwiftSteps = logSection.getSwiftIndividualSteps(buildStep: step,
+                                                                                 currentIndex: &currentIndex) {
                     step.subSteps.append(contentsOf: individualSwiftSteps)
                     step = step.withFilteredNotices()
                 }

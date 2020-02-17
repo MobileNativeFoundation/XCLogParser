@@ -212,6 +212,38 @@ extension BuildStep {
                          compilationDuration: newCompilationDuration)
     }
 
+    func with(identifier newIdentifier: String) -> BuildStep {
+        return BuildStep(type: type,
+                         machineName: machineName,
+                         buildIdentifier: buildIdentifier,
+                         identifier: newIdentifier,
+                         parentIdentifier: parentIdentifier,
+                         domain: domain,
+                         title: title,
+                         signature: signature,
+                         startDate: startDate,
+                         endDate: endDate,
+                         startTimestamp: startTimestamp,
+                         endTimestamp: endTimestamp,
+                         duration: duration,
+                         detailStepType: detailStepType,
+                         buildStatus: buildStatus,
+                         schema: schema,
+                         subSteps: subSteps,
+                         warningCount: warningCount,
+                         errorCount: errorCount,
+                         architecture: architecture,
+                         documentURL: documentURL,
+                         warnings: warnings,
+                         errors: errors,
+                         notes: notes,
+                         swiftFunctionTimes: swiftFunctionTimes,
+                         fetchedFromCache: fetchedFromCache,
+                         compilationEndTimestamp: compilationEndTimestamp,
+                         compilationDuration: compilationDuration
+        )
+    }
+
     private func filterNotices(_ notices: [Notice]?) -> [Notice]? {
         guard let notices = notices else {
             return nil
