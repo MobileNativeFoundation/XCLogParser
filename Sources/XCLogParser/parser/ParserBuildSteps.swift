@@ -322,7 +322,7 @@ public final class ParserBuildSteps {
 
     private func addCompilationTimesToTarget(_ target: BuildStep) -> BuildStep {
         let lastCompilationStep = target.subSteps
-            .filter { $0.isCompilationStep() }
+            .filter { $0.isCompilationStep() && $0.fetchedFromCache == false }
             .max { $0.compilationEndTimestamp < $1.compilationEndTimestamp }
         guard let lastStep = lastCompilationStep else {
             return target
@@ -333,7 +333,7 @@ public final class ParserBuildSteps {
 
     private func addCompilationTimesToApp(_ app: BuildStep) -> BuildStep {
         let lastCompilationStep = app.subSteps
-            .filter { $0.compilationEndTimestamp > 0 }
+            .filter { $0.compilationEndTimestamp > 0 && $0.fetchedFromCache == false }
             .max { $0.compilationEndTimestamp < $1.compilationEndTimestamp }
         guard let lastStep = lastCompilationStep else {
             return app
