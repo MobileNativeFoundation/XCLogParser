@@ -302,6 +302,21 @@ class ParserTests: XCTestCase {
                                     "file:///test_project/PodsTest/Pods/Alamofire/Source/EventMonitor.swift"]
         let documentURLs = buildStep.subSteps.map { $0.documentURL }
         XCTAssertEqual(expectedDocumentURLs, documentURLs)
+
+        let parsedBuild = buildStep.flatten()
+        var idsDict: [String: String] = [:]
+        parsedBuild.compactMap { step -> String? in
+            if step.detailStepType == .swiftCompilation {
+                return step.identifier
+            }
+            return nil
+        }.forEach { identifier in
+            if idsDict[identifier] == nil {
+                idsDict[identifier] = identifier
+            } else {
+                XCTFail("Duplicated identifier \(identifier)")
+            }
+        }
     }
 
     // swiftlint:disable line_length
