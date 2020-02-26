@@ -173,9 +173,6 @@ public struct LogFinder {
                 }
                 return lhDate.compare(rhDate) == .orderedDescending
         }
-        for file in sorted {
-            print(file)
-        }
         guard let match = sorted.first else {
             throw LogError.xcodeBuildError("""
                 Error. There is no directory for the project \(name) in the DerivedData
