@@ -86,12 +86,13 @@ An example output has been omitted for brevity since it can contain a lot of inf
   | Parameter Name | Description | Required |
   |-----|---|-----|
   | `--file`  | The path to the `xcactivitylog`.  | No * |
-  | `--project`  | The name of the project if you don't know the path to the log. The tool will try to find the latest Build log in a folder that starts with that name inside the `DerivedData` directory.  | No * |
+  | `--project`  | The name of the project if you don't know the path to the log. The tool will try to find the latest Build log in a folder that starts with that name inside the `DerivedData` directory.  Use `--strictProjectName` for stricter name matching.  | No * |
   | `--workspace`  | The path to the `xcworkspace` file if you don't know the path to the log. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
   | `--xcodeproj`  | The path to the `xcodeproj` file if you don't know the path to the log and if the project doesn't have a `xcworkspace` file. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
   | `--derived_data`  | The path to the derived data folder if you are using `xcodebuild` to build your project with the `-derivedDataPath` option.  | No |
   | `--output`  | If specified, the JSON file will be written to the given path. If not defined, the command will output to the standard output.  | No |
   | `--redacted`  | If specified, the username will be replaced by the word `redacted` in the file paths contained in the logs. Useful for privacy reasons but slightly decreases the performance.  | No |
+  | `--strictProjectName`  | Used in conjunction with `--project`. If specified, a stricter name matching will be done for the project name.  | No |
 
   >No *: One of `--file`, `--project`, `--workspace`, `--xcodeproj` parameters is required.
 
@@ -118,12 +119,13 @@ Example output available in the [reporters](#reporters) section.
   |-----|---|-----|
   | `--reporter`  | The reporter used to transform the logs. It can be either `json`, `flatJson`, `summaryJson`, `chromeTracer` or `html`. (required)  | Yes |
   | `--file`  | The path to the `xcactivitylog`.  | No * |
-  | `--project`  | The name of the project if you don't know the path to the log. The tool will try to find the latest Build log in a folder that starts with that name inside the `DerivedData` directory.  | No * |
+  | `--project`  | The name of the project if you don't know the path to the log. The tool will try to find the latest Build log in a folder that starts with that name inside the `DerivedData` directory.  Use `--strictProjectName` for stricter name matching.  | No * |
   | `--workspace`  | The path to the `xcworkspace` file if you don't know the path to the log. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
   | `--xcodeproj`  | The path to the `xcodeproj` file if you don't know the path to the log and if the project doesn't have a `xcworkspace` file. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
   | `--derived_data`  | The path to the derived data folder if you are using `xcodebuild` to build your project with the `-derivedDataPath` option.  | No |
   | `--output`  | If specified, the JSON file will be written to the given path. If not defined, the command will output to the standard output.  | No |
   | `--redacted`  | If specified, the username will be replaced by the word `redacted` in the file paths contained in the logs. Useful for privacy reasons but slightly decreases the performance.  | No |
+  | `--strictProjectName`  | Used in conjunction with `--project`. If specified, a stricter name matching will be done for the project name.  | No |
   | `--machine_name`  | If specified, the machine name will be used to create the `buildIdentifier`. If it is not specified, the host name will be used.  | No |
 
   >No *: One of `--file`, `--project`, `--workspace`, `--xcodeproj` parameters is required.
@@ -160,11 +162,12 @@ Example output:
   | Parameter Name | Description | Required |
   |-----|---|-----|
   | `--log_manifest`  | The path to an existing `LogStoreManifest.plist`.  | No * |
-  | `--project`  | The name of the project if you don't know the path to the log. The tool will try to find the latest Build log in a folder that starts with that name inside the `DerivedData` directory.  | No * |
+  | `--project`  | The name of the project if you don't know the path to the log. The tool will try to find the latest Build log in a folder that starts with that name inside the `DerivedData` directory.  Use `--strictProjectName` for stricter name matching.  | No * |
   | `--worskapce`  | The path to the `xcworkspace` file if you don't know the path to the log. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
   | `--xcodeproj`  | The path to the `xcodeproj` file if you don't know the path to the log and if the project doesn't have a `xcworkspace` file. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
   | `--derived_data`  | The path to the derived data folder if you are using `xcodebuild` to build your project with the `-derivedDataPath` option.  | No |
   | `--output`  | If specified, the JSON file will be written to the given path. If not defined, the command will output to the standard output.  | No |
+  | `--strictProjectName`  | Used in conjunction with `--project`. If specified, a stricter name matching will be done for the project name.  | No |
 
   >No *: One of `--log-manifest`, `--project`, `--workspace`, `--xcodeproj` parameters is required.
 

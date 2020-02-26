@@ -35,7 +35,8 @@ let projectOption = Option(
     key: "project",
     defaultValue: "",
     usage: "The name of an Xcode project. " +
-    "The tool will try to find the latest log folder with this prefix in the DerivedData directory.")
+    "The tool will try to find the latest log folder with this prefix in the DerivedData directory. " +
+    "Use with `--strictProjectName` for stricter name matching.")
 
 let workspaceOption = Option(
     key: "workspace",
@@ -53,6 +54,9 @@ let redactedSwitch = Switch(flag: "r",
                             key: "redacted",
                             usage: "Redacts the username of the paths found in the log. " +
     "For instance, /Users/timcook/project will be /Users/<redacted>/project")
+
+let strictProjectNameSwitch = Switch(key: "strictProjectName",
+                            usage: "Use strict name testing when trying to find the latest version of the project in the DerivedData directory.")
 
 let outputOption = Option(
     key: "output",
