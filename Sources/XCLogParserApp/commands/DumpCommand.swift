@@ -45,7 +45,8 @@ struct DumpCommand: CommandProtocol {
                                     xcworkspacePath: options.workspace,
                                     xcodeprojPath: options.xcodeproj,
                                     derivedDataPath: options.derivedData,
-                                    xcactivitylogPath: options.logFile)
+                                    xcactivitylogPath: options.logFile,
+                                    strictProjectName: options.strictProjectName)
         let actionOptions = ActionOptions(reporter: reporter,
                                            outputPath: options.output,
                                            redacted: options.redacted)
@@ -68,6 +69,7 @@ struct DumpOptions: OptionsProtocol {
     let workspace: String
     let xcodeproj: String
     let redacted: Bool
+    let strictProjectName: Bool
     let output: String
 
     static func create(_ logFile: String)
@@ -76,16 +78,19 @@ struct DumpOptions: OptionsProtocol {
         -> (_ workspace: String)
         -> (_ xcodeproj: String)
         -> (_ redacted: Bool)
+        -> (_ strictProjectName: Bool)
         -> (_ output: String) -> DumpOptions {
-            return { derivedData in { projectName in { workspace in { xcodeproj in { redacted in { output in
+            return { derivedData in { projectName in { workspace in { xcodeproj in { redacted
+                in { strictProjectName in { output in
                     self.init(logFile: logFile,
                               derivedData: derivedData,
                               projectName: projectName,
                               workspace: workspace,
                               xcodeproj: xcodeproj,
                               redacted: redacted,
+                              strictProjectName: strictProjectName,
                               output: output)
-                }}}}}}
+                }}}}}}}
     }
 
     static func evaluate(_ mode: CommandMode) -> Result<DumpOptions, CommandantError<CommandantError<Swift.Error>>> {
@@ -96,6 +101,7 @@ struct DumpOptions: OptionsProtocol {
             <*> mode <| workspaceOption
             <*> mode <| xcodeprojOption
             <*> mode <| redactedSwitch
+            <*> mode <| strictProjectNameSwitch
             <*> mode <| outputOption
     }
 

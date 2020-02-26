@@ -45,7 +45,8 @@ struct ManifestCommand: CommandProtocol {
                                     xcworkspacePath: options.workspace,
                                     xcodeprojPath: options.xcodeproj,
                                     derivedDataPath: options.derivedData,
-                                    logManifestPath: options.logManifest)
+                                    logManifestPath: options.logManifest,
+                                    strictProjectName: options.strictProjectName)
         let actionOptions = ActionOptions(reporter: reporter,
                                           outputPath: options.output,
                                           redacted: false)
@@ -69,6 +70,7 @@ struct ManifestOptions: OptionsProtocol {
     let xcodeproj: String
     let logManifest: String
     let output: String
+    let strictProjectName: Bool
 
     static func create(_ derivedData: String) ->
         (_ projectName: String) ->
@@ -76,16 +78,18 @@ struct ManifestOptions: OptionsProtocol {
         (_ xcodeproj: String) ->
         (_ logManifest: String) ->
         (_ output: String) ->
+        (_ strictProjectName: Bool) ->
         ManifestOptions {
-            return { projectName in { workspace in { xcodeproj in { logManifest in { output in
+            return { projectName in { workspace in { xcodeproj in { logManifest in { output in { strictProjectName in
                 self.init(derivedData: derivedData,
                           projectName: projectName,
                           workspace: workspace,
                           xcodeproj: xcodeproj,
                           logManifest: logManifest,
-                          output: output)
+                          output: output,
+                          strictProjectName: strictProjectName)
 
-                }}}}}
+                }}}}}}
     }
 
     static func evaluate(_ mode: CommandMode) -> Result<ManifestOptions,
@@ -102,6 +106,7 @@ struct ManifestOptions: OptionsProtocol {
                                    defaultValue: "",
                                    usage: "Optional. The path where to write the log entry.\n" +
                                    "If not specified, it will be writen to the Standard output")
+                <*> mode <| strictProjectNameSwitch
     }
 
     func isValid() -> Bool {

@@ -56,7 +56,8 @@ struct ParseCommand: CommandProtocol {
                                     xcworkspacePath: options.workspace,
                                     xcodeprojPath: options.xcodeproj,
                                     derivedDataPath: options.derivedData,
-                                    xcactivitylogPath: options.logFile)
+                                    xcactivitylogPath: options.logFile,
+                                    strictProjectName: options.strictProjectName)
         let actionOptions = ActionOptions(reporter: reporter,
                                           outputPath: options.output,
                                           redacted: options.redacted,
@@ -82,6 +83,7 @@ struct ParseOptions: OptionsProtocol {
     let reporter: String
     let machineName: String
     let redacted: Bool
+    let strictProjectName: Bool
     let output: String
 
     static func create(_ logFile: String)
@@ -92,9 +94,10 @@ struct ParseOptions: OptionsProtocol {
         -> (_ reporter: String)
         -> (_ machineName: String)
         -> (_ redacted: Bool)
+        -> (_ strictProjectName: Bool)
         -> (_ output: String) -> ParseOptions {
             return { derivedData in { projectName in { workspace in { xcodeproj in { reporter in { machineName
-                in { redacted in {
+                in { redacted in { strictProjectName in {
             output in
             self.init(logFile: logFile,
                       derivedData: derivedData,
@@ -104,8 +107,9 @@ struct ParseOptions: OptionsProtocol {
                       reporter: reporter,
                       machineName: machineName,
                       redacted: redacted,
+                      strictProjectName: strictProjectName,
                       output: output)
-                }}}}}}}}
+                    }}}}}}}}}
     }
 
     static func evaluate(_ mode: CommandMode) -> Result<ParseOptions, CommandantError<CommandantError<Swift.Error>>> {
@@ -126,6 +130,7 @@ struct ParseOptions: OptionsProtocol {
                 usage: "Optional. The name of the machine." +
                 "If not specified, the host name will be used.")
             <*> mode <| redactedSwitch
+            <*> mode <| strictProjectNameSwitch
             <*> mode <| outputOption
     }
 

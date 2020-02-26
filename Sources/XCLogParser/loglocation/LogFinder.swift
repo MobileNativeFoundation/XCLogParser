@@ -120,7 +120,9 @@ public struct LogFinder {
             return derivedData.appendingPathComponent(folderName)
         }
         if logOptions.projectName.isEmpty == false {
-            return try findDerivedDataForProject(logOptions.projectName, inDir: derivedData)
+            return try findDerivedDataForProject(logOptions.projectName,
+                                                 inDir: derivedData,
+                                                 strictProjectName: logOptions.strictProjectName)
         }
         throw LogError.noLogFound(dir: derivedData.path)
     }
@@ -141,7 +143,9 @@ public struct LogFinder {
     /// - parameter name: Name of the project
     /// - parameter inDir: URL of the derived data directory
     /// - returns: The path to the derived data of the project or nil if it is not found.
-    public func findDerivedDataForProject(_ name: String, inDir derivedDataDir: URL) throws -> URL {
+    public func findDerivedDataForProject(_ name: String,
+                                          inDir derivedDataDir: URL,
+                                          strictProjectName: Bool) throws -> URL {
 
         let fileManager = FileManager.default
 
@@ -149,6 +153,21 @@ public struct LogFinder {
                                                         includingPropertiesForKeys: [.contentModificationDateKey],
                                                         options: .skipsHiddenFiles)
         let sorted = try files.filter { url in
+            if strictProjectName {
+                var dirName = url.lastPathComponent
+                // Look for exact match first
+                if dirName == name {
+                    return true
+                } else if let lastIndex = dirName.lastIndex(of: "-") {
+                    // This looks for projectName-application_hash format
+                    // There are times when there are multiple directories
+                    // of a given project with different application hashes
+                    dirName.removeSubrange(Range(uncheckedBounds: (lower: lastIndex, upper: dirName.endIndex)))
+                    return dirName == name
+                }
+                return false
+            }
+            // Fallback to default behavior
             let dirName = url.lastPathComponent.lowercased()
             return dirName.starts(with: name.lowercased())
             }.sorted {
