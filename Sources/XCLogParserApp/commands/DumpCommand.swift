@@ -80,7 +80,8 @@ struct DumpOptions: OptionsProtocol {
         -> (_ redacted: Bool)
         -> (_ strictProjectName: Bool)
         -> (_ output: String) -> DumpOptions {
-            return { derivedData in { projectName in { workspace in { xcodeproj in { redacted in { strictProjectName in { output in
+            return { derivedData in { projectName in { workspace in { xcodeproj in { redacted
+                in { strictProjectName in { output in
                     self.init(logFile: logFile,
                               derivedData: derivedData,
                               projectName: projectName,

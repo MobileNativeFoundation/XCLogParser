@@ -120,7 +120,9 @@ public struct LogFinder {
             return derivedData.appendingPathComponent(folderName)
         }
         if logOptions.projectName.isEmpty == false {
-            return try findDerivedDataForProject(logOptions.projectName, inDir: derivedData, strictProjectName: logOptions.strictProjectName)
+            return try findDerivedDataForProject(logOptions.projectName,
+                                                 inDir: derivedData,
+                                                 strictProjectName: logOptions.strictProjectName)
         }
         throw LogError.noLogFound(dir: derivedData.path)
     }
@@ -141,7 +143,9 @@ public struct LogFinder {
     /// - parameter name: Name of the project
     /// - parameter inDir: URL of the derived data directory
     /// - returns: The path to the derived data of the project or nil if it is not found.
-    public func findDerivedDataForProject(_ name: String, inDir derivedDataDir: URL, strictProjectName: Bool) throws -> URL {
+    public func findDerivedDataForProject(_ name: String,
+                                          inDir derivedDataDir: URL,
+                                          strictProjectName: Bool) throws -> URL {
 
         let fileManager = FileManager.default
 
@@ -156,7 +160,8 @@ public struct LogFinder {
                     return true
                 } else if let lastIndex = dirName.lastIndex(of: "-") {
                     // This looks for projectName-application_hash format
-                    // There are times when there are multiple directories of a given project with different application hashes
+                    // There are times when there are multiple directories
+                    // of a given project with different application hashes
                     dirName.removeSubrange(Range(uncheckedBounds: (lower: lastIndex, upper: dirName.endIndex)))
                     return dirName == name
                 }

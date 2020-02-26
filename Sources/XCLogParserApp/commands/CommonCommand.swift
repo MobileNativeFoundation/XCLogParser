@@ -56,7 +56,8 @@ let redactedSwitch = Switch(flag: "r",
     "For instance, /Users/timcook/project will be /Users/<redacted>/project")
 
 let strictProjectNameSwitch = Switch(key: "strictProjectName",
-                            usage: "Use strict name testing when trying to find the latest version of the project in the DerivedData directory.")
+    usage: "Use strict name testing when trying to find the latest version " +
+    "of the project in the DerivedData directory.")
 
 let outputOption = Option(
     key: "output",

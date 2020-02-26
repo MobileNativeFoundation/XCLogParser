@@ -41,7 +41,7 @@ public struct LogOptions {
 
     /// Use strict Xcode project naming.
     let strictProjectName: Bool
-    
+
     /// Computed property, return the xcworkspacePath if not empty or
     /// the xcodeprojPath if xcworkspacePath is empty
     var projectLocation: String {
