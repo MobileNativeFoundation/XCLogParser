@@ -23,20 +23,20 @@ import Foundation
 public struct ActionOptions {
 
     /// The `Reporter` to use
-    let reporter: Reporter
+    public let reporter: Reporter
 
     /// The outputPath to write the report to.
     /// If empty, the report will be written to the StandardOutput
-    let outputPath: String
+    public let outputPath: String
 
     /// Used for actions involving the .xcactivitylog.
     /// If true, the username will be redacted from the paths in the log.
     /// Used to protect the privacy of the users.
-    let redacted: Bool
+    public let redacted: Bool
 
     /// Used in Parse actions. The current parsers use the host name to create a unique build identifier
     /// With this option, a user can override it and provide a name that will be used in that identifier.
-    let machineName: String?
+    public let machineName: String?
 
     public init(reporter: Reporter, outputPath: String, redacted: Bool, machineName: String? = nil) {
         self.reporter = reporter
