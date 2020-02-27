@@ -253,7 +253,7 @@ public struct BuildStep: Encodable {
                 detailStepType: DetailStepType,
                 buildStatus: String,
                 schema: String,
-                subSteps : [BuildStep],
+                subSteps: [BuildStep],
                 warningCount: Int,
                 errorCount: Int,
                 architecture: String,
@@ -264,8 +264,7 @@ public struct BuildStep: Encodable {
                 swiftFunctionTimes: [FunctionTime]?,
                 fetchedFromCache: Bool,
                 compilationEndTimestamp: Double,
-                compilationDuration: Double)
-    {
+                compilationDuration: Double) {
         self.type = type
         self.machineName = machineName
         self.buildIdentifier = buildIdentifier
