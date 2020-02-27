@@ -235,6 +235,66 @@ public struct BuildStep: Encodable {
     /// Actual compilation time of the Step. For Targets, this can be less than the `buildTime`
     /// For steps that are't compilation steps such as `.scriptExecution` this will be 0
     public var compilationDuration: Double
+
+    /// Public initializer 
+    public init(type: BuildStepType,
+                machineName: String,
+                buildIdentifier: String,
+                identifier: String,
+                parentIdentifier: String,
+                domain: String,
+                title: String,
+                signature: String,
+                startDate: String,
+                endDate: String,
+                startTimestamp: Double,
+                endTimestamp: Double,
+                duration: Double,
+                detailStepType: DetailStepType,
+                buildStatus: String,
+                schema: String,
+                subSteps : [BuildStep],
+                warningCount: Int,
+                errorCount: Int,
+                architecture: String,
+                documentURL: String,
+                warnings: [Notice]?,
+                errors: [Notice]?,
+                notes: [Notice]?,
+                swiftFunctionTimes: [FunctionTime]?,
+                fetchedFromCache: Bool,
+                compilationEndTimestamp: Double,
+                compilationDuration: Double)
+    {
+        self.type = type
+        self.machineName = machineName
+        self.buildIdentifier = buildIdentifier
+        self.identifier = identifier
+        self.parentIdentifier = parentIdentifier
+        self.domain = domain
+        self.title = title
+        self.signature = signature
+        self.startDate = startDate
+        self.endDate = endDate
+        self.startTimestamp = startTimestamp
+        self.endTimestamp = endTimestamp
+        self.duration = duration
+        self.detailStepType = detailStepType
+        self.buildStatus = buildStatus
+        self.schema = schema
+        self.subSteps = subSteps
+        self.warningCount = warningCount
+        self.errorCount = errorCount
+        self.architecture = architecture
+        self.documentURL = documentURL
+        self.warnings = warnings
+        self.errors = errors
+        self.notes = notes
+        self.swiftFunctionTimes = swiftFunctionTimes
+        self.fetchedFromCache = fetchedFromCache
+        self.compilationEndTimestamp = compilationEndTimestamp
+        self.compilationDuration = compilationDuration
+    }
 }
 
 /// Extension used to flatten the three of a `BuildStep`

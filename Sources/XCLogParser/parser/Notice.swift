@@ -98,6 +98,33 @@ public class Notice: Encodable {
         return NSRegularExpression.fromPattern(pattern)
     }()
 
+    /// Public initializer 
+    public init(type: NoticeType,
+                title: String,
+                clangFlag: String?,
+                documentURL: String,
+                severity: Int,
+                startingLineNumber: UInt64,
+                endingLineNumber: UInt64,
+                startingColumnNumber: UInt64,
+                endingColumnNumber: UInt64,
+                characterRangeEnd: UInt64,
+                characterRangeStart: UInt64,
+                interfaceBuilderIdentifier: String?) {
+        self.type = type
+        self.title = title
+        self.clangFlag = clangFlag
+        self.documentURL = documentURL
+        self.severity = severity
+        self.startingLineNumber = startingLineNumber
+        self.endingLineNumber = endingLineNumber
+        self.startingColumnNumber = startingColumnNumber
+        self.endingColumnNumber = endingColumnNumber
+        self.characterRangeEnd = characterRangeEnd
+        self.characterRangeStart = characterRangeStart
+        self.interfaceBuilderIdentifier = interfaceBuilderIdentifier
+    }
+
     public init?(withType type: NoticeType?,
                  logMessage: IDEActivityLogMessage,
                  andClangFlag clangFlag: String? = nil) {
