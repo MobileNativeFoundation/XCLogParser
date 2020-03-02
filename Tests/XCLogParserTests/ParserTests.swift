@@ -248,17 +248,20 @@ class ParserTests: XCTestCase {
         let compilationStep = makeFakeBuildStep(title: "Compilation",
                                                 type: .detail,
                                                 detailStepType: .cCompilation,
-                                                startTimestamp: now)
+                                                startTimestamp: now,
+                                                fetchedFromCache: false)
             .with(newCompilationEndTimestamp: compilationTime, andCompilationDuration: expectedCompilationDuration)
         let linkingStep = makeFakeBuildStep(title: "Linking",
                                             type: .detail,
                                             detailStepType: .linker,
-                                            startTimestamp: now + expectedCompilationDuration)
+                                            startTimestamp: now + expectedCompilationDuration,
+                                            fetchedFromCache: false)
             .with(newCompilationEndTimestamp: linkingTime, andCompilationDuration: 20)
         var targetStep = makeFakeBuildStep(title: "Build Target",
                                            type: .target,
                                            detailStepType: .none,
-                                           startTimestamp: now).with(subSteps: [compilationStep, linkingStep])
+                                           startTimestamp: now,
+                                           fetchedFromCache: false).with(subSteps: [compilationStep, linkingStep])
         let parser = ParserBuildSteps()
         targetStep = parser.addCompilationTimes(step: targetStep)
         XCTAssertEqual(compilationTime, targetStep.compilationEndTimestamp)
@@ -268,27 +271,54 @@ class ParserTests: XCTestCase {
     func testParseAppCompilationTimes() {
         let expectedCompilationDuration = 50.0
         let now = Date().timeIntervalSince1970
-
         let target1 = makeFakeBuildStep(title: "Target1",
                                                 type: .target,
                                                 detailStepType: .none,
-                                                startTimestamp: now)
+                                                startTimestamp: now,
+                                                fetchedFromCache: false)
             .with(newCompilationEndTimestamp: now + 25.0,
                   andCompilationDuration: 25.0)
         let target2 = makeFakeBuildStep(title: "Target2",
                                             type: .target,
                                             detailStepType: .none,
-                                            startTimestamp: now + 25.0)
+                                            startTimestamp: now + 25.0,
+                                            fetchedFromCache: false)
         .with(newCompilationEndTimestamp: now + 50.0,
               andCompilationDuration: 25.0)
         var app = makeFakeBuildStep(title: "My App",
                                            type: .main,
                                            detailStepType: .none,
-                                           startTimestamp: now).with(subSteps: [target1, target2])
+                                           startTimestamp: now,
+                                           fetchedFromCache: false).with(subSteps: [target1, target2])
         let parser = ParserBuildSteps()
         app = parser.addCompilationTimes(step: app)
         XCTAssertEqual(now + expectedCompilationDuration, app.compilationEndTimestamp)
         XCTAssertEqual(expectedCompilationDuration, app.compilationDuration)
+    }
+
+    func testParseAppNoopCompilationTimes() {
+        let now = Date().timeIntervalSince1970
+        let target1 = makeFakeBuildStep(title: "Target1",
+                                                type: .target,
+                                                detailStepType: .none,
+                                                startTimestamp: now,
+                                                fetchedFromCache: true)
+
+        let target2 = makeFakeBuildStep(title: "Target2",
+                                            type: .target,
+                                            detailStepType: .none,
+                                            startTimestamp: now + 25.0,
+                                            fetchedFromCache: true)
+
+        var app = makeFakeBuildStep(title: "My App",
+                                           type: .main,
+                                           detailStepType: .none,
+                                           startTimestamp: now,
+                                           fetchedFromCache: true).with(subSteps: [target1, target2])
+        let parser = ParserBuildSteps()
+        app = parser.addCompilationTimes(step: app)
+        XCTAssertEqual(app.startTimestamp, app.compilationEndTimestamp)
+        XCTAssertEqual(0.0, app.compilationDuration)
     }
 
     func testGetIndividualSteps() throws {
