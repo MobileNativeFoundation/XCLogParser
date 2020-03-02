@@ -4,7 +4,8 @@ import Foundation
 func makeFakeBuildStep(title: String,
                        type: BuildStepType,
                        detailStepType: DetailStepType,
-                       startTimestamp: Double) -> BuildStep {
+                       startTimestamp: Double,
+                       fetchedFromCache: Bool) -> BuildStep {
     return BuildStep(type: type,
                      machineName: "",
                      buildIdentifier: "",
@@ -30,7 +31,7 @@ func makeFakeBuildStep(title: String,
                      errors: nil,
                      notes: nil,
                      swiftFunctionTimes: nil,
-                     fetchedFromCache: false,
+                     fetchedFromCache: fetchedFromCache,
                      compilationEndTimestamp: 0,
                      compilationDuration: 0)
 }
