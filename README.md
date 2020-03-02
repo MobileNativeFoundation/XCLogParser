@@ -436,6 +436,15 @@ Linux:
 
 If you find a bug or you would like to propose an improvement, you're welcome to create an [issue](https://github.com/spotify/xclogparser/issues/new).
 
+## Release
+
+1. Make sure version set in [Version.swift](Sources/XCLogParser/commands/Version.swift) is updated
+2. Create new release tag in GitHub with a tag format like `vx.x.x`. Provide release title and description.
+3. Build and upload release artifacts:
+  1. for macOS, build an artifact using `DEVELOPER_DIR=<path_to_xcode_version> rake archive` upload product place in `releaase/XCLogParser-x.x.x`. Use Xcode version matching with [Requirements](#requirements-and-compatibility) section.
+  2. for Linux, 
+
+
 ## Code of Conduct
 
 This project adheres to the [Open Code of Conduct](https://github.com/spotify/code-of-conduct/blob/master/code-of-conduct.md). By participating, you are expected to honor this code.
