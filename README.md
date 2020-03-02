@@ -440,10 +440,12 @@ If you find a bug or you would like to propose an improvement, you're welcome to
 
 1. Make sure version set in [Version.swift](Sources/XCLogParser/commands/Version.swift) is updated
 2. Create new release tag in GitHub with a tag format like `vx.x.x`. Provide release title and description.
-3. Build and upload release artifacts:
-  1. for macOS, build an artifact using `DEVELOPER_DIR=<path_to_xcode_version> rake archive` upload product place in `releaase/XCLogParser-x.x.x`. Use Xcode version matching with [Requirements](#requirements-and-compatibility) section.
-  2. for Linux, 
-
+3. Build release artifacts:
+	1. for macOS, build an artifact using `DEVELOPER_DIR=<path_to_xcode_version> rake archive`. Use Xcode version matching with [Requirements](#requirements-and-compatibility) section.
+	2. for Linux, run `./build_release_in_docker.sh`
+4. Upload release artifacts to the release version summary:
+	1. for macOS, upload zip file placed in `releases/XCLogParser-x.x.x.zip`
+	2. for Linux, update current version in the filename and upload `releases/linux/XCLogParser-x.x.x-Linux.zip`
 
 ## Code of Conduct
 
