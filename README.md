@@ -32,6 +32,10 @@ Depending on your needs, there are various use-cases where `XCLogParser` can hel
 
 You can compile the executable with the command `rake build[debug]` or `rake build[release]` or simply use the Swift Package Manager commands directly. You can also run `rake install` to install the executable in your `/usr/local/bin` directory.
 
+### Homebrew
+
+`$ brew install xclogparser`
+
 We are currently working on adding more installation options.
 
 ## Xcode Integration
