@@ -233,7 +233,7 @@ xclogparser parse --project MyApp --reporter json
 </details>
 
 
-For more information regarding each field, check out the [JSON format documentation](/docs/JSON Format.md).
+For more information regarding each field, check out the [JSON format documentation](https://github.com/spotify/XCLogParser/blob/master/docs/JSON%20Format.md).
 
 
 ### FlatJson Reporter
