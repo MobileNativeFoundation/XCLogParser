@@ -23,6 +23,8 @@ import Foundation
 /// That file has a list of the existing Xcode Logs inside a Derived Data's project directory
 public struct LogManifest {
 
+    public init() {}
+
     public func getWithLogOptions(_ logOptions: LogOptions) throws  -> [LogManifestEntry] {
         let logFinder = LogFinder()
         let logManifestURL = try logFinder.findLogManifestWithLogOptions(logOptions)
