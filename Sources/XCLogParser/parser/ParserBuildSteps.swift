@@ -86,7 +86,7 @@ public final class ParserBuildSteps {
         var mainBuildStep = try parseLogSection(logSection: mainSectionWithTargets, type: .main, parentSection: nil)
         mainBuildStep.errorCount = totalErrors
         mainBuildStep.warningCount = totalWarnings
-        mainBuildStep = decorateWithSwiftCTimes(mainBuildStep)
+        mainBuildStep = decorateWithSwiftcTimes(mainBuildStep)
         return mainBuildStep
     }
 
@@ -267,7 +267,7 @@ public final class ParserBuildSteps {
                 "notes": notices.getNotes()]
     }
 
-    private func decorateWithSwiftCTimes(_ mainStep: BuildStep) -> BuildStep {
+    private func decorateWithSwiftcTimes(_ mainStep: BuildStep) -> BuildStep {
         swiftCompilerParser.parse()
         guard swiftCompilerParser.hasFunctionTimes() || swiftCompilerParser.hasTypeChecks() else {
             return mainStep
@@ -275,13 +275,13 @@ public final class ParserBuildSteps {
         var mutableMainStep = mainStep
         mutableMainStep.subSteps = mainStep.subSteps.map { subStep -> BuildStep in
             var mutableTargetStep = subStep
-            mutableTargetStep.subSteps = addSwiftCTimesSteps(mutableTargetStep.subSteps)
+            mutableTargetStep.subSteps = addSwiftcTimesSteps(mutableTargetStep.subSteps)
             return mutableTargetStep
         }
         return mutableMainStep
     }
 
-    private func addSwiftCTimesSteps(_ subSteps: [BuildStep]) -> [BuildStep] {
+    private func addSwiftcTimesSteps(_ subSteps: [BuildStep]) -> [BuildStep] {
         return subSteps.map { subStep -> BuildStep in
             switch subStep.detailStepType {
             case .swiftCompilation:
@@ -295,12 +295,12 @@ public final class ParserBuildSteps {
                         swiftCompilerParser.findTypeChecksForFilePath(subStep.documentURL)
                 }
                 if mutableSubStep.subSteps.count > 0 {
-                     mutableSubStep.subSteps = addSwiftCTimesSteps(subStep.subSteps)
+                     mutableSubStep.subSteps = addSwiftcTimesSteps(subStep.subSteps)
                 }
                 return mutableSubStep
             case .swiftAggregatedCompilation:
                 var mutableSubStep = subStep
-                mutableSubStep.subSteps = addSwiftCTimesSteps(subStep.subSteps)
+                mutableSubStep.subSteps = addSwiftcTimesSteps(subStep.subSteps)
                 return mutableSubStep
             default:
                 return subStep

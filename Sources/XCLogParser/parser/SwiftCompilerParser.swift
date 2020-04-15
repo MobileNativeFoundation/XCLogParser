@@ -44,7 +44,7 @@ public class SwiftCompilerParser {
     /// to know if the command `text` contains data about the swift function times.
     /// If there is data, the `text` wit that raw data is returned as part of a Set.
     ///
-    /// - Returns: a Dictionary of Strings with the raw SwiftC times data as key and
+    /// - Returns: a Dictionary of Strings with the raw Swift compiler times data as key and
     /// the number of ocurrences as value
     public func findRawSwiftTimes() -> [String: Int] {
         let insertQueue = DispatchQueue(label: "swift_function_times_queue")

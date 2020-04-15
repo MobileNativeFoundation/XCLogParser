@@ -1204,7 +1204,7 @@ const swiftFunctionWarning = "<div class=\\"callout callout-warning\\">" +
 "</div>";
 
 const swiftTypeCheckWarning = "<div class=\\"callout callout-warning\\">" +
-"<small class=\\"text-muted\\">Warning: No Swiftc type checks times were found.</small>" +
+"<small class=\\"text-muted\\">Warning: No Swift compiler type checks times were found.</small>" +
 "<br>" +
 "Did you compile your project with the flags -Xfrontend -debug-time-expression-type-checking?" +
 "</div>";

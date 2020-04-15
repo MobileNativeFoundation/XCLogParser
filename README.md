@@ -106,7 +106,7 @@ An example output has been omitted for brevity since it can contain a lot of inf
 
 Parses the build information from a `xcactivitylog` and converts it into different representations such as a [JSON file](#JSON-Reporter), [flat JSON file](#FlatJson-Reporter), [summary JSON file](#SummaryJson-Reporter), [Chrome Tracer file](#ChromeTracer-Reporter) or a static [HTML page](#HTML-Reporter).
 
-This command also parses Swiftc compiler times. For using that feature, you need to build your project with the options `-Xfrontend -debug-time-expression-type-checking` and `-Xfrontend -debug-time-function-bodies`.
+This command also parses `swiftc` reported compilation times. For using that feature, you need to build your project with the options `-Xfrontend -debug-time-expression-type-checking` and `-Xfrontend -debug-time-function-bodies`.
 
 Examples:
 
