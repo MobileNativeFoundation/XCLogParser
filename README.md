@@ -106,6 +106,8 @@ An example output has been omitted for brevity since it can contain a lot of inf
 
 Parses the build information from a `xcactivitylog` and converts it into different representations such as a [JSON file](#JSON-Reporter), [flat JSON file](#FlatJson-Reporter), [summary JSON file](#SummaryJson-Reporter), [Chrome Tracer file](#ChromeTracer-Reporter) or a static [HTML page](#HTML-Reporter).
 
+This command also parses Swiftc compiler times. For using that feature, you need to build your project with the options `-Xfrontend -debug-time-expression-type-checking` and `-Xfrontend -debug-time-function-bodies`.
+
 Examples:
 
 ```bash
@@ -227,7 +229,25 @@ xclogparser parse --project MyApp --reporter json
       "warningCount" : 0,
       "errors" : [],
       "warnings" : [],
-      "swiftFunctionTimes" : []
+      "swiftFunctionTimes" : [
+        {
+          "durationMS" : 0.08,
+          "occurrences" : 5,
+          "startingColumn" : 36,
+          "startingLine" : 48,
+          "file" : "file:\/\/\/Users\/<redacted>\/MyApp\/Libraries\/Utilities\/Sources\/Disposables\/Cancelable.swift",
+          "signature" : "getter description"
+        }
+      ],
+      "swiftTypeCheckTimes" : [
+        {
+          "durationMS" : 0.5,
+          "occurrences" : 2,
+          "startingColumn" : 16,
+          "startingLine" : 9,
+          "file" : "file:\/\/\/Users\/<redacted>\/MyApp\/Libraries\/Utilities\/Sources\/Disposables\/Cancelable.swift",
+        }
+      ]
   }
   ```
 </details>

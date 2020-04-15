@@ -31,7 +31,7 @@ public final class ParserBuildSteps {
     var totalWarnings = 0
     var targetErrors = 0
     var targetWarnings = 0
-    let swiftFunctionTimesParser = SwiftFunctionTimesParser()
+    let swiftCompilerParser = SwiftCompilerParser()
 
     public lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -86,7 +86,7 @@ public final class ParserBuildSteps {
         var mainBuildStep = try parseLogSection(logSection: mainSectionWithTargets, type: .main, parentSection: nil)
         mainBuildStep.errorCount = totalErrors
         mainBuildStep.warningCount = totalWarnings
-        mainBuildStep = decorateWithFunctionSteps(mainBuildStep)
+        mainBuildStep = decorateWithSwiftCTimes(mainBuildStep)
         return mainBuildStep
     }
 
@@ -165,7 +165,7 @@ public final class ParserBuildSteps {
                 step = step.moveSwiftStepsToRoot()
             }
             if step.detailStepType == .swiftCompilation {
-                swiftFunctionTimesParser.addLogSection(logSection)
+                swiftCompilerParser.addLogSection(logSection)
                 if let individualSwiftSteps = logSection.getSwiftIndividualSteps(buildStep: step,
                                                                                  currentIndex: &currentIndex) {
                     step.subSteps.append(contentsOf: individualSwiftSteps)
@@ -267,34 +267,40 @@ public final class ParserBuildSteps {
                 "notes": notices.getNotes()]
     }
 
-    private func decorateWithFunctionSteps(_ mainStep: BuildStep) -> BuildStep {
-        swiftFunctionTimesParser.parse()
-        guard swiftFunctionTimesParser.hasFunctionTimes() else {
+    private func decorateWithSwiftCTimes(_ mainStep: BuildStep) -> BuildStep {
+        swiftCompilerParser.parse()
+        guard swiftCompilerParser.hasFunctionTimes() || swiftCompilerParser.hasTypeChecks() else {
             return mainStep
         }
         var mutableMainStep = mainStep
         mutableMainStep.subSteps = mainStep.subSteps.map { subStep -> BuildStep in
             var mutableTargetStep = subStep
-            mutableTargetStep.subSteps = addFunctionSteps(mutableTargetStep.subSteps)
+            mutableTargetStep.subSteps = addSwiftCTimesSteps(mutableTargetStep.subSteps)
             return mutableTargetStep
         }
         return mutableMainStep
     }
 
-    private func addFunctionSteps(_ subSteps: [BuildStep]) -> [BuildStep] {
+    private func addSwiftCTimesSteps(_ subSteps: [BuildStep]) -> [BuildStep] {
         return subSteps.map { subStep -> BuildStep in
             switch subStep.detailStepType {
             case .swiftCompilation:
                 var mutableSubStep = subStep
-                mutableSubStep.swiftFunctionTimes = swiftFunctionTimesParser.findFunctionTimesForFilePath(
+                if swiftCompilerParser.hasFunctionTimes() {
+                    mutableSubStep.swiftFunctionTimes = swiftCompilerParser.findFunctionTimesForFilePath(
                     subStep.documentURL)
+                }
+                if swiftCompilerParser.hasTypeChecks() {
+                    mutableSubStep.swiftTypeCheckTimes =
+                        swiftCompilerParser.findTypeChecksForFilePath(subStep.documentURL)
+                }
                 if mutableSubStep.subSteps.count > 0 {
-                     mutableSubStep.subSteps = addFunctionSteps(subStep.subSteps)
+                     mutableSubStep.subSteps = addSwiftCTimesSteps(subStep.subSteps)
                 }
                 return mutableSubStep
             case .swiftAggregatedCompilation:
                 var mutableSubStep = subStep
-                mutableSubStep.subSteps = addFunctionSteps(subStep.subSteps)
+                mutableSubStep.subSteps = addSwiftCTimesSteps(subStep.subSteps)
                 return mutableSubStep
             default:
                 return subStep

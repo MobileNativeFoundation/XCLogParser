@@ -1090,7 +1090,28 @@ public static let stepHTML =
             </div> <!-- functions col-->
         </div> <!-- functions row -->
 
+        <div class="row" id="typechecks-row">
+          <div class="col-12">
+            <div class="card xc-content">
+              <div class="card-header">
+                <div class="header-title">Swift type check times</div>
+                <div class="header-action">
+                  <a class="card-header-action" href="#" data-toggle="collapse"
+                    data-target="#collapse-typechecks" aria-expanded="true">
+                    △
+                  </a>
+                </div>
+              </div> <!-- card header-->
 
+              <div class="card-body">
+                <div class="row" id="typechecks">
+                  <div class="col-sm-12" id="typechecks-summary">
+                  </div>
+                </div>
+              </div> <!-- card body -->
+            </div> <!-- card -->
+          </div> <!-- typechecks col-->
+      </div> <!-- typechecks row -->
 
       </div> <!-- container-fluid -->
 
@@ -1139,6 +1160,8 @@ const swiftFunctionSource = "<table class=\\"table table-sm table-hover table-re
   "<th scope=\\"col\\">Function</th>" +
   "<th scope=\\"col\\">Line</th>" +
   "<th scope=\\"col\\">Column</th>" +
+  "<th scope=\\"col\\">Occurrences</th>" +
+  "<th scope=\\"col\\">Cumulative (ms)</th>" +
   "</tr>" +
   "</thead>" +
   "{{#each functions}}" +
@@ -1147,6 +1170,29 @@ const swiftFunctionSource = "<table class=\\"table table-sm table-hover table-re
   "<th scope=\\"col\\">{{signature}}</th>" +
   "<th scope=\\"col\\">{{startingLine}}</th>" +
   "<th scope=\\"col\\">{{startingColumn}}</th>" +
+  "<th scope=\\"col\\">{{occurrences}}</th>" +
+  "<th scope=\\"col\\">{{cumulative}}</th>" +
+  "</tr>" +
+  "{{/each}}" +
+  "</table>";
+
+const swiftTypeCheckSource = "<table class=\\"table table-sm table-hover table-responsive\\">" +
+  "<thead>" +
+  "<tr>" +
+  "<th scope=\\"col\\">Duration (ms)</th>" +
+  "<th scope=\\"col\\">Line</th>" +
+  "<th scope=\\"col\\">Column</th>" +
+  "<th scope=\\"col\\">Occurrences</th>" +
+  "<th scope=\\"col\\">Cumulative (ms)</th>" +
+  "</tr>" +
+  "</thead>" +
+  "{{#each functions}}" +
+  "<tr>" +
+  "<th scope=\\"col\\">{{durationMS}}</th>" +
+  "<th scope=\\"col\\">{{startingLine}}</th>" +
+  "<th scope=\\"col\\">{{startingColumn}}</th>" +
+  "<th scope=\\"col\\">{{occurrences}}</th>" +
+  "<th scope=\\"col\\">{{cumulative}}</th>" +
   "</tr>" +
   "{{/each}}" +
   "</table>";
@@ -1157,7 +1203,15 @@ const swiftFunctionWarning = "<div class=\\"callout callout-warning\\">" +
 "Did you compile your project with the flags -Xfrontend -debug-time-function-bodies?" +
 "</div>";
 
+const swiftTypeCheckWarning = "<div class=\\"callout callout-warning\\">" +
+"<small class=\\"text-muted\\">Warning: No Swiftc type checks times were found.</small>" +
+"<br>" +
+"Did you compile your project with the flags -Xfrontend -debug-time-expression-type-checking?" +
+"</div>";
+
 const swiftFunctionTemplate = Handlebars.compile(swiftFunctionSource);
+
+const swiftTypeCheckTemplate = Handlebars.compile(swiftTypeCheckSource);
 
 const timestampFormat = 'MMMM Do YYYY, h:mm:ss a';
 
@@ -1182,6 +1236,7 @@ function showStep() {
     showStepErrors(step);
     showStepWarnings(step);
     showSwiftFunctionTimes(step);
+    showSwiftTypeCheckTimes(step);
   }
 }
 
@@ -1223,7 +1278,11 @@ function showSwiftFunctionTimes(step) {
   if (step.detailStepType === 'swiftCompilation') {
     $('#functions-row').show();
     if (step.swiftFunctionTimes && step.swiftFunctionTimes.length > 0) {
-      const functions = swiftFunctionTemplate({"functions": step.swiftFunctionTimes});
+      const cumulativeFunctions = step.swiftFunctionTimes.map(function(f) {
+        f.cumulative = Math.round(f.occurrences * f.durationMS * 100) / 100;
+        return f;
+      });
+      const functions = swiftFunctionTemplate({"functions": cumulativeFunctions});
       $('#functions-summary').html(functions);
     } else {
       $('#functions-summary').html(swiftFunctionWarning);
@@ -1231,6 +1290,25 @@ function showSwiftFunctionTimes(step) {
 
   } else {
     $('#functions-row').hide();
+  }
+}
+
+function showSwiftTypeCheckTimes(step) {
+  if (step.detailStepType === 'swiftCompilation') {
+    $('#typechecks-row').show();
+    if (step.swiftTypeCheckTimes && step.swiftTypeCheckTimes.length > 0) {
+      const cumulativeFunctions = step.swiftTypeCheckTimes.map(function(f) {
+        f.cumulative = Math.round(f.occurrences * f.durationMS * 100) / 100;
+        return f;
+      });
+      const functions = swiftTypeCheckTemplate({"functions": cumulativeFunctions});
+      $('#typechecks-summary').html(functions);
+    } else {
+      $('#typechecks-summary').html(swiftTypeCheckWarning);
+    }
+
+  } else {
+    $('#typechecks-row').hide();
   }
 }
 

@@ -220,7 +220,12 @@ public struct BuildStep: Encodable {
     /// Swift function's compilation times
     /// If the project was compiled with the swift flags `-Xfrontend -debug-time-function-bodies`
     /// This field will be populated
-    public var swiftFunctionTimes: [FunctionTime]?
+    public var swiftFunctionTimes: [SwiftFunctionTime]?
+
+    /// Swift function's compilation times
+    /// If the project was compiled with the swift flags `-Xfrontend -debug-time-expression-type-checking`
+    /// This field will be populated
+    public var swiftTypeCheckTimes: [SwiftTypeCheck]?
 
     /// Indicated if the step was actually processed / compiled or just fetched from Xcode's cache.
     /// In a compilation step this will be false only if the file was actually compiled.
@@ -261,7 +266,7 @@ public struct BuildStep: Encodable {
                 warnings: [Notice]?,
                 errors: [Notice]?,
                 notes: [Notice]?,
-                swiftFunctionTimes: [FunctionTime]?,
+                swiftFunctionTimes: [SwiftFunctionTime]?,
                 fetchedFromCache: Bool,
                 compilationEndTimestamp: Double,
                 compilationDuration: Double) {
