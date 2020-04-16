@@ -169,9 +169,7 @@ function drawHeaders(target) {
   const swiftCompiledFiles = swiftFiles.filter(function (file) {
     return file.fetchedFromCache == false;
   })
-  // document.getElementById('c-files-compiled').innerHTML = cCompiledFiles.length.toLocaleString('en') + ' compiled';
   document.getElementById('c-files-total').innerHTML = cFiles.length.toLocaleString('en') + ' total';
-  // document.getElementById('swift-files-compiled').innerHTML = swiftCompiledFiles.length.toLocaleString('en') + ' compiled';
   document.getElementById('swift-files-total').innerHTML = swiftFiles.length.toLocaleString('en') + ' total';
 
 }
@@ -295,9 +293,7 @@ function drawTimeline() {
       type: 'rangeBar',
       events: {
         dataPointSelection: function (event, chartContext, config) {
-          console.log(config);
           const selectedItem = targets[config.dataPointIndex];
-          console.log(selectedItem);
           itemSelected(selectedItem);
         }
       }

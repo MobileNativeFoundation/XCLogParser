@@ -261,9 +261,7 @@ function drawHeaders(target) {
   const swiftCompiledFiles = swiftFiles.filter(function (file) {
     return file.fetchedFromCache == false;
   })
-  // document.getElementById('c-files-compiled').innerHTML = cCompiledFiles.length.toLocaleString('en') + ' compiled';
   document.getElementById('c-files-total').innerHTML = cFiles.length.toLocaleString('en') + ' total';
-  // document.getElementById('swift-files-compiled').innerHTML = swiftCompiledFiles.length.toLocaleString('en') + ' compiled';
   document.getElementById('swift-files-total').innerHTML = swiftFiles.length.toLocaleString('en') + ' total';
 
 }
@@ -387,9 +385,7 @@ function drawTimeline() {
       type: 'rangeBar',
       events: {
         dataPointSelection: function (event, chartContext, config) {
-          console.log(config);
           const selectedItem = targets[config.dataPointIndex];
-          console.log(selectedItem);
           itemSelected(selectedItem);
         }
       }
@@ -1052,7 +1048,7 @@ public static let stepHTML =
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>XCLogParser Build times</title>
+  <title>XCLogParser build report</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -1296,6 +1292,25 @@ public static let stepHTML =
 
 public static let stepJS =
 """
+// Copyright (c) 2019 Spotify AB.
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 const incidentSource = "<ul>" +
   "{{#each details}}" +
   "{{#if documentURL}}" +
