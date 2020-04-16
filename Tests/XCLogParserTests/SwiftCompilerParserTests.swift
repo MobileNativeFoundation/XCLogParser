@@ -20,42 +20,30 @@
 import XCTest
 @testable import XCLogParser
 
-class SwiftFunctionTimesParserTests: XCTestCase {
+class SwiftCompilerParserTests: XCTestCase {
 
-    let parser = SwiftFunctionTimesParser()
+    let parser = SwiftCompilerParser()
 
-    func testFindRawSwiftFunctionTimes() throws {
+    func testParseSwiftFunctionTimes() throws {
         let emptylogSection = getFakeSwiftcSection(text: "text",
                                               commandDescription: "command")
-
+        let text =
+        "\t0.05ms\t/Users/user/myapp/MyView.swift:9:9\tgetter textLabel\r" +
+        "\t4.96ms\t/Users/user/myapp/MyView.swift:11:14\tinitializer init(frame:)\r" +
+        "\t0.04ms\t<invalid loc>\tgetter None\r"
         let swiftTimesLogSection = getFakeSwiftcSection(text:
-            "0.05ms\t/Users/user/myapp/MyView.swift:9:9\tgetter textLabel\r",
-        commandDescription: "-debug-time-function-bodies")
+            text, commandDescription: "-debug-time-function-bodies")
 
         let duplicatedSwiftTimeslogSection = getFakeSwiftcSection(text:
-            "0.05ms\t/Users/user/myapp/MyView.swift:9:9\tgetter textLabel\r",
-        commandDescription: "-debug-time-function-bodies")
-
+            text, commandDescription: "-debug-time-function-bodies")
+        let expectedFile = "file:///Users/user/myapp/MyView.swift"
         parser.addLogSection(emptylogSection)
         parser.addLogSection(swiftTimesLogSection)
         parser.addLogSection(duplicatedSwiftTimeslogSection)
 
-        let commandsWithFunctionTimes = parser.findRawSwiftFunctionTimes()
-        XCTAssertEqual(1, commandsWithFunctionTimes.count)
-        guard let command = commandsWithFunctionTimes.first else {
-            XCTFail("The command should have Swift function times")
-            return
-        }
-        XCTAssertEqual(swiftTimesLogSection.text, command)
-    }
-
-    func testParseFunctionTimes() {
-        let text =
-        "0.05ms\t/Users/user/myapp/MyView.swift:9:9\tgetter textLabel\r" +
-        "4.96ms\t/Users/user/myapp/MyView.swift:11:14\tinitializer init(frame:)\r" +
-        "0.04ms\t<invalid loc>\tgetter None\r"
-        guard let functionTimes = parser.parseFunctionTimes(from: text) else {
-            XCTFail("Function times should have two elements")
+        parser.parse()
+        guard let functionTimes = parser.findFunctionTimesForFilePath(expectedFile) else {
+            XCTFail("The command should have swiftc function times")
             return
         }
         XCTAssertEqual(2, functionTimes.count)
@@ -64,10 +52,42 @@ class SwiftFunctionTimesParserTests: XCTestCase {
         XCTAssertEqual(0.05, getter.durationMS)
         XCTAssertEqual(9, getter.startingLine)
         XCTAssertEqual(9, getter.startingColumn)
-        XCTAssertEqual("file:///Users/user/myapp/MyView.swift", getter.file)
+        XCTAssertEqual(2, getter.occurrences)
+        XCTAssertEqual(expectedFile, getter.file)
         XCTAssertEqual("getter textLabel", getter.signature)
         XCTAssertEqual("initializer init(frame:)", initializer.signature)
+        XCTAssertEqual(2, initializer.occurrences)
+    }
 
+    func testParseSwiftTypeCheckTimes() throws {
+        let emptylogSection = getFakeSwiftcSection(text: "text",
+                                              commandDescription: "command")
+
+        let swiftTimesLogSection = getFakeSwiftcSection(text:
+            "\t0.72ms\t/Users/project/CreatorHeaderViewModel.swift:19:15\r",
+        commandDescription: "-debug-time-expression-type-checking")
+
+        let duplicatedSwiftTimeslogSection = getFakeSwiftcSection(text:
+            "\t0.72ms\t/Users/project/CreatorHeaderViewModel.swift:19:15\r",
+        commandDescription: "-debug-time-expression-type-checking")
+        let expectedFile = "file:///Users/project/CreatorHeaderViewModel.swift"
+        parser.addLogSection(emptylogSection)
+        parser.addLogSection(swiftTimesLogSection)
+        parser.addLogSection(duplicatedSwiftTimeslogSection)
+
+        parser.parse()
+
+        guard let typeChecks = parser.findTypeChecksForFilePath(expectedFile)
+            else {
+            XCTFail("The command should have swiftc type check times")
+            return
+        }
+        XCTAssertEqual(1, typeChecks.count)
+        XCTAssertEqual(19, typeChecks[0].startingLine)
+        XCTAssertEqual(15, typeChecks[0].startingColumn)
+        XCTAssertEqual(0.72, typeChecks[0].durationMS)
+        XCTAssertEqual(expectedFile, typeChecks[0].file)
+        XCTAssertEqual(2, typeChecks[0].occurrences)
     }
 
     private func getFakeSwiftcSection(text: String, commandDescription: String) -> IDEActivityLogSection {

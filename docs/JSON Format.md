@@ -26,10 +26,28 @@ A typical step is parsed and output as JSON with the following format:
     "warningCount" : 0,
     "errors" : [],
     "warnings" : [],
-    "swiftFunctionTimes" : [],
     "fetchedFromCache" : false,
     "compilationEndTimestamp": 1545143336.649699,
-    "compilationDuration": 5.5941859483718872
+    "compilationDuration": 5.5941859483718872,
+    "swiftFunctionTimes" : [
+        {
+          "durationMS" : 0.08,
+          "occurrences" : 5,
+          "startingColumn" : 36,
+          "startingLine" : 48,
+          "file" : "file:\/\/\/Users\/<redacted>\/MyApp\/Libraries\/Utilities\/Sources\/Disposables\/Cancelable.swift",
+          "signature" : "getter description"
+        }
+      ],
+    "swiftTypeCheckTimes" : [
+        {
+          "durationMS" : 0.5,
+          "occurrences" : 2,
+          "startingColumn" : 16,
+          "startingLine" : 9,
+          "file" : "file:\/\/\/Users\/<redacted>\/MyApp\/Libraries\/Utilities\/Sources\/Disposables\/Cancelable.swift",
+        }
+      ]
 }
 ```
 
@@ -52,7 +70,8 @@ Other fields:
 - `warnings`: the list of warnings
 - `errorCount`: the number of errors for the given step.
 - `errors`: the list of errors.
-- `swiftFunctionTimes`: Optional. If the step is a `swiftCompilation` and the app was compiled with the flags `-Xfrontend -debug-time-function-bodies` it will show the list of functions and their compilation time.
+- `swiftFunctionTimes`: Optional. If the step is a `swiftCompilation` and the app was compiled with the flags `-Xfrontend -debug-time-function-bodies` it will show the list of functions and their compilation time. The `occurrences` is the number of times that function is compiled, so the effective time it took in your build is durationMS * ocurrences.
+- `swiftTypeCheckTimes`: Optional. If the step is a `swiftCompilation` and the app was compiled with the flags `-debug-time-expression-type-checking` it will show the list of functions and their compilation time. The `occurrences` is the number of times that check happens, so the effective time it took in your buikd is durationMS * ocurrences.
 - `fetchedFromCache`: For a `detail` step, `true` indicates that the file wasn't processed nor compiled but fetched from Xcode's internal cache. For a `main` or `target` step, `true` indicates that all its sub steps were fetched from cache, `false` that at least one sub step was proccesed or compiled.
 - `compilationEndTimestamp`: Timestamp in which the actual compilation finished. For a Target this could be before `endTimestamp` because in the new Xcode Build System linking can happen way after compilation.
 - `compilationDuration` Actual duration in seconds of just the compilation phase. In a Target this could be significant shorter than the `duration`.

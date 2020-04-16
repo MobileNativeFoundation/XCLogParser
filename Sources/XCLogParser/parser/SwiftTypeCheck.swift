@@ -19,8 +19,22 @@
 
 import Foundation
 
-public struct Version {
+/// Represents the time it took to the Swift Compiler to type check an expression
+public struct SwiftTypeCheck: Encodable {
 
-    public static let current = "0.2.9"
+    /// URL of the file where the function is
+    public let file: String
+
+    /// Duration in Miliseconds
+    public let durationMS: Double
+
+    /// Line number where the function is declared
+    public let startingLine: Int
+
+    /// Column number where the function is declared
+    public let startingColumn: Int
+
+    /// Number of occurences this type is checked during the build
+    public let occurrences: Int
 
 }

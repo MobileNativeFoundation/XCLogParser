@@ -20,7 +20,7 @@
 import Foundation
 
 /// Represents the time it took to the Swift Compiler to compile a function
-public struct FunctionTime: Encodable {
+public struct SwiftFunctionTime: Encodable {
     /// URL of the file where the function is
     public let file: String
 
@@ -35,4 +35,8 @@ public struct FunctionTime: Encodable {
 
     /// function signature
     public let signature: String
+
+    /// Number of occurences this function is compiled during the build
+    public let occurrences: Int
+
 }
