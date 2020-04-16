@@ -48,6 +48,70 @@ const incidentSource = "<details>" +
 
 const incidentTemplate = Handlebars.compile(incidentSource);
 
+const swiftFunctionSource = "<table id='swift-functions-table' class='display table table-sm table-hover table-responsive table-striped'>" +
+  "<thead>" +
+  "<tr>" +
+  "<th scope='col'>Duration (ms)</th>" +
+  "<th scope='col'>File</th>" +
+  "<th scope='col'>Function</th>" +
+  "<th scope='col'>Line</th>" +
+  "<th scope='col'>Column</th>" +
+  "<th scope='col'>Occurrences</th>" +
+  "<th scope='col'>Cumulative (ms)</th>" +
+  "</tr>" +
+  "</thead>" +
+  "{{#each functions}}" +
+  "<tr>" +
+  "<th scope='col'>{{durationMS}}</th>" +
+  "<th scope='col'>{{file}}</th>" +
+  "<th scope='col'>{{signature}}</th>" +
+  "<th scope='col'>{{startingLine}}</th>" +
+  "<th scope='col'>{{startingColumn}}</th>" +
+  "<th scope='col'>{{occurrences}}</th>" +
+  "<th scope='col'>{{cumulative}}</th>" +
+  "</tr>" +
+  "{{/each}}" +
+  "</table>";
+
+const swiftTypeCheckSource = "<table id='swift-typechecks-table' class='table table-sm table-hover table-responsive table-striped'>" +
+  "<thead>" +
+  "<tr>" +
+  "<th scope='col'>Duration (ms)</th>" +
+  "<th scope='col'>File</th>" +
+  "<th scope='col'>Line</th>" +
+  "<th scope='col'>Column</th>" +
+  "<th scope='col'>Occurrences</th>" +
+  "<th scope='col'>Cumulative (ms)</th>" +
+  "</tr>" +
+  "</thead>" +
+  "{{#each functions}}" +
+  "<tr>" +
+  "<th scope='col'>{{durationMS}}</th>" +
+  "<th scope='col'>{{file}}</th>" +
+  "<th scope='col'>{{startingLine}}</th>" +
+  "<th scope='col'>{{startingColumn}}</th>" +
+  "<th scope='col'>{{occurrences}}</th>" +
+  "<th scope='col'>{{cumulative}}</th>" +
+  "</tr>" +
+  "{{/each}}" +
+  "</table>";
+
+const swiftFunctionWarning = "<div class='callout callout-warning'>" +
+"<small class='text-muted'>Warning: No Swift function compilation times were found.</small>" +
+"<br>" +
+"Did you compile your project with the flags -Xfrontend -debug-time-function-bodies?" +
+"</div>";
+
+const swiftTypeCheckWarning = "<div class='callout callout-warning'>" +
+"<small class='text-muted'>Warning: No Swiftc type checks times were found.</small>" +
+"<br>" +
+"Did you compile your project with the flags -Xfrontend -debug-time-expression-type-checking?" +
+"</div>";
+
+const swiftFunctionTemplate = Handlebars.compile(swiftFunctionSource);
+
+const swiftTypeCheckTemplate = Handlebars.compile(swiftTypeCheckSource);
+
 drawCharts();
 
 function drawCharts() {
@@ -60,7 +124,7 @@ function drawCharts() {
   drawHeaders(target);
   drawErrors(target);
   drawWarnings(target);
-  drawTimeline(target);
+  drawTimeline();
   drawSlowestTargets(target);
 
   if (target === 'main') {
@@ -70,6 +134,8 @@ function drawCharts() {
   } else {
     document.getElementById('files-row').style.display = 'none';
   }
+  drawSwiftFunctions(target);
+  drawSwiftTypeChecks(target);
 }
 
 function drawHeaders(target) {
@@ -103,15 +169,14 @@ function drawHeaders(target) {
   const swiftCompiledFiles = swiftFiles.filter(function (file) {
     return file.fetchedFromCache == false;
   })
-  document.getElementById('c-files-compiled').innerHTML = cCompiledFiles.length.toLocaleString('en') + ' compiled';
+  // document.getElementById('c-files-compiled').innerHTML = cCompiledFiles.length.toLocaleString('en') + ' compiled';
   document.getElementById('c-files-total').innerHTML = cFiles.length.toLocaleString('en') + ' total';
-  document.getElementById('swift-files-compiled').innerHTML = swiftCompiledFiles.length.toLocaleString('en') + ' compiled';
+  // document.getElementById('swift-files-compiled').innerHTML = swiftCompiledFiles.length.toLocaleString('en') + ' compiled';
   document.getElementById('swift-files-total').innerHTML = swiftFiles.length.toLocaleString('en') + ' total';
 
 }
 
 function setBuildStatus() {
-  const infoData = buildData[0];
   const status = mainStep.buildStatus.charAt(0).toUpperCase() + mainStep.buildStatus.slice(1);
   const statusBox = document.getElementById('status-box');
   if (status.toLowerCase() === 'succeeded') {
@@ -135,22 +200,25 @@ function getBuildInfo() {
 function loadMainData() {
   mainStep = buildData[0];
   targets = buildData.filter(function (step) {
-    return step.type === 'target';
+    return step.type === 'target' && step.fetchedFromCache === false;
   });
   cFiles = buildData.filter(function (step) {
-    return step.type === 'detail' && step.detailStepType === cCompilation;
+    return step.type === 'detail' && step.detailStepType === cCompilation
+    && step.fetchedFromCache === false;
   });
   swiftFiles = buildData.filter(function (step) {
-    return step.type === 'detail' && step.detailStepType === swiftCompilation;
+    return step.type === 'detail' && step.detailStepType === swiftCompilation
+    && step.fetchedFromCache === false;
   });
 }
 
 function loadTargetData(target) {
   mainStep = buildData.find(function (element) {
     return element.type === 'target' && element.identifier === target
+    && element.fetchedFromCache === false;
   });
   targets = buildData.filter(function (element) {
-    return element.parentIdentifier === target;
+    return element.parentIdentifier === target && element.fetchedFromCache === false;
   });
 
   // In xcodebuild, the swift files compilation are under an Aggregated build step.
@@ -177,17 +245,13 @@ function loadTargetData(target) {
   });
 }
 
-function drawTimeline(target) {
+function drawTimeline() {
   const dataSeries = targets.map(function (target) {
     const title = getShortFilename(target.title, target.architecture);
-    var targetStartTimestamp = target.startTimestamp;
-    var targetEndTimestamp = target.endTimestamp;
-    if (targetStartTimestamp < mainStep.startTimestamp) {
-      targetStartTimestamp = mainStep.startTimestamp;
-      targetEndTimestamp = mainStep.startTimestamp;
-    }
-    var start = targetStartTimestamp;
-    var end = targetEndTimestamp === targetStartTimestamp ? targetEndTimestamp + 1 : targetEndTimestamp;
+    const targetStartTimestamp = target.startTimestamp;
+    const targetEndTimestamp = target.endTimestamp;
+    const start = targetStartTimestamp;
+    const end = targetEndTimestamp === targetStartTimestamp ? targetEndTimestamp + 1 : targetEndTimestamp;
 
     return {
       x: title,
@@ -197,88 +261,92 @@ function drawTimeline(target) {
       end: targetEndTimestamp
     };
   });
-  const options = {
+
+  const compilationSeries = targets.map(function (target) {
+    const title = getShortFilename(target.title, target.architecture);
+    const targetStartTimestamp = target.startTimestamp;
+    const targetEndTimestamp = target.compilationEndTimestamp;
+    const start = targetStartTimestamp;
+    const end = targetEndTimestamp === targetStartTimestamp ? targetEndTimestamp + 1 : targetEndTimestamp;
+
+    return {
+      x: title,
+      y: [new Date(start * 1000).getTime(),
+      new Date(end * 1000).getTime()],
+      start: targetStartTimestamp,
+      end: targetEndTimestamp
+    };
+  });
+
+
+  var options = {
+    series: [
+    {
+      name: 'Build time',
+      data: dataSeries
+    },
+    {
+      name: 'Compilation time',
+      data: compilationSeries
+    }
+  ],
     chart: {
       height: dataSeries.length * rowHeight,
       type: 'rangeBar',
       events: {
         dataPointSelection: function (event, chartContext, config) {
+          console.log(config);
           const selectedItem = targets[config.dataPointIndex];
+          console.log(selectedItem);
           itemSelected(selectedItem);
         }
       }
+  },
+  plotOptions: {
+    bar: {
+      horizontal: true,
+      barHeight: '80%'
+    }
+  },
+  xaxis: {
+    type: 'datetime'
+  },
+  stroke: {
+    width: 1
+  },
+  fill: {
+    type: 'solid',
+    opacity: 0.6
+  },
+  legend: {
+    position: 'top',
+    horizontalAlign: 'left'
+  },
+  tooltip: {
+    enabled: true,
+    custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+      const serie = dataSeries[dataPointIndex];
+      const start = serie.start;
+      const end = serie.end;
+      const duration = (end - start).toFixed(3);
+      return '<div class="arrow_box">' +
+        '<span>' + serie.x + ' </span><br>' +
+        '<span>' + duration + ' seconds</span>' +
+        '</div>'
     },
-    title: {
-      text: "Build times"
-    },
-    theme: {
-      mode: 'light',
-      palette: 'palette3'
-    },
-    plotOptions: {
-      bar: {
-        horizontal: true
-      }
-    },
-    series: [{ data: dataSeries }],
-    yaxis: {
-      min: new Date(mainStep.startTimestamp * 1000).getTime(),
-      max: new Date(mainStep.endTimestamp * 1000).getTime(),
-      tooltip: {
-        enabled: true,
-        offsetX: 0,
-      },
-      labels: {
-        show: true,
-        align: 'right',
-        minWidth: 0,
-        maxWidth: 300,
-        style: {
-          color: undefined,
-          fontSize: '12px',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          cssClass: 'apexcharts-yaxis-label',
-        }
-      }
-    },
-
-    tooltip: {
+    y: {
       enabled: true,
-      custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-        const serie = dataSeries[dataPointIndex];
-        const start = serie.start;
-        const end = serie.end;
-        const duration = (end - start).toFixed(3);
-        return '<div class="arrow_box">' +
-          '<span>' + serie.x + ' </span><br>' +
-          '<span>' + duration + ' seconds</span>' +
-          '</div>'
+      show: true,
+      formatter: undefined,
+      title: {
+        formatter: (seriesName) => seriesName,
       },
-      y: {
-        enabled: true,
-        show: true,
-        formatter: undefined,
-        title: {
-          formatter: (seriesName) => seriesName,
-        },
-      },
-
     },
-    xaxis: {
-      type: 'datetime',
 
-      labels: {
-        formatter: function (value, timestamp, index) {
-          return moment(new Date(value)).format("H:mm:ss");
-        }
-      }
-    },
   }
+  };
 
-  var chart = new ApexCharts(
-    document.querySelector("#timeline"),
-    options
-  );
+  var chart = new ApexCharts(document.querySelector("#timeline"), options);
   chart.render();
 }
 
@@ -316,10 +384,6 @@ function drawSlowestTargets(target) {
         horizontal: true
       }
     },
-    theme: {
-      mode: 'light',
-      palette: 'palette3'
-    },
     dataLabels: {
       enabled: false
     },
@@ -328,6 +392,9 @@ function drawSlowestTargets(target) {
     }],
     xaxis: {
       categories: names
+    },
+    legend: {
+      show: false
     },
     tooltip: {
       y: {
@@ -378,10 +445,6 @@ function drawSlowestFiles(collection, element) {
         horizontal: true
       }
     },
-    theme: {
-      mode: 'light',
-      palette: 'palette3'
-    },
     dataLabels: {
       enabled: false
     },
@@ -390,6 +453,9 @@ function drawSlowestFiles(collection, element) {
     }],
     xaxis: {
       categories: names
+    },
+    legend: {
+      show: false
     },
     tooltip: {
       y: {
@@ -491,5 +557,55 @@ function itemSelected(selectedItem) {
   } else if (selectedItem.type === 'detail') {
     const stepUrl = window.location.href.replace('index.html', 'step.html');
     window.location.href =  stepUrl + "?step=" + selectedItem.identifier;
+  }
+}
+
+function drawSwiftFunctions(target) {
+  const steps = target === 'main' ? buildData : targets;
+  const swiftFunctions = steps.filter(function (step) {
+    return step.swiftFunctionTimes && step.swiftFunctionTimes.length > 0;
+  }).flatMap(function (step) {
+    return step.swiftFunctionTimes
+  }).map(function(f) {
+    f.cumulative = Math.round(f.occurrences * f.durationMS * 100) / 100;
+    return f;
+  }).sort(function (lhs, rhs) {
+    return rhs.durationMS - lhs.durationMS;
+  });
+  if (swiftFunctions.length > 0) {
+    const functions = swiftFunctionTemplate({"functions": swiftFunctions});
+    $('#swiftfunctions').html(functions);
+    $('#swift-functions-table').DataTable({
+      "info": false,
+      "scrollX": true,
+      "order": [[ 0, "desc" ]]
+    });
+  } else {
+    $('#swiftfunctions').html(swiftFunctionWarning);
+  }
+}
+
+function drawSwiftTypeChecks(target) {
+  const steps = target === 'main' ? buildData : targets;
+  const swiftTypeCheckTimes = steps.filter(function (step) {
+    return step.swiftTypeCheckTimes && step.swiftTypeCheckTimes.length > 0;
+  }).flatMap(function (step) {
+    return step.swiftTypeCheckTimes
+  }).map(function(f) {
+    f.cumulative = Math.round(f.occurrences * f.durationMS * 100) / 100;
+    return f;
+  }).sort(function (lhs, rhs) {
+    return rhs.durationMS - lhs.durationMS;
+  });
+  if (swiftTypeCheckTimes.length > 0) {
+    const functions = swiftTypeCheckTemplate({"functions": swiftTypeCheckTimes});
+    $('#swifttypechecks').html(functions);
+    $('#swift-typechecks-table').DataTable({
+      "info": false,
+      "scrollX": true,
+      "order": [[ 0, "desc" ]]
+    });
+  } else {
+    $('#swifttypechecks').html(swiftTypeCheckWarning);
   }
 }
