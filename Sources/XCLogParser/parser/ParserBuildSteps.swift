@@ -165,7 +165,9 @@ public final class ParserBuildSteps {
                 step = step.moveSwiftStepsToRoot()
             }
             if step.detailStepType == .swiftCompilation {
-                swiftCompilerParser.addLogSection(logSection)
+                if step.fetchedFromCache == false {
+                    swiftCompilerParser.addLogSection(logSection)
+                }
                 if let individualSwiftSteps = logSection.getSwiftIndividualSteps(buildStep: step,
                                                                                  currentIndex: &currentIndex) {
                     step.subSteps.append(contentsOf: individualSwiftSteps)

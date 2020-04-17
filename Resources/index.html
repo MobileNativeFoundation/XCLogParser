@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Build Data</title>
+  <title>XCLogParser build report</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" >
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
@@ -265,6 +266,46 @@
             </div> <!-- card -->
           </div> <!-- col -->
         </div> <!-- top files row -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card xc-content">
+              <div class="card-header">
+                <div class="header-title">Swift functions build time</div>
+                <div class="header-action">
+                  <a class="card-header-action" href="#" data-toggle="collapse"
+                    data-target="#collapse-swiftfunctions" aria-expanded="true">
+                    △
+                  </a>
+                </div>
+              </div>
+              <div id="collapse-swiftfunctions" class="collapse show">
+                <div class="card-body">
+                  <div id="swiftfunctions"></div>
+                </div> <!-- card-body -->
+              </div> <!--collapse-swiftfunctions -->
+            </div> <!-- card -->
+          </div> <!-- col -->
+        </div> <!-- row -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card xc-content">
+              <div class="card-header">
+                <div class="header-title">Swift Type check times</div>
+                <div class="header-action">
+                  <a class="card-header-action" href="#" data-toggle="collapse"
+                    data-target="#collapse-swifttypechecks" aria-expanded="true">
+                    △
+                  </a>
+                </div>
+              </div>
+              <div id="collapse-swifttypechecks" class="collapse show">
+                <div class="card-body">
+                  <div id="swifttypechecks"></div>
+                </div> <!-- card-body -->
+              </div> <!--collapse-swifttypechecks -->
+            </div> <!-- card -->
+          </div> <!-- col -->
+        </div> <!-- row -->
 
       </div> <!-- container-fluid -->
 
@@ -282,6 +323,7 @@
   <script type="text/javascript" src="js/build.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.23.0/moment-with-locales.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
   <script type="text/javascript" src="js/app.js"></script>
 </body>
 </html>
