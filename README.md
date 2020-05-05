@@ -50,12 +50,31 @@ xclogparser parse --project MyApp --reporter html
 
 This script assumes that the `xclogparser` executable is installed and present in your PATH.
 
->Note: Errors thrown in post-action run scripts are silenced, so it could be hard to notice simple mistakes.
-
->Note: Since Xcode 11, `xcodebuild` only generates the .xcactivitylog build logs when the option `--resultBundlePath`. If you're compiling with that command and not with Xcode, be sure to set that option to a valid path.
-
 The run script is executed in a temporary directory by Xcode, so you may find it useful to immediately open the generated output with `open MyAppLogs` at the end of the script.
 The Finder will automatically open the output folder after a build completes and you can then view the generated HTML page that contains a nice visualization of your build! ✨
+
+### Tips & Tricks
+
+1. Errors thrown in post-action run scripts are silenced, so it could be hard to notice simple mistakes.
+1. Since Xcode 11, `xcodebuild` only generates the .xcactivitylog build logs when the option `--resultBundlePath`. If you're compiling with that command and not with Xcode, be sure to set that option to a valid path.
+1. Xcode likes to wait for all subprocesses to exit before completing the build. For this reason, you may notice a delayed "Build Succeeded" message if your post-scheme action is taking too long to execute. You can workaround this by offloading the execution to another script in the background and immediately close the input, output and error streams in order to let Xcode and xcodebuild finish cleanly. Create the following `launcher` script and invoke it from your post-scheme action as follows `launcher command-that-parses-the-log-here`:
+    ```sh
+    #!/bin/sh
+
+    # The first argument is the directory of the executable you want to run.
+    # The following arguments are directly forwarded to the executable.
+    # We execute the command in the background and immediately close the input, output
+    # and error streams in order to let Xcode and xcodebuild finish cleanly.
+    # This is done to prevent Xcode and xcodebuild being stuck in waiting for all 
+    # subprocesses to end before exiting.
+    executable=$1
+    shift;
+    $executable "$@" <&- >&- 2>&- &
+    ```
+1. The post-scheme acction is not executed in case the build fails. A undocumented feature in Xcode allows you to execute it even in this case. Set the attribute `runPostActionsOnFailure` to `YES` in your scheme's `BuildAction` as follows:
+    ```xml
+    <BuildAction buildImplicitDependencies='YES' parallelizeBuildables='YES' runPostActionsOnFailure='YES'>
+    ```
 
 ## Log Types
 
