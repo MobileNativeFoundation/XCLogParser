@@ -35,6 +35,9 @@ class ReporterTests: XCTestCase {
 
         let jsonReporter = Reporter.json.makeLogReporter()
         XCTAssertTrue(jsonReporter is JsonReporter)
+
+        let issuesReporter = Reporter.issues.makeLogReporter()
+        XCTAssertTrue(issuesReporter is IssuesReporter)
     }
 
 }

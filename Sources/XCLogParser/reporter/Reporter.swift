@@ -25,6 +25,7 @@ public enum Reporter: String {
     case summaryJson
     case chromeTracer
     case html
+    case issues
 
     func makeLogReporter() -> LogReporter {
         switch self {
@@ -38,6 +39,8 @@ public enum Reporter: String {
             return SummaryJsonReporter()
         case .html:
             return HtmlReporter()
+        case .issues:
+            return IssuesReporter()
         }
     }
 }
