@@ -20,7 +20,7 @@
 import Foundation
 
 /// The type of a Notice
-public enum NoticeType: String, Encodable {
+public enum NoticeType: String, Codable {
 
     /// Notes
     case note
@@ -58,7 +58,7 @@ public enum NoticeType: String, Encodable {
             return .note
         case "Swift Compiler Error":
             return .swiftError
-        case "ARC Semantic Issue":
+        case Suffix("Semantic Issue"):
             return .clangError
         case "Warning":
             return .projectWarning
@@ -78,7 +78,7 @@ public enum NoticeType: String, Encodable {
 
 /// Xcode reports warnings, errors and notes as IDEActivityLogMessage. This class
 /// wraps that data
-public class Notice: Encodable {
+public class Notice: Codable {
 
     public let type: NoticeType
     public let title: String

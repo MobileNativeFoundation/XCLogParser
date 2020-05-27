@@ -19,7 +19,7 @@ This is an example of a report created from the Build Log of the [Kickstarter iO
 `XCLogParser` is written as a [SPM](https://github.com/apple/swift-package-manager/) executable and it supports three commands:
 
 1. [Dump](#dump-command) the contents of an `xcactivitylog` into a `JSON` document.
-2. [Parse](#parse-command) the contents of an `xcactivitylog` into different kind of reports (`json`, `flatJson`, `summaryJson`, `chromeTracer` and `html`).
+2. [Parse](#parse-command) the contents of an `xcactivitylog` into different kind of reports (`json`, `flatJson`, `summaryJson`, `chromeTracer`, `issues` and `html`).
 3. Dump the [Manifest](#manifest-command) contents of a `LogStoreManifest.plist` file into a `JSON` document.
 
 Depending on your needs, there are various use-cases where `XCLogParser` can help you:
@@ -142,7 +142,7 @@ Example output available in the [reporters](#reporters) section.
 
   | Parameter Name | Description | Required |
   |-----|---|-----|
-  | `--reporter`  | The reporter used to transform the logs. It can be either `json`, `flatJson`, `summaryJson`, `chromeTracer` or `html`. (required)  | Yes |
+  | `--reporter`  | The reporter used to transform the logs. It can be either `json`, `flatJson`, `summaryJson`, `chromeTracer`, `issues` or `html`. (required)  | Yes |
   | `--file`  | The path to the `xcactivitylog`.  | No * |
   | `--project`  | The name of the project if you don't know the path to the log. The tool will try to find the latest Build log in a folder that starts with that name inside the `DerivedData` directory.  Use `--strictProjectName` for stricter name matching.  | No * |
   | `--workspace`  | The path to the `xcworkspace` file if you don't know the path to the log. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
@@ -206,6 +206,7 @@ The [parse command](#parse-command) has different types of reporters built-in th
 - [Flat JSON](#flatojson-reporter)
 - [Summary JSON](#summaryjson-reporter)
 - [Chrome Tracer](#chrometracer-reporter)
+- [Issues](#issues)
 - [HTML](#html-reporter)
 
 ### JSON Reporter
@@ -432,6 +433,52 @@ xclogparser parse --file path/to/log.xcactivitylog --reporter chromeTracer
   <summary>Example Output</summary>
 
   <img src="images/kickstarter-ios-chrome-tracer.png">
+</details>
+
+### Issues reporter
+
+Outputs the list of Errors and Warnings found in the log as a JSON document. Useful when you only want to check the issues found while building.
+
+Example:
+
+```bash
+xclogparser parse --file path/to/log.xcactivitylog --reporter issues
+```
+
+<details>
+    <summary>Example Output</summary>
+    ```json
+    {
+      "errors" : [
+        {
+          "characterRangeStart" : 0,
+          "startingColumnNumber" : 5,
+          "endingColumnNumber" : 30,
+          "characterRangeEnd" : 18446744073709551615,
+          "title" : "Error",
+          "endingLineNumber" : 10,
+          "type" : "swiftError",
+          "documentURL" : "file:\/\/\/MyProject\/MyFile.swift",
+          "startingLineNumber" : 10,
+          "severity" : 1
+        }
+      ],
+      "warnings" : [
+        {
+          "characterRangeStart" : 0,
+          "startingColumnNumber" : 5,
+          "endingColumnNumber" : 30,
+          "characterRangeEnd" : 18446744073709551615,
+          "title" : "Warning",
+          "endingLineNumber" : 10,
+          "type" : "swiftWarning",
+          "documentURL" : "file:\/\/\/MyProject\/MyFile.swift",
+          "startingLineNumber" : 10,
+          "severity" : 1
+        }
+      ]
+    }
+    ```
 </details>
 
 ### HTML Reporter
