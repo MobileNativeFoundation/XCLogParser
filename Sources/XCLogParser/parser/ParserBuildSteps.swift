@@ -91,7 +91,10 @@ public final class ParserBuildSteps {
     }
 
     // swiftlint:disable function_body_length
-    public func parseLogSection(logSection: IDEActivityLogSection, type: BuildStepType, parentSection: BuildStep?)
+    public func parseLogSection(logSection: IDEActivityLogSection,
+                                type: BuildStepType,
+                                parentSection: BuildStep?,
+                                parentLogSection: IDEActivityLogSection? = nil)
         throws -> BuildStep {
             currentIndex += 1
             let detailType = type == .detail ? DetailStepType.getDetailType(signature: logSection.signature) : .none
@@ -155,22 +158,26 @@ public final class ParserBuildSteps {
 
             step.subSteps = try logSection.subSections.map { subSection -> BuildStep in
                 let subType: BuildStepType = type == .main ? .target : .detail
-                return try parseLogSection(logSection: subSection, type: subType, parentSection: step)
+                return try parseLogSection(logSection: subSection,
+                                           type: subType,
+                                           parentSection: step,
+                                           parentLogSection: logSection)
             }
             if type == .target {
                 step.warningCount = targetWarnings
                 step.errorCount = targetErrors
-            }
-            if type == .detail {
+            } else if type == .detail {
                 step = step.moveSwiftStepsToRoot()
             }
             if step.detailStepType == .swiftCompilation {
                 if step.fetchedFromCache == false {
                     swiftCompilerParser.addLogSection(logSection)
                 }
-                if let individualSwiftSteps = logSection.getSwiftIndividualSteps(buildStep: step,
-                                                                                 currentIndex: &currentIndex) {
-                    step.subSteps.append(contentsOf: individualSwiftSteps)
+                if let swiftSteps = logSection.getSwiftIndividualSteps(buildStep: step,
+                                                                       parentCommandDetailDesc:
+                                                                       parentLogSection?.commandDetailDesc ?? "",
+                                                                       currentIndex: &currentIndex) {
+                    step.subSteps.append(contentsOf: swiftSteps)
                     step = step.withFilteredNotices()
                 }
             }

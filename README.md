@@ -455,12 +455,13 @@ xclogparser parse --file path/to/log.xcactivitylog --reporter issues
           "startingColumnNumber" : 5,
           "endingColumnNumber" : 30,
           "characterRangeEnd" : 18446744073709551615,
-          "title" : "Error",
+          "title" : "use of undeclared type 'AType'",
           "endingLineNumber" : 10,
           "type" : "swiftError",
           "documentURL" : "file:\/\/\/MyProject\/MyFile.swift",
           "startingLineNumber" : 10,
           "severity" : 1
+          "detail": "\/MyProject\/MyFile.swift:10:5: error: use of undeclared type 'AType'\r    func doSomething(completion: @escaping () -> AType) -> void) {\r^~~~\r"
         }
       ],
       "warnings" : [

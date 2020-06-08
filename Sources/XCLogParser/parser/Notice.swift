@@ -92,6 +92,7 @@ public class Notice: Codable {
     public let characterRangeEnd: UInt64
     public let characterRangeStart: UInt64
     public let interfaceBuilderIdentifier: String?
+    public let detail: String?
 
     static var clangWarningRegexp: NSRegularExpression? = {
         let pattern = "\\[(-W[\\w-]*)\\]+"
@@ -110,7 +111,8 @@ public class Notice: Codable {
                 endingColumnNumber: UInt64,
                 characterRangeEnd: UInt64,
                 characterRangeStart: UInt64,
-                interfaceBuilderIdentifier: String?) {
+                interfaceBuilderIdentifier: String? = nil,
+                detail: String? = nil) {
         self.type = type
         self.title = title
         self.clangFlag = clangFlag
@@ -123,11 +125,13 @@ public class Notice: Codable {
         self.characterRangeEnd = characterRangeEnd
         self.characterRangeStart = characterRangeStart
         self.interfaceBuilderIdentifier = interfaceBuilderIdentifier
+        self.detail = detail
     }
 
     public init?(withType type: NoticeType?,
                  logMessage: IDEActivityLogMessage,
-                 andClangFlag clangFlag: String? = nil) {
+                 clangFlag: String? = nil,
+                 detail: String? = nil) {
         guard let type = type else {
             return nil
         }
@@ -136,6 +140,7 @@ public class Notice: Codable {
         } else {
             self.interfaceBuilderIdentifier = nil
         }
+        self.detail = detail
         if let location = logMessage.location as? DVTTextDocumentLocation {
             self.type = type
             if let analyzerMessage = logMessage as? IDEActivityLogAnalyzerEventStepMessage {
@@ -183,7 +188,7 @@ public class Notice: Codable {
         if let clangWarningsFlags = self.parseClangWarningFlags(text: logSection.text),
             clangWarningsFlags.count > 0 {
             return zip(logSection.messages, clangWarningsFlags).compactMap { (message, warningFlag) -> Notice? in
-                Notice(withType: .clangWarning, logMessage: message, andClangFlag: warningFlag)
+                Notice(withType: .clangWarning, logMessage: message, clangFlag: warningFlag)
             }
         }
         // we look for analyzer warnings, swift warnings, notes and errors
@@ -199,7 +204,9 @@ public class Notice: Codable {
             // Special case, Interface builder warning can only be spotted by checking the whole text of the
             // log section
             let noticeTypeTitle = message.categoryIdent.isEmpty ? logSection.text : message.categoryIdent
-            if let notice = Notice(withType: NoticeType.fromTitle(noticeTypeTitle), logMessage: message) {
+            if let notice = Notice(withType: NoticeType.fromTitle(noticeTypeTitle),
+                                   logMessage: message,
+                                   detail: logSection.text) {
                 return [notice]
             }
             return nil
