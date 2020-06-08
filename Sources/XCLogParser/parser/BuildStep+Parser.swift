@@ -24,7 +24,7 @@ public extension BuildStep {
     /// Flattens a group of swift compilations steps.
     ///
     /// When a Swift module is compiled with `whole module` option
-    /// The paresed log looks like:
+    /// The parsed log looks like:
     /// - CompileSwiftTarget
     ///     - CompileSwift
     ///         - CompileSwift file1.swift
