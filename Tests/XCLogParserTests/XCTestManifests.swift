@@ -106,7 +106,7 @@ extension ParserTests {
         ("testParseNote", testParseNote),
         ("testParseTargetCompilationTimes", testParseTargetCompilationTimes),
         ("testParseTargetName", testParseTargetName),
-        ("testParseWarning", testParseWarning),
+        ("testParseWarningsAndErrors", testParseWarningsAndErrors),
     ]
 }
 

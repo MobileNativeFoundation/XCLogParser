@@ -85,7 +85,7 @@ class ParserTests: XCTestCase {
             categoryIdent: "",
             secondaryLocations: [],
             additionalDescription: "")
-        let fakeLog = getFakeIDEActivityLogWithMessage(noteMessage,
+        let fakeLog = getFakeIDEActivityLogWithMessages([noteMessage],
                                                        andText: "text")
         let build = try parser.parse(activityLog: fakeLog)
         XCTAssertNotNil(build.notes, "Build's notes are empty")
@@ -96,7 +96,8 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(noteMessage.title, note.title)
     }
 
-    func testParseWarning() throws {
+    // swiftlint:disable:next function_body_length
+    func testParseWarningsAndErrors() throws {
         let timestamp = Date().timeIntervalSinceReferenceDate
         let textDocumentLocation = DVTTextDocumentLocation(documentURLString: "file://project/file.m",
                                                            timestamp: timestamp,
@@ -119,7 +120,19 @@ class ParserTests: XCTestCase {
                                                    categoryIdent: "",
                                                    secondaryLocations: [],
                                                    additionalDescription: "")
-        let fakeLog = getFakeIDEActivityLogWithMessage(warningMessage,
+        let clangErrorMessage = IDEActivityLogMessage(title: "Void is not a type",
+                                                 shortTitle: "",
+                                                 timeEmitted: timestamp,
+                                                 rangeEndInSectionText: 18446744073709551615,
+                                                 rangeStartInSectionText: 0,
+                                                 subMessages: [],
+                                                 severity: 2,
+                                                 type: "com.apple.dt.IDE.diagnostic",
+                                                 location: textDocumentLocation,
+                                                 categoryIdent: "Semantic Issue",
+                                                 secondaryLocations: [],
+                                                 additionalDescription: "")
+        let fakeLog = getFakeIDEActivityLogWithMessages([warningMessage, clangErrorMessage],
                                                        andText: "This is deprecated, [-Wdeprecated-declarations]")
         let build = try parser.parse(activityLog: fakeLog)
         XCTAssertNotNil(build.warnings, "Warnings shouldn't be empty")
@@ -129,7 +142,14 @@ class ParserTests: XCTestCase {
         }
         XCTAssertEqual(warningMessage.title, warning.title)
         XCTAssertEqual("[-Wdeprecated-declarations]", warning.clangFlag ?? "empty")
+        XCTAssertEqual(NoticeType.clangWarning, warning.type)
         XCTAssertNil(warning.interfaceBuilderIdentifier)
+        guard let error = build.errors?.first else {
+            XCTFail("Build's errors are empty")
+            return
+        }
+        XCTAssertEqual(clangErrorMessage.title, error.title)
+        XCTAssertEqual(NoticeType.clangError, error.type)
     }
 
     func testParseInterfaceBuilderWarning() throws {
@@ -152,7 +172,7 @@ class ParserTests: XCTestCase {
                                                    categoryIdent: "",
                                                    secondaryLocations: [],
                                                    additionalDescription: "")
-        let fakeLog = getFakeIDEActivityLogWithMessage(warningMessage,
+        let fakeLog = getFakeIDEActivityLogWithMessages([warningMessage],
                                                        andText: "/* com.apple.ibtool.document.warnings */ " +
             "/project/Base.lproj/Main.storyboard:ABC: warning:")
         let build = try parser.parse(activityLog: fakeLog)
@@ -213,8 +233,8 @@ class ParserTests: XCTestCase {
     ServicesPlist.build/Script-7AD9607C371622036A6BC748.sh
     """
 
-    private func getFakeIDEActivityLogWithMessage(_ message: IDEActivityLogMessage,
-                                                  andText text: String) -> IDEActivityLog {
+    private func getFakeIDEActivityLogWithMessages(_ messages: [IDEActivityLogMessage],
+                                                   andText text: String) -> IDEActivityLog {
         let timestamp = Date().timeIntervalSinceReferenceDate
         let fakeMainStep = IDEActivityLogSection(sectionType: 1,
                                                  domainType: "",
@@ -224,7 +244,7 @@ class ParserTests: XCTestCase {
                                                  timeStoppedRecording: timestamp,
                                                  subSections: [],
                                                  text: text,
-                                                 messages: [message],
+                                                 messages: messages,
                                                  wasCancelled: false,
                                                  isQuiet: true,
                                                  wasFetchedFromCache: true,
