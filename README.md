@@ -65,7 +65,7 @@ The Finder will automatically open the output folder after a build completes and
     # The following arguments are directly forwarded to the executable.
     # We execute the command in the background and immediately close the input, output
     # and error streams in order to let Xcode and xcodebuild finish cleanly.
-    # This is done to prevent Xcode and xcodebuild being stuck in waiting for all 
+    # This is done to prevent Xcode and xcodebuild being stuck in waiting for all
     # subprocesses to end before exiting.
     executable=$1
     shift;
@@ -447,6 +447,7 @@ xclogparser parse --file path/to/log.xcactivitylog --reporter issues
 
 <details>
     <summary>Example Output</summary>
+
     ```json
     {
       "errors" : [
