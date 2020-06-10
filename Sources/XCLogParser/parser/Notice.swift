@@ -184,15 +184,20 @@ public class Notice: Codable {
     /// - returns: An Array of `Notice`
     public static func parseFromLogSection(_ logSection: IDEActivityLogSection) -> [Notice] {
         // we look for clangWarnings parsing the text of the logSection
-        // is it possible to have errors and clang warnings in the same step?
+        var clangWarnings: [Notice] = []
         if let clangWarningsFlags = self.parseClangWarningFlags(text: logSection.text),
             clangWarningsFlags.count > 0 {
-            return zip(logSection.messages, clangWarningsFlags).compactMap { (message, warningFlag) -> Notice? in
+            clangWarnings = zip(logSection.messages, clangWarningsFlags)
+                .compactMap { (message, warningFlag) -> Notice? in
                 Notice(withType: .clangWarning, logMessage: message, clangFlag: warningFlag)
             }
         }
+        // Remove the messages that were categorized as clangWarnings
+        let remainingLogMessages = logSection.messages.filter { message in
+            return clangWarnings.contains { $0.title == message.title } == false
+        }
         // we look for analyzer warnings, swift warnings, notes and errors
-        return logSection.messages.compactMap { message -> [Notice]? in
+        return clangWarnings + remainingLogMessages.compactMap { message -> [Notice]? in
             if let resultMessage = message as? IDEActivityLogAnalyzerResultMessage {
                 return resultMessage.subMessages.compactMap {
                     if let stepMessage = $0 as? IDEActivityLogAnalyzerEventStepMessage {
