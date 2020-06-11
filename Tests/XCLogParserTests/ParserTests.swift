@@ -20,7 +20,7 @@
 import XCTest
 @testable import XCLogParser
 
-// swiftlint:disable type_body_length
+// swiftlint:disable type_body_length file_length
 class ParserTests: XCTestCase {
 
     let parser = ParserBuildSteps()
@@ -143,6 +143,8 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(warningMessage.title, warning.title)
         XCTAssertEqual("[-Wdeprecated-declarations]", warning.clangFlag ?? "empty")
         XCTAssertEqual(NoticeType.clangWarning, warning.type)
+        XCTAssertEqual(textDocumentLocation.startingLineNumber + 1, warning.startingLineNumber)
+        XCTAssertEqual(textDocumentLocation.startingColumnNumber + 1, warning.startingColumnNumber)
         XCTAssertNil(warning.interfaceBuilderIdentifier)
         guard let error = build.errors?.first else {
             XCTFail("Build's errors are empty")
@@ -150,6 +152,25 @@ class ParserTests: XCTestCase {
         }
         XCTAssertEqual(clangErrorMessage.title, error.title)
         XCTAssertEqual(NoticeType.clangError, error.type)
+        XCTAssertEqual(textDocumentLocation.startingLineNumber + 1, error.startingLineNumber)
+        XCTAssertEqual(textDocumentLocation.startingColumnNumber + 1, error.startingColumnNumber)
+    }
+
+    func testParseSwiftIssuesDetails() {
+        let detailsText = """
+/project/SwiftProject/ContentView.swift:33:8: error: expected type\renum a:\r \
+^\r/project/SwiftProject/ContentView.swift:33:8: error: expected '{' in enum\renum a:\r \
+^\r/project/SwiftProject/ContentView.swift:28:31: error: use of undeclared type 'Views' \
+\r    static var previews: some Views {\r ^~~~~\r/project/SwiftProject/ContentView.swift:27:8: error: \
+type 'ContentView_Previews' does not conform to protocol 'PreviewProvider'\rstruct \
+        ContentView_Previews: PreviewProvider {\r       ^\r/project/SwiftProject/ContentView.swift:27:8: \
+note: do you want to add protocol stubs?\rstruct ContentView_Previews: PreviewProvider {\r       \
+^\r/project/SwiftProject/ContentView.swift:13:9: warning: 'doSomething()' is deprecated: renamed \
+to 'updatedDoSomething'\r        doSomething()\r        ^\r/project/SwiftProject/ContentView.swift:13:9: \
+note: use 'updatedDoSomething' instead\r doSomething()\r        ^~~~~~~~~~~\r        updatedDoSomething\r
+"""
+        let detailsByLocation = Notice.parseSwiftIssuesDetailsByLocation(detailsText)
+        XCTAssertEqual(detailsByLocation.count, 4)
     }
 
     func testParseInterfaceBuilderWarning() throws {

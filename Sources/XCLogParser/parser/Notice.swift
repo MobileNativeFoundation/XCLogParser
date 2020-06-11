@@ -50,6 +50,10 @@ public enum NoticeType: String, Codable {
     /// A warning inside an Interface Builder file
     case interfaceBuilderWarning
 
+    /// A warning about the usage of a deprecated API
+    case deprecatedWarning
+
+    // swiftlint:disable:next cyclomatic_complexity
     public static func fromTitle(_ title: String) -> NoticeType? {
         switch title {
         case "Swift Compiler Warning":
@@ -58,8 +62,12 @@ public enum NoticeType: String, Codable {
             return .note
         case "Swift Compiler Error":
             return .swiftError
+        case Prefix("Lexical"):
+            return .clangError
         case Suffix("Semantic Issue"):
             return .clangError
+        case Suffix("Deprecations"):
+            return .deprecatedWarning
         case "Warning":
             return .projectWarning
         case "Apple Mach-O Linker Warning":
@@ -70,6 +78,10 @@ public enum NoticeType: String, Codable {
             return .note
         case Prefix("/* com.apple.ibtool.document.warnings */"):
             return .interfaceBuilderWarning
+        case "Parse Issue":
+            return .clangError
+        case "Uncategorized":
+            return .clangError
         default:
             return .note
         }
@@ -150,12 +162,13 @@ public class Notice: Codable {
             }
             self.documentURL = location.documentURLString
             self.severity = logMessage.severity
-            self.startingLineNumber = location.startingLineNumber
-            self.endingLineNumber = location.endingLineNumber
-            self.startingColumnNumber = location.startingColumnNumber
-            self.endingColumnNumber = location.endingColumnNumber
             self.characterRangeEnd = location.characterRangeEnd
             self.characterRangeStart = location.characterRangeStart
+            // Xcode reports line and column numbers using zero-based numbers
+            self.startingLineNumber = Self.realLocationNumber(location.startingLineNumber)
+            self.endingLineNumber = Self.realLocationNumber(location.endingLineNumber)
+            self.startingColumnNumber = Self.realLocationNumber(location.startingColumnNumber)
+            self.endingColumnNumber = Self.realLocationNumber(location.endingColumnNumber)
             self.clangFlag = clangFlag
         } else {
             self.type = type
@@ -174,7 +187,38 @@ public class Notice: Codable {
             self.characterRangeStart = 0
             self.clangFlag = clangFlag
         }
+    }
 
+    public func with(detail newDetail: String?) -> Notice {
+        return Notice(type: type,
+                      title: title,
+                      clangFlag: clangFlag,
+                      documentURL: documentURL,
+                      severity: severity,
+                      startingLineNumber: startingLineNumber,
+                      endingLineNumber: endingLineNumber,
+                      startingColumnNumber: startingColumnNumber,
+                      endingColumnNumber: endingColumnNumber,
+                      characterRangeEnd: characterRangeEnd,
+                      characterRangeStart: characterRangeStart,
+                      interfaceBuilderIdentifier: interfaceBuilderIdentifier,
+                      detail: newDetail)
+    }
+
+    public func with(type newType: NoticeType) -> Notice {
+        return Notice(type: newType,
+                      title: title,
+                      clangFlag: clangFlag,
+                      documentURL: documentURL,
+                      severity: severity,
+                      startingLineNumber: startingLineNumber,
+                      endingLineNumber: endingLineNumber,
+                      startingColumnNumber: startingColumnNumber,
+                      endingColumnNumber: endingColumnNumber,
+                      characterRangeEnd: characterRangeEnd,
+                      characterRangeStart: characterRangeStart,
+                      interfaceBuilderIdentifier: interfaceBuilderIdentifier,
+                      detail: detail)
     }
 
     /// Parses an `IDEActivityLogSection` looking for Warnings, Errors and Notes in its `IDEActivityLogMessage`.
@@ -196,6 +240,8 @@ public class Notice: Codable {
         let remainingLogMessages = logSection.messages.filter { message in
             return clangWarnings.contains { $0.title == message.title } == false
         }
+        // parse details for Swift issues
+        let swiftErrorDetails = parseSwiftIssuesDetailsByLocation(logSection.text)
         // we look for analyzer warnings, swift warnings, notes and errors
         return clangWarnings + remainingLogMessages.compactMap { message -> [Notice]? in
             if let resultMessage = message as? IDEActivityLogAnalyzerResultMessage {
@@ -209,15 +255,67 @@ public class Notice: Codable {
             // Special case, Interface builder warning can only be spotted by checking the whole text of the
             // log section
             let noticeTypeTitle = message.categoryIdent.isEmpty ? logSection.text : message.categoryIdent
-            if let notice = Notice(withType: NoticeType.fromTitle(noticeTypeTitle),
+
+            if var notice = Notice(withType: NoticeType.fromTitle(noticeTypeTitle),
                                    logMessage: message,
                                    detail: logSection.text) {
+
+                // Add the right details to Swift errors
+                if notice.type == NoticeType.swiftError {
+                    var errorLocation = notice.documentURL.replacingOccurrences(of: "file://", with: "")
+                    errorLocation += ":\(notice.startingLineNumber):\(notice.startingColumnNumber):"
+
+                    notice = notice.with(detail: swiftErrorDetails[errorLocation])
+                }
+
+                // Xcode reports swift deprecation warnings as errors, fix it
+                if notice.type == NoticeType.swiftError && notice.title.contains(" deprecated:") {
+                    notice = notice.with(type: .deprecatedWarning)
+                }
                 return [notice]
             }
             return nil
         }.reduce([Notice]()) { flatten, notices -> [Notice] in
             flatten + notices
         }
+    }
+
+    /// Xcode reportes the details of Swift errors and warnings as a mixed text with all the errors in a
+    /// compilation unit in the same Text. This functions parses.
+    /// - parameter text: The LogSection.text with the error details
+    /// - returns: A Dictionary where the keys are the error location in the form pathToFile:line:column:
+    /// and the values are the error details for that location
+    public static func parseSwiftIssuesDetailsByLocation(_ text: String) -> [String: String] {
+        return text
+            .split(separator: "\r")
+            .reduce([]) { (details, line) -> [String] in
+                var details = details
+                if line.contains(": error:") || line.contains(": warning:") {
+                    details.append(String(line))
+                } else {
+                    guard let current = details.last else {
+                        return details
+                    }
+                    details.removeLast()
+                    details.append("\(current)\n\(line)")
+                }
+                return details
+            }
+            .reduce([String: String]()) { (detailsByLoc, detail) -> [String: String] in
+                let range: Range<String.Index>?
+                if detail.contains(": error:") {
+                    range = detail.range(of: ": error:")
+                } else {
+                    range = detail.range(of: ": warning:")
+                }
+                if let range = range {
+                    let location = detail[...range.lowerBound]
+                    var detailsByLoc = detailsByLoc
+                    detailsByLoc[String(location)] = detail
+                    return detailsByLoc
+                }
+                return detailsByLoc
+            }
     }
 
     /// Parses the text of a IDELogSection looking for the pattern [-Wwarning-type]
@@ -233,6 +331,17 @@ public class Notice: Codable {
         return matches.map { result -> String in
             String(text.substring(result.range))
         }
+    }
+
+    /// Xcode reports the line and column number based on a zero-index location
+    /// This adds a 1 to report the real location
+    /// If there is no location, Xcode reports UIInt64.max. In that case this function
+    /// doesn't do anything and returns the same number
+    private static func realLocationNumber(_ number: UInt64) -> UInt64 {
+        if number != UInt64.max {
+            return number + 1
+        }
+        return number
     }
 
 }
