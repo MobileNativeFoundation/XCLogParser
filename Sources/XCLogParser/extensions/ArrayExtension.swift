@@ -38,7 +38,8 @@ extension Array where Element: Notice {
             $0.type == .clangWarning ||
             $0.type == .projectWarning ||
             $0.type == .analyzerWarning ||
-            $0.type == .interfaceBuilderWarning
+            $0.type == .interfaceBuilderWarning ||
+            $0.type == .deprecatedWarning
         }
     }
 
