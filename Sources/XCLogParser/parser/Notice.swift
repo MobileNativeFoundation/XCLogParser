@@ -280,7 +280,7 @@ public class Notice: Codable {
         }
     }
 
-    /// Xcode reportes the details of Swift errors and warnings as a mixed text with all the errors in a
+    /// Xcode reports the details of Swift errors and warnings as a mixed text with all the errors in a
     /// compilation unit in the same Text. This functions parses.
     /// - parameter text: The LogSection.text with the error details
     /// - returns: A Dictionary where the keys are the error location in the form pathToFile:line:column:
