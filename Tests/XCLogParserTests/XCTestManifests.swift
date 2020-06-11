@@ -104,6 +104,7 @@ extension ParserTests {
         ("testParseAppNoopCompilationTimes", testParseAppNoopCompilationTimes),
         ("testParseInterfaceBuilderWarning", testParseInterfaceBuilderWarning),
         ("testParseNote", testParseNote),
+        ("testParseSwiftIssuesDetails", testParseSwiftIssuesDetails),
         ("testParseTargetCompilationTimes", testParseTargetCompilationTimes),
         ("testParseTargetName", testParseTargetName),
         ("testParseWarningsAndErrors", testParseWarningsAndErrors),
