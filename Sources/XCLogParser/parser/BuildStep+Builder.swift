@@ -49,7 +49,8 @@ extension BuildStep {
                          swiftFunctionTimes: swiftFunctionTimes,
                          fetchedFromCache: fetchedFromCache,
                          compilationEndTimestamp: compilationEndTimestamp,
-                         compilationDuration: compilationDuration
+                         compilationDuration: compilationDuration,
+                         clangTimeTraceFile: clangTimeTraceFile
         )
     }
 
@@ -81,7 +82,8 @@ extension BuildStep {
                          swiftFunctionTimes: swiftFunctionTimes,
                          fetchedFromCache: fetchedFromCache,
                          compilationEndTimestamp: compilationEndTimestamp,
-                         compilationDuration: compilationDuration)
+                         compilationDuration: compilationDuration,
+                         clangTimeTraceFile: clangTimeTraceFile)
     }
 
     func with(signature newSignature: String) -> BuildStep {
@@ -112,7 +114,8 @@ extension BuildStep {
                          swiftFunctionTimes: swiftFunctionTimes,
                          fetchedFromCache: fetchedFromCache,
                          compilationEndTimestamp: compilationEndTimestamp,
-                         compilationDuration: compilationDuration)
+                         compilationDuration: compilationDuration,
+                         clangTimeTraceFile: clangTimeTraceFile)
     }
 
     func withFilteredNotices() -> BuildStep {
@@ -146,7 +149,8 @@ extension BuildStep {
                          swiftFunctionTimes: swiftFunctionTimes,
                          fetchedFromCache: fetchedFromCache,
                          compilationEndTimestamp: compilationEndTimestamp,
-                         compilationDuration: compilationDuration)
+                         compilationDuration: compilationDuration,
+                         clangTimeTraceFile: clangTimeTraceFile)
     }
 
     func with(subSteps newSubSteps: [BuildStep]) -> BuildStep {
@@ -177,7 +181,8 @@ extension BuildStep {
                          swiftFunctionTimes: swiftFunctionTimes,
                          fetchedFromCache: fetchedFromCache,
                          compilationEndTimestamp: compilationEndTimestamp,
-                         compilationDuration: compilationDuration)
+                         compilationDuration: compilationDuration,
+                         clangTimeTraceFile: clangTimeTraceFile)
     }
 
     func with(newCompilationEndTimestamp: Double,
@@ -209,7 +214,8 @@ extension BuildStep {
                          swiftFunctionTimes: swiftFunctionTimes,
                          fetchedFromCache: fetchedFromCache,
                          compilationEndTimestamp: newCompilationEndTimestamp,
-                         compilationDuration: newCompilationDuration)
+                         compilationDuration: newCompilationDuration,
+                         clangTimeTraceFile: clangTimeTraceFile)
     }
 
     func with(identifier newIdentifier: String) -> BuildStep {
@@ -240,8 +246,8 @@ extension BuildStep {
                          swiftFunctionTimes: swiftFunctionTimes,
                          fetchedFromCache: fetchedFromCache,
                          compilationEndTimestamp: compilationEndTimestamp,
-                         compilationDuration: compilationDuration
-        )
+                         compilationDuration: compilationDuration,
+                         clangTimeTraceFile: clangTimeTraceFile)
     }
 
     private func filterNotices(_ notices: [Notice]?) -> [Notice]? {

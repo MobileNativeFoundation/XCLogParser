@@ -240,6 +240,11 @@ public struct BuildStep: Encodable {
     /// Actual compilation time of the Step. For Targets, this can be less than the `buildTime`
     /// For steps that are't compilation steps such as `.scriptExecution` this will be 0
     public var compilationDuration: Double
+    
+    /// Clang's time trace file path
+    /// If the project was compiled with the clang flag `-ftime-trace`
+    /// This filed will be populated
+    public var clangTimeTraceFile: String?
 
     /// Public initializer 
     public init(type: BuildStepType,
@@ -269,7 +274,8 @@ public struct BuildStep: Encodable {
                 swiftFunctionTimes: [SwiftFunctionTime]?,
                 fetchedFromCache: Bool,
                 compilationEndTimestamp: Double,
-                compilationDuration: Double) {
+                compilationDuration: Double,
+                clangTimeTraceFile: String?) {
         self.type = type
         self.machineName = machineName
         self.buildIdentifier = buildIdentifier
@@ -298,6 +304,7 @@ public struct BuildStep: Encodable {
         self.fetchedFromCache = fetchedFromCache
         self.compilationEndTimestamp = compilationEndTimestamp
         self.compilationDuration = compilationDuration
+        self.clangTimeTraceFile = clangTimeTraceFile
     }
 }
 

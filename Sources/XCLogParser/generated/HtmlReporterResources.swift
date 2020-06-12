@@ -1149,6 +1149,14 @@ public static let stepHTML =
                       <div id="info-arch"></div>
                     </div>
                   </div>
+                  <div class="row">
+                    <div class="col-sm-2">
+                      Time trace file
+                    </div>
+                    <div class="col-sm-10">
+                      <a id="info-time-trace-file" href=""></a>
+                    </div>
+                  </div>
                 </div> <!-- card body -->
               </div> <!-- collapse-info -->
             </div> <!-- card -->
@@ -1406,6 +1414,8 @@ function showStep() {
     $('#info-duration').html(step.duration + ' secs.');
     $('#info-start-time').html(moment(new Date(step.startTimestamp * 1000)).format(timestampFormat));
     $('#info-end-time').html(moment(new Date(step.endTimestamp * 1000)).format(timestampFormat));
+    $('#info-time-trace-file').html(step.clangTimeTraceFile);
+    $('#info-time-trace-file').attr("href", step.clangTimeTraceFile);
     showStepErrors(step);
     showStepWarnings(step);
     showSwiftFunctionTimes(step);
