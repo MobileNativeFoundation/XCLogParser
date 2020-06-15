@@ -113,7 +113,7 @@ end
 
 def get_version
   version_file = File.open('Sources/XCLogParser/commands/Version.swift').read
-  /let current = "(?<version>[\d.]*)"/ =~ version_file
+  /let current = \"(?<version>.*)\"/ =~ version_file
   version
 end
 

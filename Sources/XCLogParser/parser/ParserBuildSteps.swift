@@ -109,7 +109,7 @@ public final class ParserBuildSteps {
                 targetErrors = 0
                 targetWarnings = 0
             }
-            let notices = parseWarningsAndErrorsFromLogSection(logSection)
+            let notices = parseWarningsAndErrorsFromLogSection(logSection, forType: detailType)
             let warnings: [Notice]? = notices?["warnings"]
             let errors: [Notice]? = notices?["errors"]
             let notes: [Notice]? = notices?["notes"]
@@ -269,8 +269,9 @@ public final class ParserBuildSteps {
         return command.substring(match.range(at: 1))
     }
 
-    private func parseWarningsAndErrorsFromLogSection(_ logSection: IDEActivityLogSection) -> [String: [Notice]]? {
-        let notices = Notice.parseFromLogSection(logSection)
+    private func parseWarningsAndErrorsFromLogSection(_ logSection: IDEActivityLogSection, forType type: DetailStepType)
+        -> [String: [Notice]]? {
+        let notices = Notice.parseFromLogSection(logSection, forType: type)
         return ["warnings": notices.getWarnings(),
                 "errors": notices.getErrors(),
                 "notes": notices.getNotes()]
