@@ -279,7 +279,7 @@ public class ActivityParser {
         if className == String(describing: DVTTextDocumentLocation.self) {
             return try parseDVTTextDocumentLocation(iterator: &iterator)
         } else if className == String(describing: DVTDocumentLocation.self)  ||
-            className == "Xcode3ProjectDocumentLocation" {
+            className == "Xcode3ProjectDocumentLocation" || className == "IDELogDocumentLocation" {
             return try parseDVTDocumentLocation(iterator: &iterator)
         } else if className == String(describing: IBDocumentMemberLocation.self) {
             return try parseIBDocumentMemberLocation(iterator: &iterator)

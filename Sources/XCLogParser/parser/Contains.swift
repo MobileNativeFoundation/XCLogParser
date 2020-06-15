@@ -19,8 +19,21 @@
 
 import Foundation
 
-public struct Version {
+public struct Contains {
 
-    public static let current = "0.2.15"
+    let str: String
 
+    public init(_ str: String) {
+        self.str = str.lowercased()
+    }
+
+    private func match(_ input: String) -> Bool {
+        return input.lowercased().contains(str)
+    }
+}
+
+extension Contains {
+    static func ~= (contains: Contains, input: String) -> Bool {
+        return contains.match(input)
+    }
 }
