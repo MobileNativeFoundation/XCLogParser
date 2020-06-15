@@ -36,7 +36,7 @@ extension Notice {
             clangWarningsFlags.count > 0 {
             clangWarnings = zip(logSection.messages, clangWarningsFlags)
                 .compactMap { (message, warningFlag) -> Notice? in
-                    // If the warning is treated as error, we marked the issue as errro
+                    // If the warning is treated as error, we marked the issue as error
                     let type: NoticeType = warningFlag.contains("-Werror") ? .clangError : .clangWarning
                     return Notice(withType: type, logMessage: message, clangFlag: warningFlag)
             }
