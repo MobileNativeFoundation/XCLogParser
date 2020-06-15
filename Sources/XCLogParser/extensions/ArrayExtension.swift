@@ -45,7 +45,12 @@ extension Array where Element: Notice {
 
     func getErrors() -> [Notice] {
         return filter {
-            $0.type == .swiftError || $0.type == .error || $0.type == .clangError
+            $0.type == .swiftError ||
+            $0.type == .error ||
+            $0.type == .clangError ||
+            $0.type == .linkerError ||
+            $0.type == .packageLoadingError ||
+            $0.type == .scriptPhaseError
         }
     }
 
