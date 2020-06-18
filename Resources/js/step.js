@@ -112,6 +112,8 @@ function showStep() {
     $('#info-duration').html(step.duration + ' secs.');
     $('#info-start-time').html(moment(new Date(step.startTimestamp * 1000)).format(timestampFormat));
     $('#info-end-time').html(moment(new Date(step.endTimestamp * 1000)).format(timestampFormat));
+    $('#info-time-trace-file').html(step.clangTimeTraceFile);
+    $('#info-time-trace-file').attr("href", step.clangTimeTraceFile);
     showStepErrors(step);
     showStepWarnings(step);
     showSwiftFunctionTimes(step);

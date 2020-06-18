@@ -32,6 +32,7 @@ public final class ParserBuildSteps {
     var targetErrors = 0
     var targetWarnings = 0
     let swiftCompilerParser = SwiftCompilerParser()
+    let clangCompilerParser = ClangCompilerParser()
 
     public lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -153,7 +154,8 @@ public final class ParserBuildSteps {
                                  fetchedFromCache: wasFetchedFromCache(parent:
                                     parentSection, section: logSection),
                                  compilationEndTimestamp: 0,
-                                 compilationDuration: 0
+                                 compilationDuration: 0,
+                                 clangTimeTraceFile: nil
                                  )
 
             step.subSteps = try logSection.subSections.map { subSection -> BuildStep in
@@ -181,6 +183,11 @@ public final class ParserBuildSteps {
                     step = step.withFilteredNotices()
                 }
             }
+
+            if step.fetchedFromCache == false && step.detailStepType == .cCompilation {
+                step.clangTimeTraceFile = "file://\(clangCompilerParser.parseTimeTraceFile(logSection) ?? "")"
+            }
+
             step = addCompilationTimes(step: step)
             return step
     }

@@ -77,7 +77,8 @@ class IssuesReporterTests: XCTestCase {
                              swiftFunctionTimes: nil,
                              fetchedFromCache: false,
                              compilationEndTimestamp: end.timeIntervalSince1970,
-                             compilationDuration: 100 * 100
+                             compilationDuration: 100 * 100,
+                             clangTimeTraceFile: nil
         )
         return root
     }
@@ -126,7 +127,8 @@ class IssuesReporterTests: XCTestCase {
                              swiftFunctionTimes: nil,
                              fetchedFromCache: false,
                              compilationEndTimestamp: end.timeIntervalSince1970,
-                             compilationDuration: 100 * 100
+                             compilationDuration: 100 * 100,
+                             clangTimeTraceFile: nil
         )
         return root
     }
@@ -175,7 +177,8 @@ class IssuesReporterTests: XCTestCase {
                          swiftFunctionTimes: nil,
                          fetchedFromCache: false,
                          compilationEndTimestamp: end.timeIntervalSince1970,
-                         compilationDuration: 100 * 100
+                         compilationDuration: 100 * 100,
+                         clangTimeTraceFile: nil
         )
     }
 }
