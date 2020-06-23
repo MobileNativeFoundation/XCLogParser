@@ -1,0 +1,59 @@
+name: release_binaries
+on:
+  release:
+    types: created
+
+jobs:
+  macOS:
+    name: Add macOS binaries to release
+    runs-on: macOS-latest
+    env:
+      XCODE_VERSION: ${{ '11.4' }}
+    steps:
+      - name: Select Xcode
+        run: "sudo xcode-select -s /Applications/Xcode_$XCODE_VERSION.app"
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Build
+        run: rake build[release]
+      - name: Set tag name
+        run: echo ::set-env name=TAG_NAME::$(echo $GITHUB_REF | cut -c 11-)
+      - name: Zip release
+        run: "mkdir releases && zip -j releases/XCLogParser-macOS-amd64-$TAG_NAME.zip .build/release/xclogparser"
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v1-release
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: releases/*
+          file_glob: true
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  linux:
+    name: Add Linux binaries to release
+    runs-on: ubuntu-latest
+    container:
+      image: swift:5.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Install Ruby
+        run: apt-get update && apt-get install -y ruby zlib1g-dev
+      - name: Build
+        run: LANG=en_US.UTF-8 LC_CTYPE=UTF-8 rake build[release]
+      - name: Set tag name
+        run: echo ::set-env name=TAG_NAME::$(echo $GITHUB_REF | cut -c 11-)
+      - name: Zip release
+        uses: montudor/action-zip@v0.1.0
+        with:
+          args: zip -j XCLogParser-linux-amd64.zip .build/release/xclogparser
+      - name: Rename zip
+        run: "mkdir releases && mv XCLogParser-linux-amd64.zip releases/XCLogParser-linux-amd64-$TAG_NAME.zip"
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v1-release
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: releases/*
+          file_glob: true
+          tag: ${{ github.ref }}
+          overwrite: true

@@ -13,7 +13,7 @@ INSTALLATION_PREFIX = '/usr/local'.freeze
 
 
 desc 'Build XCLogParser'
-task :build, [:configuration, :sdks, :is_archive] do |task, args|
+task :build, [:configuration, :sdks, :is_archive] => ['gen_resources'] do |task, args|
   # Set task defaults
   args.with_defaults(:configuration => 'debug', :sdks => ['macos'])
 
