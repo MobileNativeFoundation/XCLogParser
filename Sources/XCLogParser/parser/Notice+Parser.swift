@@ -38,7 +38,12 @@ extension Notice {
                 .compactMap { (message, warningFlag) -> Notice? in
                     // If the warning is treated as error, we marked the issue as error
                     let type: NoticeType = warningFlag.contains("-Werror") ? .clangError : .clangWarning
-                    return Notice(withType: type, logMessage: message, clangFlag: warningFlag)
+                    let notice = Notice(withType: type, logMessage: message, clangFlag: warningFlag)
+
+                    if let notice = notice, isDeprecatedWarning(type: type, text: notice.title, clangFlags: warningFlag) {
+                        return notice.with(type: .deprecatedWarning)
+                    }
+                    return notice
             }
         }
         // Remove the messages that were categorized as clangWarnings
@@ -74,8 +79,7 @@ extension Notice {
 
                 // Handle special cases
 
-                // Xcode reports swift deprecation warnings as swift errors, mark them as deprecatedWarnings
-                if isDeprecatedWarning(type: notice.type, text: notice.title) {
+                if isDeprecatedWarning(type: notice.type, text: notice.title, clangFlags: notice.clangFlag) {
                     return [notice.with(type: .deprecatedWarning)]
                 }
                 // Ld command errors
@@ -149,7 +153,12 @@ extension Notice {
         }
     }
 
-    private static func isDeprecatedWarning(type: NoticeType, text: String) -> Bool {
+    private static func isDeprecatedWarning(type: NoticeType, text: String, clangFlags: String?) -> Bool {
+        // Mark clang deprecated flags (https://clang.llvm.org/docs/DiagnosticsReference.html)
+        if let clangFlags = clangFlags, clangFlags.contains("-Wdeprecated") {
+            return true
+        }
+        // Support for Swift and ObjC code marked as deprecated
         if type == .swiftError || type == .swiftWarning || type == .projectWarning || type == .clangWarning {
             return text.contains(" deprecated:")
                 || text.contains("was deprecated in")
