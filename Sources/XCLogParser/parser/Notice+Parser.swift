@@ -40,7 +40,8 @@ extension Notice {
                     let type: NoticeType = warningFlag.contains("-Werror") ? .clangError : .clangWarning
                     let notice = Notice(withType: type, logMessage: message, clangFlag: warningFlag)
 
-                    if let notice = notice, isDeprecatedWarning(type: type, text: notice.title, clangFlags: warningFlag) {
+                    if let notice = notice,
+                        isDeprecatedWarning(type: type, text: notice.title, clangFlags: warningFlag) {
                         return notice.with(type: .deprecatedWarning)
                     }
                     return notice
