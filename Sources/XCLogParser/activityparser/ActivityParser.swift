@@ -295,7 +295,8 @@ public class ActivityParser {
             throw XCLogParserError.parseError("Unexpected token found parsing IDEActivityLogMessage \(classRefToken)")
         }
         if className == String(describing: IDEActivityLogMessage.self) ||
-            className == "IDEClangDiagnosticActivityLogMessage" {
+            className == "IDEClangDiagnosticActivityLogMessage" ||
+            className == "IDEDiagnosticActivityLogMessage" {
             return try parseIDEActivityLogMessage(iterator: &iterator)
         }
         if className ==  String(describing: IDEActivityLogAnalyzerResultMessage.self) {

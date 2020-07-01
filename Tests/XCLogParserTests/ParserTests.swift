@@ -142,7 +142,7 @@ class ParserTests: XCTestCase {
         }
         XCTAssertEqual(warningMessage.title, warning.title)
         XCTAssertEqual("[-Wdeprecated-declarations]", warning.clangFlag ?? "empty")
-        XCTAssertEqual(NoticeType.clangWarning, warning.type)
+        XCTAssertEqual(NoticeType.deprecatedWarning, warning.type)
         XCTAssertEqual(textDocumentLocation.startingLineNumber + 1, warning.startingLineNumber)
         XCTAssertEqual(textDocumentLocation.startingColumnNumber + 1, warning.startingColumnNumber)
         XCTAssertNil(warning.interfaceBuilderIdentifier)
