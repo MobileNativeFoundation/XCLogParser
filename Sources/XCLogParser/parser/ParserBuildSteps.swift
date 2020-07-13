@@ -91,7 +91,7 @@ public final class ParserBuildSteps {
         return mainBuildStep
     }
 
-    // swiftlint:disable function_body_length
+    // swiftlint:disable function_body_length cyclomatic_complexity
     public func parseLogSection(logSection: IDEActivityLogSection,
                                 type: BuildStepType,
                                 parentSection: BuildStep?,

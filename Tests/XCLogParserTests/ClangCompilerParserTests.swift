@@ -24,9 +24,11 @@ class ClangCompilerParserTests: XCTestCase {
     let parser = ClangCompilerParser()
 
     func testParseTimeTraceFile() throws {
-        let clangCompileLogSection = getFakeClangSection(text:
-            "Time trace json-file dumped to /Users/project/ObjectsDirectory/UIViewController+Utility.json\rUse chrome://tracing or Speedscope App (https://www.speedscope.app) for flamegraph visualization\r",
-        commandDescription: "-ftime-trace")
+        let text = """
+        Time trace json-file dumped to /Users/project/ObjectsDirectory/UIViewController+Utility.json\r\
+        Use chrome://tracing or Speedscope App (https://www.speedscope.app) for flamegraph visualization\r
+        """
+        let clangCompileLogSection = getFakeClangSection(text: text, commandDescription: "-ftime-trace")
 
         let expectedFile = "/Users/project/ObjectsDirectory/UIViewController+Utility.json"
         let timeTraceFile = parser.parseTimeTraceFile(clangCompileLogSection)
