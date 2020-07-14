@@ -246,6 +246,11 @@ public struct BuildStep: Encodable {
     /// This filed will be populated
     public var clangTimeTraceFile: String?
 
+    /// ld64's statistics info
+    /// If the project was compiled with `-Xlinker -print_statistics`
+    /// This field will be populated
+    public var linkerStatistics: LinkerStatistics?
+
     /// Public initializer 
     public init(type: BuildStepType,
                 machineName: String,
@@ -275,7 +280,8 @@ public struct BuildStep: Encodable {
                 fetchedFromCache: Bool,
                 compilationEndTimestamp: Double,
                 compilationDuration: Double,
-                clangTimeTraceFile: String?) {
+                clangTimeTraceFile: String?,
+                linkerStatistics: LinkerStatistics?) {
         self.type = type
         self.machineName = machineName
         self.buildIdentifier = buildIdentifier
@@ -305,6 +311,7 @@ public struct BuildStep: Encodable {
         self.compilationEndTimestamp = compilationEndTimestamp
         self.compilationDuration = compilationDuration
         self.clangTimeTraceFile = clangTimeTraceFile
+        self.linkerStatistics = linkerStatistics
     }
 }
 
