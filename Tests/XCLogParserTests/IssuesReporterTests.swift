@@ -78,7 +78,8 @@ class IssuesReporterTests: XCTestCase {
                              fetchedFromCache: false,
                              compilationEndTimestamp: end.timeIntervalSince1970,
                              compilationDuration: 100 * 100,
-                             clangTimeTraceFile: nil
+                             clangTimeTraceFile: nil,
+                             linkerStatistics: nil
         )
         return root
     }
@@ -128,7 +129,8 @@ class IssuesReporterTests: XCTestCase {
                              fetchedFromCache: false,
                              compilationEndTimestamp: end.timeIntervalSince1970,
                              compilationDuration: 100 * 100,
-                             clangTimeTraceFile: nil
+                             clangTimeTraceFile: nil,
+                             linkerStatistics: nil
         )
         return root
     }
@@ -178,7 +180,8 @@ class IssuesReporterTests: XCTestCase {
                          fetchedFromCache: false,
                          compilationEndTimestamp: end.timeIntervalSince1970,
                          compilationDuration: 100 * 100,
-                         clangTimeTraceFile: nil
+                         clangTimeTraceFile: nil,
+                         linkerStatistics: nil
         )
     }
 }

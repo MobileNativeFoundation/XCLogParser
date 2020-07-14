@@ -155,7 +155,8 @@ public final class ParserBuildSteps {
                                     parentSection, section: logSection),
                                  compilationEndTimestamp: 0,
                                  compilationDuration: 0,
-                                 clangTimeTraceFile: nil
+                                 clangTimeTraceFile: nil,
+                                 linkerStatistics: nil
                                  )
 
             step.subSteps = try logSection.subSections.map { subSection -> BuildStep in
@@ -186,6 +187,10 @@ public final class ParserBuildSteps {
 
             if step.fetchedFromCache == false && step.detailStepType == .cCompilation {
                 step.clangTimeTraceFile = "file://\(clangCompilerParser.parseTimeTraceFile(logSection) ?? "")"
+            }
+
+            if step.fetchedFromCache == false && step.detailStepType == .linker {
+                step.linkerStatistics = clangCompilerParser.parseLinkerStatistics(logSection)
             }
 
             step = addCompilationTimes(step: step)
