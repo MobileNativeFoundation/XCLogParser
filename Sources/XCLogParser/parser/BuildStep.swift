@@ -243,7 +243,7 @@ public struct BuildStep: Encodable {
 
     /// Clang's time trace file path
     /// If the project was compiled with the clang flag `-ftime-trace`
-    /// This filed will be populated
+    /// This field will be populated
     public var clangTimeTraceFile: String?
 
     /// Public initializer 
