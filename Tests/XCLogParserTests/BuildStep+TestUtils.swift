@@ -33,5 +33,6 @@ func makeFakeBuildStep(title: String,
                      swiftFunctionTimes: nil,
                      fetchedFromCache: fetchedFromCache,
                      compilationEndTimestamp: 0,
-                     compilationDuration: 0)
+                     compilationDuration: 0,
+                     clangTimeTraceFile: nil)
 }
