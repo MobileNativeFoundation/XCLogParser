@@ -35,6 +35,47 @@ class ClangCompilerParserTests: XCTestCase {
         XCTAssertEqual(expectedFile, timeTraceFile)
     }
 
+    func testParseLinkerStatistics() throws {
+        let text = """
+        ld total time:  561.6 milliseconds ( 100.0%)\r\
+        option parsing time:   51.7 milliseconds (   9.2%)\r\
+        object file processing:    0.0 milliseconds (   0.0%)\r\
+        resolve symbols:  336.1 milliseconds (  59.8%)\r\
+        build atom list:    0.0 milliseconds (   0.0%)\r\
+        passess:   97.3 milliseconds (  17.3%)\r\
+        write output:   76.3 milliseconds (  13.5%)\r\
+        pageins=7464, pageouts=0, faults=31012\r\
+        processed   5 object files,  totaling         140,932 bytes\r\
+        processed  42 archive files, totaling      24,362,016 bytes\r\
+        processed  87 dylib files\r\
+        wrote output file            totaling       8,758,732 bytes\r
+        """
+        let clangCompileLogSection = getFakeClangSection(text: text, commandDescription: "-print_statistics")
+        let statistics = parser.parseLinkerStatistics(clangCompileLogSection)!
+        XCTAssertEqual(statistics.totalMS, 561.6, accuracy: 0.0001)
+        XCTAssertEqual(statistics.optionParsingMS, 51.7, accuracy: 0.0001)
+        XCTAssertEqual(statistics.optionParsingPercent, 9.2, accuracy: 0.0001)
+        XCTAssertEqual(statistics.objectFileProcessingMS, 0.0, accuracy: 0.0001)
+        XCTAssertEqual(statistics.objectFileProcessingPercent, 0.0, accuracy: 0.0001)
+        XCTAssertEqual(statistics.resolveSymbolsMS, 336.1, accuracy: 0.0001)
+        XCTAssertEqual(statistics.resolveSymbolsPercent, 59.8, accuracy: 0.0001)
+        XCTAssertEqual(statistics.buildAtomListMS, 0.0, accuracy: 0.0001)
+        XCTAssertEqual(statistics.buildAtomListPercent, 0.0, accuracy: 0.0001)
+        XCTAssertEqual(statistics.runPassesMS, 97.3, accuracy: 0.0001)
+        XCTAssertEqual(statistics.runPassesPercent, 17.3, accuracy: 0.0001)
+        XCTAssertEqual(statistics.writeOutputMS, 76.3, accuracy: 0.0001)
+        XCTAssertEqual(statistics.writeOutputPercent, 13.5, accuracy: 0.0001)
+        XCTAssertEqual(statistics.pageins, 7464)
+        XCTAssertEqual(statistics.pageouts, 0)
+        XCTAssertEqual(statistics.faults, 31012)
+        XCTAssertEqual(statistics.objectFiles, 5)
+        XCTAssertEqual(statistics.objectFilesBytes, 140932)
+        XCTAssertEqual(statistics.archiveFiles, 42)
+        XCTAssertEqual(statistics.archiveFilesBytes, 24362016)
+        XCTAssertEqual(statistics.dylibFiles, 87)
+        XCTAssertEqual(statistics.wroteOutputFileBytes, 8758732)
+    }
+
     private func getFakeClangSection(text: String, commandDescription: String) -> IDEActivityLogSection {
         return IDEActivityLogSection(sectionType: 1,
                                      domainType: "",
