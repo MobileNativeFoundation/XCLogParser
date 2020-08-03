@@ -108,6 +108,15 @@ class ParserTests: XCTestCase {
                                                            characterRangeEnd: 14,
                                                            characterRangeStart: 15,
                                                            locationEncoding: 16)
+        let textWrongDocumentLocation = DVTTextDocumentLocation(documentURLString: "file://project/header.h",
+                                                           timestamp: timestamp,
+                                                           startingLineNumber: 10,
+                                                           startingColumnNumber: 11,
+                                                           endingLineNumber: 12,
+                                                           endingColumnNumber: 13,
+                                                           characterRangeEnd: 14,
+                                                           characterRangeStart: 15,
+                                                           locationEncoding: 16)
         let warningMessage = IDEActivityLogMessage(title: "ABC is deprecated",
                                                    shortTitle: "",
                                                    timeEmitted: timestamp,
@@ -117,6 +126,18 @@ class ParserTests: XCTestCase {
                                                    severity: 1,
                                                    type: "com.apple.dt.IDE.diagnostic",
                                                    location: textDocumentLocation,
+                                                   categoryIdent: "",
+                                                   secondaryLocations: [],
+                                                   additionalDescription: "")
+        let duplicatedWarningMessage = IDEActivityLogMessage(title: "ABC is deprecated",
+                                                   shortTitle: "",
+                                                   timeEmitted: timestamp,
+                                                   rangeEndInSectionText: 18446744073709551615,
+                                                   rangeStartInSectionText: 0,
+                                                   subMessages: [],
+                                                   severity: 1,
+                                                   type: "com.apple.dt.IDE.diagnostic",
+                                                   location: textWrongDocumentLocation,
                                                    categoryIdent: "",
                                                    secondaryLocations: [],
                                                    additionalDescription: "")
@@ -132,17 +153,20 @@ class ParserTests: XCTestCase {
                                                  categoryIdent: "Semantic Issue",
                                                  secondaryLocations: [],
                                                  additionalDescription: "")
-        let fakeLog = getFakeIDEActivityLogWithMessages([warningMessage, clangErrorMessage],
-                                                       andText: "This is deprecated, [-Wdeprecated-declarations]")
+        let fakeLog = getFakeIDEActivityLogWithMessages([warningMessage, clangErrorMessage, duplicatedWarningMessage],
+                                                       andText: "This is deprecated, [-Wdeprecated-declarations]",
+                                                       loc: textDocumentLocation)
         let build = try parser.parse(activityLog: fakeLog)
         XCTAssertNotNil(build.warnings, "Warnings shouldn't be empty")
         guard let warning = build.warnings?.first else {
             XCTFail("Build's warnings are empty")
             return
         }
+        XCTAssertEqual(1, build.warningCount)
         XCTAssertEqual(warningMessage.title, warning.title)
         XCTAssertEqual("[-Wdeprecated-declarations]", warning.clangFlag ?? "empty")
         XCTAssertEqual(NoticeType.deprecatedWarning, warning.type)
+        XCTAssertEqual(textDocumentLocation.documentURLString, warning.documentURL)
         XCTAssertEqual(textDocumentLocation.startingLineNumber + 1, warning.startingLineNumber)
         XCTAssertEqual(textDocumentLocation.startingColumnNumber + 1, warning.startingColumnNumber)
         XCTAssertNil(warning.interfaceBuilderIdentifier)
@@ -255,7 +279,10 @@ note: use 'updatedDoSomething' instead\r doSomething()\r        ^~~~~~~~~~~\r   
     """
 
     private func getFakeIDEActivityLogWithMessages(_ messages: [IDEActivityLogMessage],
-                                                   andText text: String) -> IDEActivityLog {
+                                                   andText text: String,
+                                                   loc: DVTDocumentLocation = DVTDocumentLocation(documentURLString: "",
+                                                                                                       timestamp: 0))
+    -> IDEActivityLog {
         let timestamp = Date().timeIntervalSinceReferenceDate
         let fakeMainStep = IDEActivityLogSection(sectionType: 1,
                                                  domainType: "",
@@ -270,8 +297,7 @@ note: use 'updatedDoSomething' instead\r doSomething()\r        ^~~~~~~~~~~\r   
                                                  isQuiet: true,
                                                  wasFetchedFromCache: true,
                                                  subtitle: "",
-                                                 location: DVTDocumentLocation(documentURLString: "",
-                                                                               timestamp: timestamp),
+                                                 location: loc,
                                                  commandDetailDesc: "",
                                                  uniqueIdentifier: "uniqueIdentifier",
                                                  localizedResultString: "",

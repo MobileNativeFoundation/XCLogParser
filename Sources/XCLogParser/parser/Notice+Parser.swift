@@ -42,6 +42,11 @@ extension Notice {
 
                     if let notice = notice,
                         isDeprecatedWarning(type: type, text: notice.title, clangFlags: warningFlag) {
+                        // Fixes a bug where Xcode logs add more than one message to report one
+                        // deprecation warning. Only one has the right documentURL
+                        if notice.documentURL != logSection.location.documentURLString {
+                            return nil
+                        }
                         return notice.with(type: .deprecatedWarning)
                     }
                     return notice
