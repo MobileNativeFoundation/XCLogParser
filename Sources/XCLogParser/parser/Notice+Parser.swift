@@ -31,27 +31,9 @@ extension Notice {
     public static func parseFromLogSection(_ logSection: IDEActivityLogSection, forType type: DetailStepType)
         -> [Notice] {
         // we look for clangWarnings parsing the text of the logSection
-        var clangWarnings: [Notice] = []
-        if let clangWarningsFlags = self.parseClangWarningFlags(text: logSection.text),
-            clangWarningsFlags.count > 0 {
-            clangWarnings = zip(logSection.messages, clangWarningsFlags)
-                .compactMap { (message, warningFlag) -> Notice? in
-                    // If the warning is treated as error, we marked the issue as error
-                    let type: NoticeType = warningFlag.contains("-Werror") ? .clangError : .clangWarning
-                    let notice = Notice(withType: type, logMessage: message, clangFlag: warningFlag)
+        let clangWarningsFlags = self.parseClangWarningFlags(text: logSection.text)
+        let clangWarnings = self.parseClangWarnings(clangFlags: clangWarningsFlags, logSection: logSection)
 
-                    if let notice = notice,
-                        isDeprecatedWarning(type: type, text: notice.title, clangFlags: warningFlag) {
-                        // Fixes a bug where Xcode logs add more than one message to report one
-                        // deprecation warning. Only one has the right documentURL
-                        if notice.documentURL != logSection.location.documentURLString {
-                            return nil
-                        }
-                        return notice.with(type: .deprecatedWarning)
-                    }
-                    return notice
-            }
-        }
         // Remove the messages that were categorized as clangWarnings
         let remainingLogMessages = logSection.messages.filter { message in
             return clangWarnings.contains { $0.title == message.title } == false
@@ -77,10 +59,15 @@ extension Notice {
 
                 // Add the right details to Swift errors
                 if notice.type == NoticeType.swiftError || notice.type == .swiftWarning {
-                    var errorLocation = notice.documentURL.replacingOccurrences(of: "file://", with: "")
-                    errorLocation += ":\(notice.startingLineNumber):\(notice.startingColumnNumber):"
+                    // Special case, if Swiftc fails for a whole module,
+                    // we don't have location and the detail already has
+                    // enough information
+                    if let detail = notice.detail, detail.starts(with: "error:") == false {
+                        var errorLocation = notice.documentURL.replacingOccurrences(of: "file://", with: "")
+                        errorLocation += ":\(notice.startingLineNumber):\(notice.startingColumnNumber):"
 
-                    notice = notice.with(detail: swiftErrorDetails[errorLocation])
+                            notice = notice.with(detail: swiftErrorDetails[errorLocation])
+                    }
                 }
 
                 // Handle special cases
@@ -156,6 +143,29 @@ extension Notice {
         let matches = clangWarningRegexp.matches(in: text, options: .reportCompletion, range: range)
         return matches.map { result -> String in
             String(text.substring(result.range))
+        }
+    }
+
+    private static func parseClangWarnings(clangFlags: [String]?, logSection: IDEActivityLogSection) -> [Notice] {
+        guard let clangFlags = clangFlags else {
+            return [Notice]()
+        }
+        return zip(logSection.messages, clangFlags)
+            .compactMap { (message, warningFlag) -> Notice? in
+                // If the warning is treated as error, we marked the issue as error
+                let type: NoticeType = warningFlag.contains("-Werror") ? .clangError : .clangWarning
+                let notice = Notice(withType: type, logMessage: message, clangFlag: warningFlag)
+
+                if let notice = notice,
+                    isDeprecatedWarning(type: type, text: notice.title, clangFlags: warningFlag) {
+                    // Fixes a bug where Xcode logs add more than one message to report one
+                    // deprecation warning. Only one has the right documentURL
+                    if notice.documentURL != logSection.location.documentURLString {
+                        return nil
+                    }
+                    return notice.with(type: .deprecatedWarning)
+                }
+                return notice
         }
     }
 

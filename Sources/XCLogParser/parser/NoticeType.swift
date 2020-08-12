@@ -87,6 +87,8 @@ public enum NoticeType: String, Codable {
             return .packageLoadingError
         case Contains("Command PhaseScriptExecution"):
             return .scriptPhaseError
+        case Prefix("error: Swiftc"):
+            return .swiftError
         default:
             return .note
         }
