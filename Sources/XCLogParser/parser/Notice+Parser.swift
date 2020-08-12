@@ -62,11 +62,11 @@ extension Notice {
                     // Special case, if Swiftc fails for a whole module,
                     // we don't have location and the detail already has
                     // enough information
-                    if let detail = notice.detail, detail.starts(with: "error:") == false {
+                    let noticeDetail = notice.detail ?? ""
+                    if noticeDetail.starts(with: "error:") == false {
                         var errorLocation = notice.documentURL.replacingOccurrences(of: "file://", with: "")
                         errorLocation += ":\(notice.startingLineNumber):\(notice.startingColumnNumber):"
-
-                            notice = notice.with(detail: swiftErrorDetails[errorLocation])
+                        notice = notice.with(detail: swiftErrorDetails[errorLocation])
                     }
                 }
 
