@@ -121,6 +121,7 @@ public class ClangCompilerParser {
         var totalFileBytes = 0
 
         let numberFormatter = NumberFormatter()
+        numberFormatter.locale = Locale(identifier: "en")
         numberFormatter.numberStyle = .decimal
 
         let fileInfoPattern = """
