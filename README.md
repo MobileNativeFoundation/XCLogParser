@@ -71,7 +71,7 @@ The Finder will automatically open the output folder after a build completes and
     shift;
     $executable "$@" <&- >&- 2>&- &
     ```
-1. The post-scheme acction is not executed in case the build fails. A undocumented feature in Xcode allows you to execute it even in this case. Set the attribute `runPostActionsOnFailure` to `YES` in your scheme's `BuildAction` as follows:
+1. The post-scheme action is not executed in case the build fails. A undocumented feature in Xcode allows you to execute it even in this case. Set the attribute `runPostActionsOnFailure` to `YES` in your scheme's `BuildAction` as follows:
     ```xml
     <BuildAction buildImplicitDependencies='YES' parallelizeBuildables='YES' runPostActionsOnFailure='YES'>
     ```
