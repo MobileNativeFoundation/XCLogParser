@@ -100,8 +100,7 @@ struct ParseOptions: OptionsProtocol {
         -> (_ strictProjectName: Bool)
         -> (_ output: String) -> ParseOptions {
             return { derivedData in { projectName in { workspace in { xcodeproj in { reporter in { machineName
-                in { redacted in { withoutBuildSpecificInformation in { strictProjectName in {
-            output in
+                in { redacted in { withoutBuildSpecificInformation in { strictProjectName in { output in
             self.init(logFile: logFile,
                       derivedData: derivedData,
                       projectName: projectName,

@@ -27,11 +27,11 @@ public final class Lexer {
     let filePath: String
     var classNames = [String]()
     var userDirToRedact: String? {
-        set {
-            redactor.userDirToRedact = newValue
-        }
         get {
             redactor.userDirToRedact
+        }
+        set {
+            redactor.userDirToRedact = newValue
         }
     }
     private var redactor: LogRedactor
