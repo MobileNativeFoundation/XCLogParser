@@ -49,7 +49,8 @@ struct ManifestCommand: CommandProtocol {
                                     strictProjectName: options.strictProjectName)
         let actionOptions = ActionOptions(reporter: reporter,
                                           outputPath: options.output,
-                                          redacted: false)
+                                          redacted: false,
+                                          withoutBuildSpecificInformation: false)
         let action = Action.manifest(options: actionOptions)
         let command = Command(logOptions: logOptions, action: action)
         do {

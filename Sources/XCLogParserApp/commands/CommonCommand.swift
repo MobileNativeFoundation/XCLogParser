@@ -55,6 +55,11 @@ let redactedSwitch = Switch(flag: "r",
                             usage: "Redacts the username of the paths found in the log. " +
     "For instance, /Users/timcook/project will be /Users/<redacted>/project")
 
+let withoutBuildSpecificInformationSwitch = Switch(flag: "w",
+                                                   key: "without_build_specific_information",
+                                                   usage: "Removes build specific information from the logs. " +
+    "For instance, DerivedData/Product-bolnckhlbzxpxoeyfujluasoupft/Build will be DerivedData/Product/Build")
+
 let strictProjectNameSwitch = Switch(key: "strictProjectName",
     usage: "Use strict name testing when trying to find the latest version " +
     "of the project in the DerivedData directory.")
