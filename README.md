@@ -115,6 +115,7 @@ An example output has been omitted for brevity since it can contain a lot of inf
   | `--derived_data`  | The path to the derived data folder if you are using `xcodebuild` to build your project with the `-derivedDataPath` option.  | No |
   | `--output`  | If specified, the JSON file will be written to the given path. If not defined, the command will output to the standard output.  | No |
   | `--redacted`  | If specified, the username will be replaced by the word `redacted` in the file paths contained in the logs. Useful for privacy reasons but slightly decreases the performance.  | No |
+  | `--without_build_specific_info`  | If specified, build specific information will be removed from the logs (for example `bolnckhlbzxpxoeyfujluasoupft` will be removed from  `DerivedData/Product-bolnckhlbzxpxoeyfujluasoupft/Build` ). Useful for grouping logs by its content.  | No |
   | `--strictProjectName`  | Used in conjunction with `--project`. If specified, a stricter name matching will be done for the project name.  | No |
 
   >No *: One of `--file`, `--project`, `--workspace`, `--xcodeproj` parameters is required.
@@ -154,6 +155,7 @@ Example output available in the [reporters](#reporters) section.
   | `--derived_data`  | The path to the derived data folder if you are using `xcodebuild` to build your project with the `-derivedDataPath` option.  | No |
   | `--output`  | If specified, the JSON file will be written to the given path. If not defined, the command will output to the standard output.  | No |
   | `--redacted`  | If specified, the username will be replaced by the word `redacted` in the file paths contained in the logs. Useful for privacy reasons but slightly decreases the performance.  | No |
+  | `--without_build_specific_info`  | If specified, build specific information will be removed from the logs (for example `bolnckhlbzxpxoeyfujluasoupft` will be removed from  `DerivedData/Product-bolnckhlbzxpxoeyfujluasoupft/Build` ). Useful for grouping logs by its content.  | No |
   | `--strictProjectName`  | Used in conjunction with `--project`. If specified, a stricter name matching will be done for the project name.  | No |
   | `--machine_name`  | If specified, the machine name will be used to create the `buildIdentifier`. If it is not specified, the host name will be used.  | No |
 

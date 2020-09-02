@@ -61,6 +61,7 @@ struct ParseCommand: CommandProtocol {
         let actionOptions = ActionOptions(reporter: reporter,
                                           outputPath: options.output,
                                           redacted: options.redacted,
+                                          withoutBuildSpecificInformation: options.withoutBuildSpecificInformation,
                                           machineName: options.machineName.isEmpty ? nil : options.machineName)
         let action = Action.parse(options: actionOptions)
         let command = Command(logOptions: logOptions, action: action)
@@ -83,6 +84,7 @@ struct ParseOptions: OptionsProtocol {
     let reporter: String
     let machineName: String
     let redacted: Bool
+    let withoutBuildSpecificInformation: Bool
     let strictProjectName: Bool
     let output: String
 
@@ -94,11 +96,11 @@ struct ParseOptions: OptionsProtocol {
         -> (_ reporter: String)
         -> (_ machineName: String)
         -> (_ redacted: Bool)
+        -> (_ withoutBuildSpecificInformation: Bool)
         -> (_ strictProjectName: Bool)
         -> (_ output: String) -> ParseOptions {
             return { derivedData in { projectName in { workspace in { xcodeproj in { reporter in { machineName
-                in { redacted in { strictProjectName in {
-            output in
+                in { redacted in { withoutBuildSpecificInformation in { strictProjectName in { output in
             self.init(logFile: logFile,
                       derivedData: derivedData,
                       projectName: projectName,
@@ -107,9 +109,10 @@ struct ParseOptions: OptionsProtocol {
                       reporter: reporter,
                       machineName: machineName,
                       redacted: redacted,
+                      withoutBuildSpecificInformation: withoutBuildSpecificInformation,
                       strictProjectName: strictProjectName,
                       output: output)
-                    }}}}}}}}}
+                    }}}}}}}}}}
     }
 
     static func evaluate(_ mode: CommandMode) -> Result<ParseOptions, CommandantError<CommandantError<Swift.Error>>> {
@@ -130,6 +133,7 @@ struct ParseOptions: OptionsProtocol {
                 usage: "Optional. The name of the machine." +
                 "If not specified, the host name will be used.")
             <*> mode <| redactedSwitch
+            <*> mode <| withoutBuildSpecificInformationSwitch
             <*> mode <| strictProjectNameSwitch
             <*> mode <| outputOption
     }

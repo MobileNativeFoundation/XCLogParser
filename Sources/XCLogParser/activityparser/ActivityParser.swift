@@ -36,14 +36,22 @@ public class ActivityParser {
     /// - parameter logURL: `URL` of the xcactivitylog
     /// - parameter redacted: If true, the username will be replaced
     /// in the file paths inside the logs for the word `redacted`.
-    /// This flag is iseful to preserve the privacy of the users.
+    /// This flag is useful to preserve the privacy of the users.
+    /// - parameter withoutBuildSpecificInformation: If true, build specific
+    /// information will be removed from the logs (for example `bolnckhlbzxpxoeyfujluasoupft`
+    /// will be removed from  `DerivedData/Product-bolnckhlbzxpxoeyfujluasoupft/Build`).
+    /// This flag is useful for grouping logs by its content.
     /// - returns: An instance of `IDEActivityLog1
     /// - throws: An Error if the file is not valid.
-    public func parseActivityLogInURL(_ logURL: URL, redacted: Bool) throws -> IDEActivityLog {
+    public func parseActivityLogInURL(_ logURL: URL,
+                                      redacted: Bool,
+                                      withoutBuildSpecificInformation: Bool) throws -> IDEActivityLog {
         let logLoader = LogLoader()
         let content = try logLoader.loadFromURL(logURL)
         let lexer = Lexer(filePath: logURL.path)
-        let tokens = try lexer.tokenize(contents: content, redacted: redacted)
+        let tokens = try lexer.tokenize(contents: content,
+                                        redacted: redacted,
+                                        withoutBuildSpecificInformation: withoutBuildSpecificInformation)
         return try parseIDEActiviyLogFromTokens(tokens)
     }
 

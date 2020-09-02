@@ -27,11 +27,11 @@ public final class Lexer {
     let filePath: String
     var classNames = [String]()
     var userDirToRedact: String? {
-        set {
-            redactor.userDirToRedact = newValue
-        }
         get {
             redactor.userDirToRedact
+        }
+        set {
+            redactor.userDirToRedact = newValue
         }
     }
     private var redactor: LogRedactor
@@ -46,16 +46,22 @@ public final class Lexer {
     /// - parameter contents: The contents of the .xcactivitylog
     /// - parameter redacted: If true, the user's directory will be replaced by `<redacted>`
     /// for privacy concerns.
+    /// - parameter withoutBuildSpecificInformation: If true, build specific information will be removed from the logs.
     /// - returns: An array of all the `Token` in the log.
     /// - throws: An error if the document is not a valid SLF document
-    public func tokenize(contents: String, redacted: Bool) throws -> [Token] {
+    public func tokenize(contents: String,
+                         redacted: Bool,
+                         withoutBuildSpecificInformation: Bool) throws -> [Token] {
         let scanner = Scanner(string: contents)
         guard scanSLFHeader(scanner: scanner) else {
             throw XCLogParserError.invalidLogHeader(filePath)
         }
         var tokens = [Token]()
         while !scanner.isAtEnd {
-            guard let logTokens = scanSLFType(scanner: scanner, redacted: redacted), logTokens.isEmpty == false else {
+            guard let logTokens = scanSLFType(scanner: scanner,
+                                              redacted: redacted,
+                                              withoutBuildSpecificInformation: withoutBuildSpecificInformation),
+                logTokens.isEmpty == false else {
                 print(tokens)
                 throw XCLogParserError.invalidLine(scanner.approximateLine)
             }
@@ -73,7 +79,7 @@ public final class Lexer {
         return scanner.scanString(Lexer.SLFHeader, into: &format)
     }
 
-    private func scanSLFType(scanner: Scanner, redacted: Bool) -> [Token]? {
+    private func scanSLFType(scanner: Scanner, redacted: Bool, withoutBuildSpecificInformation: Bool) -> [Token]? {
 
         guard let payload = scanPayload(scanner: scanner) else {
             return nil
@@ -83,7 +89,11 @@ public final class Lexer {
         }
 
         return tokenTypes.compactMap { tokenType -> Token? in
-            scanToken(scanner: scanner, payload: payload, tokenType: tokenType, redacted: redacted)
+            scanToken(scanner: scanner,
+                      payload: payload,
+                      tokenType: tokenType,
+                      redacted: redacted,
+                      withoutBuildSpecificInformation: withoutBuildSpecificInformation)
         }
     }
 
@@ -127,54 +137,102 @@ public final class Lexer {
         return nil
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
-    private func scanToken(scanner: Scanner, payload: String, tokenType: TokenType, redacted: Bool) -> Token? {
+    private func scanToken(scanner: Scanner,
+                           payload: String,
+                           tokenType: TokenType,
+                           redacted: Bool,
+                           withoutBuildSpecificInformation: Bool) -> Token? {
         switch tokenType {
         case .int:
-            guard let value = UInt64(payload) else {
-                print("error parsing int")
-                return nil
-            }
-            return .int(value)
+            return handleIntTokenTypeCase(payload: payload)
         case .className:
-            guard let className = scanString(length: payload, scanner: scanner, redacted: redacted) else {
-                print("error parsing string")
-                return nil
-            }
-            classNames.append(className)
-            return .className(className)
+            return handleClassNameTokenTypeCase(scanner: scanner,
+                                                payload: payload,
+                                                redacted: redacted,
+                                                withoutBuildSpecificInformation: withoutBuildSpecificInformation)
         case .classNameRef:
-            guard let value = Int(payload) else {
-                print("error parsing classNameRef")
-                return nil
-            }
-            let element = value - 1
-            let className = classNames[element]
-            return .classNameRef(className)
+            return handleClassNameRefTokenTypeCase(payload: payload)
         case .string:
-            guard let content = scanString(length: payload, scanner: scanner, redacted: redacted) else {
-                print("error parsing string")
-                return nil
-            }
-            return .string(content)
+            return handleStringTokenTypeCase(scanner: scanner,
+                                             payload: payload,
+                                             redacted: redacted,
+                                             withoutBuildSpecificInformation: withoutBuildSpecificInformation)
         case .double:
-            guard let double = hexToInt(payload) else {
-                print("error parsing double")
-                return nil
-            }
-            return .double(double)
+            return handleDoubleTokenTypeCase(payload: payload)
         case .null:
             return .null
         case .list:
-            guard let value = Int(payload) else {
-                print("error parsing list")
-                return nil
-            }
-            return .list(value)
+            return handleListTokenTypeCase(payload: payload)
         }
     }
 
-    private func scanString(length: String, scanner: Scanner, redacted: Bool) -> String? {
+    private func handleIntTokenTypeCase(payload: String) -> Token? {
+        guard let value = UInt64(payload) else {
+            print("error parsing int")
+            return nil
+        }
+        return .int(value)
+    }
+
+    private func handleClassNameTokenTypeCase(scanner: Scanner,
+                                              payload: String,
+                                              redacted: Bool,
+                                              withoutBuildSpecificInformation: Bool) -> Token? {
+        guard let className = scanString(length: payload,
+                                         scanner: scanner,
+                                         redacted: redacted,
+                                         withoutBuildSpecificInformation: withoutBuildSpecificInformation) else {
+                                            print("error parsing string")
+                                            return nil
+        }
+        classNames.append(className)
+        return .className(className)
+    }
+
+    private func handleClassNameRefTokenTypeCase(payload: String) -> Token? {
+        guard let value = Int(payload) else {
+            print("error parsing classNameRef")
+            return nil
+        }
+        let element = value - 1
+        let className = classNames[element]
+        return .classNameRef(className)
+    }
+
+    private func handleStringTokenTypeCase(scanner: Scanner,
+                                           payload: String,
+                                           redacted: Bool,
+                                           withoutBuildSpecificInformation: Bool) -> Token? {
+        guard let content = scanString(length: payload,
+                                       scanner: scanner,
+                                       redacted: redacted,
+                                       withoutBuildSpecificInformation: withoutBuildSpecificInformation) else {
+                                        print("error parsing string")
+                                        return nil
+        }
+        return .string(content)
+    }
+
+    private func handleDoubleTokenTypeCase(payload: String) -> Token? {
+        guard let double = hexToInt(payload) else {
+            print("error parsing double")
+            return nil
+        }
+        return .double(double)
+    }
+
+    private func handleListTokenTypeCase(payload: String) -> Token? {
+        guard let value = Int(payload) else {
+            print("error parsing list")
+            return nil
+        }
+        return .list(value)
+    }
+
+    private func scanString(length: String,
+                            scanner: Scanner,
+                            redacted: Bool,
+                            withoutBuildSpecificInformation: Bool) -> String? {
         guard let value = Int(length) else {
             print("error parsing string")
             return nil
@@ -187,10 +245,14 @@ public final class Lexer {
         let end = String.Index(encodedOffset: scanner.scanLocation + value)
         #endif
         scanner.scanLocation += value
+        var result = String(scanner.string[start..<end])
         if redacted {
-            return redactor.redactUserDir(string: String(scanner.string[start..<end]))
+            result = redactor.redactUserDir(string: result)
         }
-        return String(scanner.string[start..<end])
+        if withoutBuildSpecificInformation {
+            result = result.removeProductBuildIdentifier()
+        }
+        return result
     }
 
     private func hexToInt(_ input: String) -> Double? {
