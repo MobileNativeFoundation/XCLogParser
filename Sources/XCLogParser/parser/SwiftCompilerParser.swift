@@ -74,11 +74,21 @@ public class SwiftCompilerParser {
     }
 
     public func findFunctionTimesForFilePath(_ filePath: String) -> [SwiftFunctionTime]? {
-        return functionsPerFile?[filePath]
+        // File paths found in IDEActivityLogSection.text are unescaped
+        // so percent encoding needs to be removed from filePath
+        guard let unescapedFilePath = filePath.removingPercentEncoding else {
+            return nil
+        }
+        return functionsPerFile?[unescapedFilePath]
     }
 
     public func findTypeChecksForFilePath(_ filePath: String) -> [SwiftTypeCheck]? {
-        return typeChecksPerFile?[filePath]
+        // File paths found in IDEActivityLogSection.text are unescaped
+         // so percent encoding needs to be removed from filePath
+        guard let unescapedFilePath = filePath.removingPercentEncoding else {
+            return nil
+        }
+        return typeChecksPerFile?[unescapedFilePath]
     }
 
     public func hasFunctionTimes() -> Bool {
