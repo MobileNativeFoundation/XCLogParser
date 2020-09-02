@@ -25,52 +25,68 @@ class SwiftCompilerParserTests: XCTestCase {
     let parser = SwiftCompilerParser()
 
     func testParseSwiftFunctionTimes() throws {
+        try runParseSwiftFunctionTimesTest(rawFile: "myapp/MyView", escapedFile: "myapp/MyView")
+        try runParseSwiftFunctionTimesTest(rawFile: "my app/MyView", escapedFile: "my%20app/MyView")
+    }
+
+    private func runParseSwiftFunctionTimesTest(rawFile: String,
+                                                escapedFile: String,
+                                                file: StaticString = #file,
+                                                line: UInt = #line) throws {
         let emptylogSection = getFakeSwiftcSection(text: "text",
                                               commandDescription: "command")
         let text =
-        "\t0.05ms\t/Users/user/myapp/MyView.swift:9:9\tgetter textLabel\r" +
-        "\t4.96ms\t/Users/user/myapp/MyView.swift:11:14\tinitializer init(frame:)\r" +
+        "\t0.05ms\t/Users/user/\(rawFile).swift:9:9\tgetter textLabel\r" +
+        "\t4.96ms\t/Users/user/\(rawFile).swift:11:14\tinitializer init(frame:)\r" +
         "\t0.04ms\t<invalid loc>\tgetter None\r"
         let swiftTimesLogSection = getFakeSwiftcSection(text:
             text, commandDescription: "-debug-time-function-bodies")
 
         let duplicatedSwiftTimeslogSection = getFakeSwiftcSection(text:
             text, commandDescription: "-debug-time-function-bodies")
-        let expectedFile = "file:///Users/user/myapp/MyView.swift"
+        let expectedFile = "file:///Users/user/\(escapedFile).swift"
         parser.addLogSection(emptylogSection)
         parser.addLogSection(swiftTimesLogSection)
         parser.addLogSection(duplicatedSwiftTimeslogSection)
 
         parser.parse()
         guard let functionTimes = parser.findFunctionTimesForFilePath(expectedFile) else {
-            XCTFail("The command should have swiftc function times")
+            XCTFail("The command should have swiftc function times", file: file, line: line)
             return
         }
-        XCTAssertEqual(2, functionTimes.count)
+        XCTAssertEqual(2, functionTimes.count, file: file, line: line)
         let getter = functionTimes[0]
         let initializer = functionTimes[1]
-        XCTAssertEqual(0.05, getter.durationMS)
-        XCTAssertEqual(9, getter.startingLine)
-        XCTAssertEqual(9, getter.startingColumn)
-        XCTAssertEqual(2, getter.occurrences)
-        XCTAssertEqual(expectedFile, getter.file)
-        XCTAssertEqual("getter textLabel", getter.signature)
-        XCTAssertEqual("initializer init(frame:)", initializer.signature)
-        XCTAssertEqual(2, initializer.occurrences)
+        XCTAssertEqual(0.05, getter.durationMS, file: file, line: line)
+        XCTAssertEqual(9, getter.startingLine, file: file, line: line)
+        XCTAssertEqual(9, getter.startingColumn, file: file, line: line)
+        XCTAssertEqual(2, getter.occurrences, file: file, line: line)
+        XCTAssertEqual(expectedFile.removingPercentEncoding, getter.file, file: file, line: line)
+        XCTAssertEqual("getter textLabel", getter.signature, file: file, line: line)
+        XCTAssertEqual("initializer init(frame:)", initializer.signature, file: file, line: line)
+        XCTAssertEqual(2, initializer.occurrences, file: file, line: line)
     }
 
     func testParseSwiftTypeCheckTimes() throws {
+        try runTestParseSwiftTypeCheckTimes(rawFile: "project/CreatorHeaderViewModel", escapedFile: "project/CreatorHeaderViewModel")
+        try runTestParseSwiftTypeCheckTimes(rawFile: "my project/CreatorHeaderViewModel", escapedFile: "my%20project/CreatorHeaderViewModel")
+    }
+
+    private func runTestParseSwiftTypeCheckTimes(rawFile: String,
+                                                 escapedFile: String,
+                                                 file: StaticString = #file,
+                                                 line: UInt = #line) throws {
         let emptylogSection = getFakeSwiftcSection(text: "text",
                                               commandDescription: "command")
 
         let swiftTimesLogSection = getFakeSwiftcSection(text:
-            "\t0.72ms\t/Users/project/CreatorHeaderViewModel.swift:19:15\r",
+            "\t0.72ms\t/Users/\(rawFile).swift:19:15\r",
         commandDescription: "-debug-time-expression-type-checking")
 
         let duplicatedSwiftTimeslogSection = getFakeSwiftcSection(text:
-            "\t0.72ms\t/Users/project/CreatorHeaderViewModel.swift:19:15\r",
+            "\t0.72ms\t/Users/\(rawFile).swift:19:15\r",
         commandDescription: "-debug-time-expression-type-checking")
-        let expectedFile = "file:///Users/project/CreatorHeaderViewModel.swift"
+        let expectedFile = "file:///Users/\(escapedFile).swift"
         parser.addLogSection(emptylogSection)
         parser.addLogSection(swiftTimesLogSection)
         parser.addLogSection(duplicatedSwiftTimeslogSection)
@@ -86,7 +102,7 @@ class SwiftCompilerParserTests: XCTestCase {
         XCTAssertEqual(19, typeChecks[0].startingLine)
         XCTAssertEqual(15, typeChecks[0].startingColumn)
         XCTAssertEqual(0.72, typeChecks[0].durationMS)
-        XCTAssertEqual(expectedFile, typeChecks[0].file)
+        XCTAssertEqual(expectedFile.removingPercentEncoding, typeChecks[0].file)
         XCTAssertEqual(2, typeChecks[0].occurrences)
     }
 
