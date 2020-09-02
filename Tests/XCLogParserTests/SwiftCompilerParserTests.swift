@@ -68,8 +68,10 @@ class SwiftCompilerParserTests: XCTestCase {
     }
 
     func testParseSwiftTypeCheckTimes() throws {
-        try runTestParseSwiftTypeCheckTimes(rawFile: "project/CreatorHeaderViewModel", escapedFile: "project/CreatorHeaderViewModel")
-        try runTestParseSwiftTypeCheckTimes(rawFile: "my project/CreatorHeaderViewModel", escapedFile: "my%20project/CreatorHeaderViewModel")
+        try runTestParseSwiftTypeCheckTimes(rawFile: "project/CreatorHeaderViewModel",
+                                            escapedFile: "project/CreatorHeaderViewModel")
+        try runTestParseSwiftTypeCheckTimes(rawFile: "my project/CreatorHeaderViewModel",
+                                            escapedFile: "my%20project/CreatorHeaderViewModel")
     }
 
     private func runTestParseSwiftTypeCheckTimes(rawFile: String,
