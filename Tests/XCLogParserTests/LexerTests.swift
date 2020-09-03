@@ -108,11 +108,11 @@ class LexerTests: XCTestCase {
     }
 
     func testTokenizeStringWithoutBuildSpecificInformation() throws {
-        let logContents = "SLF09#21%IDEActivityLogSection1@346\"/Applications/Xcode.app/Contents/Developer/" +
+        let logContents = "SLF09#21%IDEActivityLogSection1@385\"/Applications/Xcode.app/Contents/Developer/" +
             "Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool: file: /Users/myuser/Library/Developer/Xcode/" +
             "DerivedData/Product-bolnckhlbzxpxoeyfujluasoupft/Build/Intermediates.noindex/Product.build/" +
             "Debug-iphonesimulator/Library.build/Objects-normal/x86_64/Object.o is not an object file" +
-        " (not allowed in a library)"
+        " (not allowed in a library) some hexadecimal number 0x7fcdc8712290"
 
         let tokens = try lexer.tokenize(contents: logContents, redacted: false, withoutBuildSpecificInformation: true)
         XCTAssertTrue(tokens.count == 4)
@@ -120,15 +120,16 @@ class LexerTests: XCTestCase {
         XCTAssertEqual(stringToken, Token.string("/Applications/Xcode.app/Contents/Developer/Toolchains/" +
             "XcodeDefault.xctoolchain/usr/bin/libtool: file: /Users/myuser/Library/Developer/Xcode/" +
             "DerivedData/Product/Build/Intermediates.noindex/Product.build/Debug-iphonesimulator/" +
-            "Library.build/Objects-normal/x86_64/Object.o is not an object file (not allowed in a library)"))
+            "Library.build/Objects-normal/x86_64/Object.o is not an object file (not allowed in a library) " +
+            "some hexadecimal number <hexadecimal_number>"))
     }
 
     func testTokenizeStringRedactedAndWithoutBuildSpecificInformation() throws {
-        let logContents = "SLF09#21%IDEActivityLogSection1@346\"/Applications/Xcode.app/Contents/Developer/" +
+        let logContents = "SLF09#21%IDEActivityLogSection1@385\"/Applications/Xcode.app/Contents/Developer/" +
             "Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool: file: /Users/myuser/Library/Developer/Xcode/" +
             "DerivedData/Product-bolnckhlbzxpxoeyfujluasoupft/Build/Intermediates.noindex/Product.build/" +
             "Debug-iphonesimulator/Library.build/Objects-normal/x86_64/Object.o is not an object file" +
-        " (not allowed in a library)"
+        " (not allowed in a library) some hexadecimal number 0x7fcdc8712290"
 
         let tokens = try lexer.tokenize(contents: logContents, redacted: true, withoutBuildSpecificInformation: true)
         XCTAssertTrue(tokens.count == 4)
@@ -136,6 +137,7 @@ class LexerTests: XCTestCase {
         XCTAssertEqual(stringToken, Token.string("/Applications/Xcode.app/Contents/Developer/Toolchains/" +
             "XcodeDefault.xctoolchain/usr/bin/libtool: file: /Users/<redacted>/Library/Developer/Xcode/" +
             "DerivedData/Product/Build/Intermediates.noindex/Product.build/Debug-iphonesimulator/" +
-            "Library.build/Objects-normal/x86_64/Object.o is not an object file (not allowed in a library)"))
+            "Library.build/Objects-normal/x86_64/Object.o is not an object file (not allowed in a library) " +
+            "some hexadecimal number <hexadecimal_number>"))
     }
 }

@@ -250,7 +250,9 @@ public final class Lexer {
             result = redactor.redactUserDir(string: result)
         }
         if withoutBuildSpecificInformation {
-            result = result.removeProductBuildIdentifier()
+            result = result
+                .removeProductBuildIdentifier()
+                .removeHexadecimalNumbers()
         }
         return result
     }
