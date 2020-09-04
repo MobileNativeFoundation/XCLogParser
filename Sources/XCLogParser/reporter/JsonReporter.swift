@@ -21,7 +21,7 @@ import Foundation
 
 public struct JsonReporter: LogReporter {
 
-    public func report(build: Any, output: ReporterOutput, rootOutput: String?) throws {
+    public func report(build: Any, output: ReporterOutput, rootOutput: String) throws {
         switch build {
         case let steps as BuildStep:
             try report(encodable: steps, output: output)

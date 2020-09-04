@@ -23,7 +23,7 @@ import Foundation
 /// It uses the html and javascript files from the Resources folder as templates
 public struct HtmlReporter: LogReporter {
 
-    public func report(build: Any, output: ReporterOutput, rootOutput: String?) throws {
+    public func report(build: Any, output: ReporterOutput, rootOutput: String) throws {
         guard let steps = build as? BuildStep else {
             throw XCLogParserError.errorCreatingReport("Type not supported \(type(of: build))")
         }
@@ -39,17 +39,17 @@ public struct HtmlReporter: LogReporter {
     private func writeHtmlReport(for build: BuildStep,
                                  jsonString: String,
                                  output: ReporterOutput,
-                                 rootOutput: String?) throws {
+                                 rootOutput: String) throws {
         var path = "build/xclogparser/reports"
-        if let rootOutput = rootOutput {
-            path = FileOutput(path: rootOutput).path
-        }
         if let output = output as? FileOutput {
             path = output.path
         }
+        if !rootOutput.isEmpty {
+            path = FileOutput(path: rootOutput).path
+        }
         let fileManager = FileManager.default
         var buildDir = "\(path)/\(dirFor(build: build))"
-        if rootOutput != nil {
+        if !rootOutput.isEmpty {
             buildDir = path
         }
         try fileManager.createDirectory(
@@ -75,5 +75,4 @@ public struct HtmlReporter: LogReporter {
         dateFormatter.dateFormat = "YYYYMMddHHmmss"
         return dateFormatter.string(from: Date(timeIntervalSince1970: Double(build.startTimestamp)))
     }
-
 }
