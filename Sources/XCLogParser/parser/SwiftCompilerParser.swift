@@ -63,6 +63,7 @@ public class SwiftCompilerParser {
                 textsAndOccurrences[rawFunctionTimes] = outputOccurrence
             }
         }
+        print("done with findRawSwiftTimes")
         return textsAndOccurrences
     }
 

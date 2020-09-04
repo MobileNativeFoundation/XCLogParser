@@ -38,12 +38,31 @@ protocol SwiftCompilerTimeOptionParser {
 
 extension SwiftCompilerTimeOptionParser {
 
-    func isInvalid(fileName: String) -> Bool {
-        return fileName == "<invalid loc>"
+    /// Parses /users/spotify/project/SomeFile.swift:10:12
+    /// - Returns: ("file:///users/spotify/project/SomeFile.swift", 10, 12)
+    func parseNameAndLocation(from fileAndLocation: String) -> (String, Int, Int)? {
+        // /users/spotify/project/SomeFile.swift:10:12
+        let fileAndLocationParts = fileAndLocation.components(separatedBy: ":")
+        let rawFile = fileAndLocationParts[0]
+
+        guard rawFile != "<invalid loc>" else {
+            return nil
+        }
+
+        guard fileAndLocationParts.count == 3 else {
+            return nil
+        }
+
+        let file = prefixWithFileURL(fileName: rawFile)
+        let line = Int(fileAndLocationParts[1])!
+        let column = Int(fileAndLocationParts[2])!
+
+        return (file, line, column)
     }
 
+    /// Parses
     func parseCompileDuration(_ durationString: String) -> Double {
-        if let duration = Double(durationString) {
+        if let duration = Double(durationString.replacingOccurrences(of: "ms", with: "")) {
             return duration
         }
         return 0.0
