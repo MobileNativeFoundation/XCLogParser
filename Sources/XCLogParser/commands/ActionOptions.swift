@@ -38,10 +38,14 @@ public struct ActionOptions {
     /// With this option, a user can override it and provide a name that will be used in that identifier.
     public let machineName: String?
 
-    public init(reporter: Reporter, outputPath: String, redacted: Bool, machineName: String? = nil) {
+    /// The rootOutput will generate the HTML output in the given folder
+    public let rootOutput: String?
+
+    public init(reporter: Reporter, outputPath: String, redacted: Bool, machineName: String? = nil, rootOutput: String? = nil) {
         self.reporter = reporter
         self.outputPath = outputPath
         self.redacted = redacted
         self.machineName = machineName
+        self.rootOutput = rootOutput
     }
 }

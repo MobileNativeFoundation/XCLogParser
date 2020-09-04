@@ -61,7 +61,8 @@ struct ParseCommand: CommandProtocol {
         let actionOptions = ActionOptions(reporter: reporter,
                                           outputPath: options.output,
                                           redacted: options.redacted,
-                                          machineName: options.machineName.isEmpty ? nil : options.machineName)
+                                          machineName: options.machineName.isEmpty ? nil : options.machineName,
+                                          rootOutput: options.rootOutput)
         let action = Action.parse(options: actionOptions)
         let command = Command(logOptions: logOptions, action: action)
         do {
@@ -85,6 +86,7 @@ struct ParseOptions: OptionsProtocol {
     let redacted: Bool
     let strictProjectName: Bool
     let output: String
+    let rootOutput: String
 
     static func create(_ logFile: String)
         -> (_ derivedData: String)
@@ -95,10 +97,11 @@ struct ParseOptions: OptionsProtocol {
         -> (_ machineName: String)
         -> (_ redacted: Bool)
         -> (_ strictProjectName: Bool)
-        -> (_ output: String) -> ParseOptions {
+        -> (_ output: String)
+        -> (_ rootOutput: String) -> ParseOptions {
             return { derivedData in { projectName in { workspace in { xcodeproj in { reporter in { machineName
                 in { redacted in { strictProjectName in {
-            output in
+                    output in { rootOutput in
             self.init(logFile: logFile,
                       derivedData: derivedData,
                       projectName: projectName,
@@ -108,8 +111,9 @@ struct ParseOptions: OptionsProtocol {
                       machineName: machineName,
                       redacted: redacted,
                       strictProjectName: strictProjectName,
-                      output: output)
-                    }}}}}}}}}
+                      output: output,
+                      rootOutput: rootOutput)
+                    }}}}}}}}}}
     }
 
     static func evaluate(_ mode: CommandMode) -> Result<ParseOptions, CommandantError<CommandantError<Swift.Error>>> {
@@ -132,6 +136,8 @@ struct ParseOptions: OptionsProtocol {
             <*> mode <| redactedSwitch
             <*> mode <| strictProjectNameSwitch
             <*> mode <| outputOption
+            <*> mode <| rootOutputOption
+
     }
 
     func hasValidLogOptions() -> Bool {

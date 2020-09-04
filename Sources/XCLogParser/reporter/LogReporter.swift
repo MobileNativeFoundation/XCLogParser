@@ -21,6 +21,6 @@ import Foundation
 
 public protocol LogReporter {
 
-    func report(build: Any, output: ReporterOutput) throws
+    func report(build: Any, output: ReporterOutput, rootOutput: String?) throws
 
 }
