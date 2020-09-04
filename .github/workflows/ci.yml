@@ -9,6 +9,8 @@ jobs:
       - uses: actions/checkout@v1
       - name: SwiftLint
         uses: norio-nomura/action-swiftlint@3.1.0
+        with:
+          args: --strict
 
   macOS:
     runs-on: macOS-latest

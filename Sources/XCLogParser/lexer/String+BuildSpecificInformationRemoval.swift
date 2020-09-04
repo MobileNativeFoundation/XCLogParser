@@ -44,4 +44,25 @@ extension String {
             return self
         }
     }
+
+    /// Removes hexadecimal numbers from the log and puts `<hexadecimal_number>` instead.
+    ///
+    /// Example: "NSUnderlyingError=0x7fcdc8712290" becomes "NSUnderlyingError=<hexadecimal_number>".
+    func removeHexadecimalNumbers() -> String {
+        do {
+            var mutableSelf = self
+            let regularExpression = try NSRegularExpression(pattern: "0[xX][0-9a-fA-F]+")
+            regularExpression.enumerateMatches(in: self,
+                                               options: [],
+                                               range: NSRange(location: 0, length: count)) { match, _, _ in
+                if let match = match {
+                    let hexadecimalNumber = self.substring(match.range(at: 0))
+                    mutableSelf = mutableSelf.replacingOccurrences(of: hexadecimalNumber, with: "<hexadecimal_number>")
+                }
+            }
+            return mutableSelf
+        } catch {
+            return self
+        }
+    }
 }

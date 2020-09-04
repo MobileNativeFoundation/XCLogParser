@@ -34,6 +34,11 @@ public struct ActionOptions {
     /// Used to protect the privacy of the users.
     public let redacted: Bool
 
+    /// Used for actions involving the .xcactivitylog.
+    /// If true, build specific information will be removed from the logs.
+    /// Useful for grouping logs by its content.
+    public let withoutBuildSpecificInformation: Bool
+
     /// Used in Parse actions. The current parsers use the host name to create a unique build identifier
     /// With this option, a user can override it and provide a name that will be used in that identifier.
     public let machineName: String?
@@ -41,10 +46,16 @@ public struct ActionOptions {
     /// The rootOutput will generate the HTML output in the given folder
     public let rootOutput: String?
 
-    public init(reporter: Reporter, outputPath: String, redacted: Bool, machineName: String? = nil, rootOutput: String? = nil) {
+    public init(reporter: Reporter,
+                outputPath: String,
+                redacted: Bool,
+                withoutBuildSpecificInformation: Bool,
+                machineName: String? = nil,
+                rootOutput: String? = nil) {
         self.reporter = reporter
         self.outputPath = outputPath
         self.redacted = redacted
+        self.withoutBuildSpecificInformation = withoutBuildSpecificInformation
         self.machineName = machineName
         self.rootOutput = rootOutput
     }

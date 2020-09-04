@@ -48,8 +48,9 @@ struct DumpCommand: CommandProtocol {
                                     xcactivitylogPath: options.logFile,
                                     strictProjectName: options.strictProjectName)
         let actionOptions = ActionOptions(reporter: reporter,
-                                           outputPath: options.output,
-                                           redacted: options.redacted)
+                                          outputPath: options.output,
+                                          redacted: options.redacted,
+                                          withoutBuildSpecificInformation: options.withoutBuildSpecificInformation)
         let action = Action.dump(options: actionOptions)
         let command = Command(logOptions: logOptions, action: action)
         do {
@@ -69,6 +70,7 @@ struct DumpOptions: OptionsProtocol {
     let workspace: String
     let xcodeproj: String
     let redacted: Bool
+    let withoutBuildSpecificInformation: Bool
     let strictProjectName: Bool
     let output: String
 
@@ -78,19 +80,21 @@ struct DumpOptions: OptionsProtocol {
         -> (_ workspace: String)
         -> (_ xcodeproj: String)
         -> (_ redacted: Bool)
+        -> (_ withoutBuildSpecificInformation: Bool)
         -> (_ strictProjectName: Bool)
         -> (_ output: String) -> DumpOptions {
-            return { derivedData in { projectName in { workspace in { xcodeproj in { redacted
-                in { strictProjectName in { output in
+            return { derivedData in { projectName in { workspace in { xcodeproj
+                in { redacted in { withoutBuildSpecificInformation in { strictProjectName in { output in
                     self.init(logFile: logFile,
                               derivedData: derivedData,
                               projectName: projectName,
                               workspace: workspace,
                               xcodeproj: xcodeproj,
                               redacted: redacted,
+                              withoutBuildSpecificInformation: withoutBuildSpecificInformation,
                               strictProjectName: strictProjectName,
                               output: output)
-                }}}}}}}
+                }}}}}}}}
     }
 
     static func evaluate(_ mode: CommandMode) -> Result<DumpOptions, CommandantError<CommandantError<Swift.Error>>> {
@@ -101,6 +105,7 @@ struct DumpOptions: OptionsProtocol {
             <*> mode <| workspaceOption
             <*> mode <| xcodeprojOption
             <*> mode <| redactedSwitch
+            <*> mode <| withoutBuildSpecificInformationSwitch
             <*> mode <| strictProjectNameSwitch
             <*> mode <| outputOption
     }

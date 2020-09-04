@@ -49,14 +49,18 @@ public struct CommandHandler {
     }
 
     func handleDump(fromLogURL logURL: URL, options: ActionOptions) throws {
-        let activityLog = try activityLogParser.parseActivityLogInURL(logURL, redacted: options.redacted)
+        let activityLog = try activityLogParser.parseActivityLogInURL(logURL,
+                                                                      redacted: options.redacted,
+                                                                      withoutBuildSpecificInformation: options.withoutBuildSpecificInformation) // swiftlint:disable:this line_length
         let reporterOutput = ReporterOutputFactory.makeReporterOutput(path: options.outputPath)
         let logReporter = options.reporter.makeLogReporter()
         try logReporter.report(build: activityLog, output: reporterOutput, rootOutput: options.rootOutput)
     }
 
     func handleParse(fromLogURL logURL: URL, options: ActionOptions) throws {
-        let activityLog = try activityLogParser.parseActivityLogInURL(logURL, redacted: options.redacted)
+        let activityLog = try activityLogParser.parseActivityLogInURL(logURL,
+                                                                      redacted: options.redacted,
+                                                                      withoutBuildSpecificInformation: options.withoutBuildSpecificInformation) // swiftlint:disable:this line_length
         let buildParser = ParserBuildSteps(machineName: options.machineName)
         let buildSteps = try buildParser.parse(activityLog: activityLog)
         let reporterOutput = ReporterOutputFactory.makeReporterOutput(path: options.outputPath)
