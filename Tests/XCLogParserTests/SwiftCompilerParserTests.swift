@@ -36,9 +36,9 @@ class SwiftCompilerParserTests: XCTestCase {
         let emptylogSection = getFakeSwiftcSection(text: "text",
                                               commandDescription: "command")
         let text =
-        "\t0.05ms\t/Users/user/\(rawFile).swift:9:9\tgetter textLabel\r" +
-        "\t4.96ms\t/Users/user/\(rawFile).swift:11:14\tinitializer init(frame:)\r" +
-        "\t0.04ms\t<invalid loc>\tgetter None\r"
+        "0.05ms\t/Users/user/\(rawFile).swift:9:9\tgetter textLabel\r" +
+        "4.96ms\t/Users/user/\(rawFile).swift:11:14\tinitializer init(frame:)\r" +
+        "0.04ms\t<invalid loc>\tgetter None\r"
         let swiftTimesLogSection = getFakeSwiftcSection(text:
             text, commandDescription: "-debug-time-function-bodies")
 
@@ -82,11 +82,11 @@ class SwiftCompilerParserTests: XCTestCase {
                                               commandDescription: "command")
 
         let swiftTimesLogSection = getFakeSwiftcSection(text:
-            "\t0.72ms\t/Users/\(rawFile).swift:19:15\r",
+            "0.72ms\t/Users/\(rawFile).swift:19:15\r",
         commandDescription: "-debug-time-expression-type-checking")
 
         let duplicatedSwiftTimeslogSection = getFakeSwiftcSection(text:
-            "\t0.72ms\t/Users/\(rawFile).swift:19:15\r",
+            "0.72ms\t/Users/\(rawFile).swift:19:15\r",
         commandDescription: "-debug-time-expression-type-checking")
         let expectedFile = "file:///Users/\(escapedFile).swift"
         parser.addLogSection(emptylogSection)
