@@ -54,4 +54,45 @@ final class StringBuildSpecificInformationRemovalTest: XCTestCase {
 
         XCTAssertEqual(result, log)
     }
+
+    func testRemoveHexadecimalNumbersWithLogContainingHexadecimalNumberRemovesHexadecimalNumber() {
+        let log = """
+        UserInfo={NSUnderlyingError=0x7fcdc8712290 {Error Domain=kCFErrorDomainCFNetwork Code=-1003 "(null)"
+        UserInfo={_kCFStreamErrorCodeKey=8, _kCFStreamErrorDomainKey=12}}
+        """
+
+        let result = log.removeHexadecimalNumbers()
+
+        XCTAssertEqual(result, """
+        UserInfo={NSUnderlyingError=<hexadecimal_number> {Error Domain=kCFErrorDomainCFNetwork Code=-1003 \"(null)\"
+        UserInfo={_kCFStreamErrorCodeKey=8, _kCFStreamErrorDomainKey=12}}
+        """)
+    }
+
+    func testRemoveHexadecimalNumbersWithLogContainingMultipleHexadecimalNumbersRemovesAllOfThem() {
+        let log = """
+        {NSUnderlyingError=0x7fb6d57290c0 {Error Domain=kCFErrorDomainCFNetwork Code=-1005 "(null)"
+        UserInfo={NSErrorPeerAddressKey=<CFData 0x7fb6d562c810 [0x7fffa8cc28e0]>{length = 16, capacity = 16,
+        bytes = 0x100200500aad1b7e0000000000000000}
+        """
+
+        let result = log.removeHexadecimalNumbers()
+
+        XCTAssertEqual(result, """
+        {NSUnderlyingError=<hexadecimal_number> {Error Domain=kCFErrorDomainCFNetwork Code=-1005 "(null)"
+        UserInfo={NSErrorPeerAddressKey=<CFData <hexadecimal_number> [<hexadecimal_number>]>{length = 16, capacity = 16,
+        bytes = <hexadecimal_number>}
+        """)
+    }
+
+    func testRemoveHexadecimalNumbersWithLogNotContainingHexadecimalNumbersIsNoop() {
+        let log = """
+        UserInfo={NSUnderlyingError=7fcdc8712290 {Error Domain=kCFErrorDomainCFNetwork Code=-1003 \"(null)\"
+        UserInfo={_kCFStreamErrorCodeKey=8, _kCFStreamErrorDomainKey=12}}
+        """
+
+        let result = log.removeHexadecimalNumbers()
+
+        XCTAssertEqual(result, log)
+    }
 }
