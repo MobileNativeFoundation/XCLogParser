@@ -28,7 +28,7 @@ class IssuesReporterTests: XCTestCase {
         // Build with no issues
         let buildStep = getBuildStep()
         let fakeOutput = FakeOutput()
-        try issuesReporter.report(build: buildStep, output: fakeOutput, rootOutput: nil)
+        try issuesReporter.report(build: buildStep, output: fakeOutput, rootOutput: "")
         guard let emptyIssues = try fakeOutput.getIssues() else {
             XCTFail("Issues should not be nil")
             return
@@ -38,7 +38,7 @@ class IssuesReporterTests: XCTestCase {
         // Build with issues
         let stepWithIssues = getBuildStepWithIssues()
         let fakeOutputWithIssues = FakeOutput()
-        try issuesReporter.report(build: stepWithIssues, output: fakeOutputWithIssues, rootOutput: nil)
+        try issuesReporter.report(build: stepWithIssues, output: fakeOutputWithIssues, rootOutput: "")
         guard let issues = try fakeOutputWithIssues.getIssues() else {
             XCTFail("Issues should not be nil")
             return
