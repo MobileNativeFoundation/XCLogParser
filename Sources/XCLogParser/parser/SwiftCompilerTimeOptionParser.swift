@@ -40,6 +40,7 @@ extension SwiftCompilerTimeOptionParser {
 
     /// Parses /users/spotify/project/SomeFile.swift:10:12
     /// - Returns: ("file:///users/spotify/project/SomeFile.swift", 10, 12)
+    // swiftlint:disable:next large_tuple
     func parseNameAndLocation(from fileAndLocation: String) -> (String, Int, Int)? {
         // /users/spotify/project/SomeFile.swift:10:12
         let fileAndLocationParts = fileAndLocation.components(separatedBy: ":")
