@@ -36,7 +36,10 @@ public struct HtmlReporter: LogReporter {
         try writeHtmlReport(for: steps, jsonString: jsonString, output: output, rootOutput: rootOutput)
     }
 
-    private func writeHtmlReport(for build: BuildStep, jsonString: String, output: ReporterOutput, rootOutput: String?) throws {
+    private func writeHtmlReport(for build: BuildStep,
+                                 jsonString: String,
+                                 output: ReporterOutput,
+                                 rootOutput: String?) throws {
         var path = "build/xclogparser/reports"
         if let rootOutput = rootOutput {
             path = FileOutput(path: rootOutput).path
