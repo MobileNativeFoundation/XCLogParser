@@ -25,13 +25,6 @@ class SwiftCompilerFunctionTimeOptionParser: SwiftCompilerTimeOptionParser {
 
     private static let compilerFlag = "-debug-time-function-bodies"
 
-    private static let invalidLoc = "<invalid loc>"
-
-    private lazy var regexp: NSRegularExpression? = {
-        let pattern = "[\\t*|\\r]([0-9]+\\.[0-9]+)ms\\t+(<invalid\\tloc>|[^\\t]+)\\t+(.+)\\r"
-        return NSRegularExpression.fromPattern(pattern)
-    }()
-
     func hasCompilerFlag(commandDesc: String) -> Bool {
         commandDesc.range(of: Self.compilerFlag) != nil
     }
@@ -53,62 +46,35 @@ class SwiftCompilerFunctionTimeOptionParser: SwiftCompilerTimeOptionParser {
     }
 
     private func parse(command: String, occurrences: Int) -> [SwiftFunctionTime]? {
-        guard let regexp = regexp else {
-            return nil
-        }
-        let range = NSRange(location: 0, length: command.count)
-        let matches = regexp.matches(in: command, options: .reportProgress, range: range)
-        let functionTimes = matches.compactMap { result -> SwiftFunctionTime? in
-            let durationString = command.substring(result.range(at: 1))
-            let file = command.substring(result.range(at: 2))
-            // some entries are invalid, we discard them
-            if isInvalid(fileName: file) {
+        let functions: [SwiftFunctionTime] = command.components(separatedBy: "\r").compactMap { commandLine in
+
+            // 0.14ms   /users/spotify/project/SomeFile.swift:10:12   someMethod(param:)
+            let parts = commandLine.components(separatedBy: "\t")
+
+            guard parts.count == 3 else {
                 return nil
             }
 
-            let name = command.substring(result.range(at: 3))
-            guard let (fileName, location) = parseFunctionLocation(file) else {
+            // 0.14ms
+            let duration = parseCompileDuration(parts[0])
+
+            // /users/spotify/project/SomeFile.swift:10:12
+            let fileAndLocation = parts[1]
+            guard let (file, line, column) = parseNameAndLocation(from: fileAndLocation) else {
                 return nil
             }
-            let fileURL = prefixWithFileURL(fileName: fileName)
-            guard let (line, column) = parseLocation(location) else {
-                return nil
-            }
 
-            let duration = parseCompileDuration(durationString)
-            return SwiftFunctionTime(file: fileURL,
-                                durationMS: duration,
-                                startingLine: line,
-                                startingColumn: column,
-                                signature: name,
-                                occurrences: occurrences)
+            // someMethod(param:)
+            let signature = parts[2]
+
+            return SwiftFunctionTime(file: file,
+                                     durationMS: duration,
+                                     startingLine: line,
+                                     startingColumn: column,
+                                     signature: signature,
+                                     occurrences: occurrences)
         }
-        return functionTimes
+
+        return functions
     }
-
-    private func parseFunctionLocation(_ function: String) -> (String, String)? {
-        guard let colonIndex = function.firstIndex(of: ":") else {
-            return nil
-        }
-        let functionName = function[..<colonIndex]
-        let locationIndex = function.index(after: colonIndex)
-        let location = function[locationIndex...]
-
-        return (String(functionName), String(location))
-    }
-
-    private func parseLocation(_ location: String) -> (Int, Int)? {
-        guard let colonIndex = location.firstIndex(of: ":") else {
-            return nil
-        }
-        let line = location[..<colonIndex]
-        let columnIndex = location.index(after: colonIndex)
-        let column = location[columnIndex...]
-        guard let lineNumber = Int(String(line)),
-            let columnNumber = Int(String(column)) else {
-                return nil
-        }
-        return (lineNumber, columnNumber)
-    }
-
 }

@@ -25,13 +25,6 @@ class SwiftCompilerTypeCheckOptionParser: SwiftCompilerTimeOptionParser {
 
     private static let compilerFlag = "-debug-time-expression-type-checking"
 
-    private static let invalidLoc = "<invalid loc>"
-
-    private lazy var regexp: NSRegularExpression? = {
-        let pattern = "\\t*([0-9]+\\.[0-9]+)ms\\t(.+):([0-9]+):([0-9]+)\\r"
-        return NSRegularExpression.fromPattern(pattern)
-    }()
-
     func hasCompilerFlag(commandDesc: String) -> Bool {
         commandDesc.range(of: Self.compilerFlag) != nil
     }
@@ -52,32 +45,29 @@ class SwiftCompilerTypeCheckOptionParser: SwiftCompilerTimeOptionParser {
     }
 
     private func parse(command: String, occurrences: Int) -> [SwiftTypeCheck]? {
-        guard let regexp = regexp else {
-            return nil
-        }
-        let range = NSRange(location: 0, length: command.count)
-        let matches = regexp.matches(in: command, options: .reportProgress, range: range)
-        let typeCheckerTimes = matches.compactMap { result -> SwiftTypeCheck? in
+        return command.components(separatedBy: "\r").compactMap { commandLine in
+            // 0.14ms   /users/spotify/project/SomeFile.swift:10:12
+            let parts = commandLine.components(separatedBy: "\t")
 
-            let durationString = command.substring(result.range(at: 1))
-            let fileName = command.substring(result.range(at: 2))
-            let lineStr = command.substring(result.range(at: 3))
-            let columnStr = command.substring(result.range(at: 4))
-            if isInvalid(fileName: fileName) {
+            guard parts.count == 2 else {
                 return nil
             }
-            guard let line = Int(lineStr), let column = Int(columnStr) else {
+
+            // 0.14ms
+            let duration = parseCompileDuration(parts[0])
+
+            // /users/spotify/project/SomeFile.swift:10:12
+            let fileAndLocation = parts[1]
+            guard let (file, line, column) = parseNameAndLocation(from: fileAndLocation) else {
                 return nil
             }
-            let fileURL = prefixWithFileURL(fileName: fileName)
-            let duration = parseCompileDuration(durationString)
-            return SwiftTypeCheck(file: fileURL,
-                                durationMS: duration,
-                                startingLine: line,
-                                startingColumn: column,
-                                occurrences: occurrences)
+
+            return SwiftTypeCheck(file: file,
+                                  durationMS: duration,
+                                  startingLine: line,
+                                  startingColumn: column,
+                                  occurrences: occurrences)
         }
-        return typeCheckerTimes
     }
 
 }
