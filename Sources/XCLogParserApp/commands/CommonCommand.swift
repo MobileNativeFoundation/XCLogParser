@@ -69,3 +69,7 @@ let outputOption = Option(
     defaultValue: "",
     usage: "Optional. Path to which the report will be written to." +
             "If not specified, the report will be written to the standard output")
+let rootOutputOption = Option(key: "rootOutput",
+                        defaultValue: "",
+                        usage: "Optional. Add the project output into the given current path" +
+                                "i.e: myGivenPath/report.json")

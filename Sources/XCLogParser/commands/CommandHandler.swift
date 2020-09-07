@@ -45,7 +45,7 @@ public struct CommandHandler {
         let logManifestEntries = try logManifest.getWithLogOptions(logOptions)
         let reporterOutput = ReporterOutputFactory.makeReporterOutput(path: actionOptions.outputPath)
         let logReporter = actionOptions.reporter.makeLogReporter()
-        try logReporter.report(build: logManifestEntries, output: reporterOutput)
+        try logReporter.report(build: logManifestEntries, output: reporterOutput, rootOutput: actionOptions.rootOutput)
     }
 
     func handleDump(fromLogURL logURL: URL, options: ActionOptions) throws {
@@ -54,7 +54,7 @@ public struct CommandHandler {
                                                                       withoutBuildSpecificInformation: options.withoutBuildSpecificInformation) // swiftlint:disable:this line_length
         let reporterOutput = ReporterOutputFactory.makeReporterOutput(path: options.outputPath)
         let logReporter = options.reporter.makeLogReporter()
-        try logReporter.report(build: activityLog, output: reporterOutput)
+        try logReporter.report(build: activityLog, output: reporterOutput, rootOutput: options.rootOutput)
     }
 
     func handleParse(fromLogURL logURL: URL, options: ActionOptions) throws {
@@ -65,7 +65,7 @@ public struct CommandHandler {
         let buildSteps = try buildParser.parse(activityLog: activityLog)
         let reporterOutput = ReporterOutputFactory.makeReporterOutput(path: options.outputPath)
         let logReporter = options.reporter.makeLogReporter()
-        try logReporter.report(build: buildSteps, output: reporterOutput)
+        try logReporter.report(build: buildSteps, output: reporterOutput, rootOutput: options.rootOutput)
     }
 
 }

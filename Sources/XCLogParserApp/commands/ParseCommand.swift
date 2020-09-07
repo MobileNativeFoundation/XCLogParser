@@ -62,7 +62,8 @@ struct ParseCommand: CommandProtocol {
                                           outputPath: options.output,
                                           redacted: options.redacted,
                                           withoutBuildSpecificInformation: options.withoutBuildSpecificInformation,
-                                          machineName: options.machineName.isEmpty ? nil : options.machineName)
+                                          machineName: options.machineName.isEmpty ? nil : options.machineName,
+                                          rootOutput: options.rootOutput)
         let action = Action.parse(options: actionOptions)
         let command = Command(logOptions: logOptions, action: action)
         do {
@@ -87,6 +88,7 @@ struct ParseOptions: OptionsProtocol {
     let withoutBuildSpecificInformation: Bool
     let strictProjectName: Bool
     let output: String
+    let rootOutput: String
 
     static func create(_ logFile: String)
         -> (_ derivedData: String)
@@ -98,9 +100,10 @@ struct ParseOptions: OptionsProtocol {
         -> (_ redacted: Bool)
         -> (_ withoutBuildSpecificInformation: Bool)
         -> (_ strictProjectName: Bool)
-        -> (_ output: String) -> ParseOptions {
+        -> (_ output: String)
+        -> (_ rootOutput: String) -> ParseOptions {
             return { derivedData in { projectName in { workspace in { xcodeproj in { reporter in { machineName
-                in { redacted in { withoutBuildSpecificInformation in { strictProjectName in { output in
+                in { redacted in { withoutBuildSpecificInformation in { strictProjectName in { output in { rootOutput in
             self.init(logFile: logFile,
                       derivedData: derivedData,
                       projectName: projectName,
@@ -111,8 +114,9 @@ struct ParseOptions: OptionsProtocol {
                       redacted: redacted,
                       withoutBuildSpecificInformation: withoutBuildSpecificInformation,
                       strictProjectName: strictProjectName,
-                      output: output)
-                    }}}}}}}}}}
+                      output: output,
+                      rootOutput: rootOutput)
+                    }}}}}}}}}}}
     }
 
     static func evaluate(_ mode: CommandMode) -> Result<ParseOptions, CommandantError<CommandantError<Swift.Error>>> {
@@ -136,6 +140,8 @@ struct ParseOptions: OptionsProtocol {
             <*> mode <| withoutBuildSpecificInformationSwitch
             <*> mode <| strictProjectNameSwitch
             <*> mode <| outputOption
+            <*> mode <| rootOutputOption
+
     }
 
     func hasValidLogOptions() -> Bool {

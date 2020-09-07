@@ -25,7 +25,7 @@ public struct ChromeTracerReporter: LogReporter {
 
     private let microSecondsPerSecond: Double = 1_000_000
 
-    public func report(build: Any, output: ReporterOutput) throws {
+    public func report(build: Any, output: ReporterOutput, rootOutput: String) throws {
         guard let steps = build as? BuildStep else {
             throw XCLogParserError.errorCreatingReport("Type not supported \(type(of: build))")
         }

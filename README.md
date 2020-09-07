@@ -154,6 +154,7 @@ Example output available in the [reporters](#reporters) section.
   | `--xcodeproj`  | The path to the `xcodeproj` file if you don't know the path to the log and if the project doesn't have a `xcworkspace` file. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
   | `--derived_data`  | The path to the derived data folder if you are using `xcodebuild` to build your project with the `-derivedDataPath` option.  | No |
   | `--output`  | If specified, the JSON file will be written to the given path. If not defined, the command will output to the standard output.  | No |
+  | `--rootOutput`  | If specified, the HTML file will be written to the given folder, it has precedence over `output` if the folder doesn't exist will be created. It works with relative home path.`~`  | No |
   | `--redacted`  | If specified, the username will be replaced by the word `redacted` in the file paths contained in the logs. Useful for privacy reasons but slightly decreases the performance.  | No |
   | `--without_build_specific_info`  | If specified, build specific information will be removed from the logs (for example `bolnckhlbzxpxoeyfujluasoupft` will be removed from  `DerivedData/Product-bolnckhlbzxpxoeyfujluasoupft/Build` ). Useful for grouping logs by its content.  | No |
   | `--strictProjectName`  | Used in conjunction with `--project`. If specified, a stricter name matching will be done for the project name.  | No |
