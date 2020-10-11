@@ -66,7 +66,8 @@ extension Notice {
                     if noticeDetail.starts(with: "error:") == false {
                         var errorLocation = notice.documentURL.replacingOccurrences(of: "file://", with: "")
                         errorLocation += ":\(notice.startingLineNumber):\(notice.startingColumnNumber):"
-                        // do not report error in a file that it does not belong to (we'll ended up having duplicated errors)
+                        // do not report error in a file that it does not belong to (we'll ended
+                        // up having duplicated errors)
                         if logSection.location.documentURLString != notice.documentURL {
                             return nil
                         }
