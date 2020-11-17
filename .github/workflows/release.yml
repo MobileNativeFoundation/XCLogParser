@@ -17,7 +17,7 @@ jobs:
       - name: Build
         run: rake build[release]
       - name: Set tag name
-        run: echo ::set-env name=TAG_NAME::$(echo $GITHUB_REF | cut -c 11-)
+        run: echo "TAG_NAME=$(echo $GITHUB_REF | cut -c 11-)" >> $GITHUB_ENV
       - name: Zip release
         run: "mkdir releases && zip -j releases/XCLogParser-macOS-x86_64-$TAG_NAME.zip .build/release/xclogparser"
       - name: Upload binaries to release
@@ -42,7 +42,7 @@ jobs:
       - name: Build
         run: LANG=en_US.UTF-8 LC_CTYPE=UTF-8 rake build[release]
       - name: Set tag name
-        run: echo ::set-env name=TAG_NAME::$(echo $GITHUB_REF | cut -c 11-)
+        run: echo "TAG_NAME=$(echo $GITHUB_REF | cut -c 11-)" >> $GITHUB_ENV
       - name: Zip release
         uses: montudor/action-zip@v0.1.0
         with:
