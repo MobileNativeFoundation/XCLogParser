@@ -71,7 +71,7 @@ The Finder will automatically open the output folder after a build completes and
     shift;
     $executable "$@" <&- >&- 2>&- &
     ```
-1. The post-scheme action is not executed in case the build fails. A undocumented feature in Xcode allows you to execute it even in this case. Set the attribute `runPostActionsOnFailure` to `YES` in your scheme's `BuildAction` as follows:
+1. The post-scheme action is not executed in case the build fails. An undocumented feature in Xcode allows you to execute it even in this case. Set the attribute `runPostActionsOnFailure` to `YES` in your scheme's `BuildAction` as follows:
     ```xml
     <BuildAction buildImplicitDependencies='YES' parallelizeBuildables='YES' runPostActionsOnFailure='YES'>
     ```
@@ -195,7 +195,7 @@ Example output:
   |-----|---|-----|
   | `--log_manifest`  | The path to an existing `LogStoreManifest.plist`.  | No * |
   | `--project`  | The name of the project if you don't know the path to the log. The tool will try to find the latest Build log in a folder that starts with that name inside the `DerivedData` directory.  Use `--strictProjectName` for stricter name matching.  | No * |
-  | `--worskapce`  | The path to the `xcworkspace` file if you don't know the path to the log. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
+  | `--workspace`  | The path to the `xcworkspace` file if you don't know the path to the log. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
   | `--xcodeproj`  | The path to the `xcodeproj` file if you don't know the path to the log and if the project doesn't have a `xcworkspace` file. It will generate the folder name for the project in the `DerivedData` folder using Xcode's hash algorithm and it will try to locate the latest Build Log inside that directory.  | No * |
   | `--derived_data`  | The path to the derived data folder if you are using `xcodebuild` to build your project with the `-derivedDataPath` option.  | No |
   | `--output`  | If specified, the JSON file will be written to the given path. If not defined, the command will output to the standard output.  | No |
@@ -523,7 +523,7 @@ MacOS:
 
 1. Clone the repo with `git clone git@github.com:spotify/XCLogParser.git`.
 2. Run `rake gen_resources` to generate a static resource Swift file that is needed to compile the app.
-3. Run `swift package generate-xcodeproj` to generate an Xcode project (or use any text editor).
+3. Run `swift package generate-xcodeproj` to generate a Xcode project (or use any text editor).
 4. Run tests in Xcode directly (CMD + U) or using `rake test`.
 5. Create issue and discuss a possible solution or improvement.
 6. Create a PR.
