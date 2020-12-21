@@ -113,6 +113,12 @@ public struct HtmlReporter: LogReporter {
         encoder.outputFormatting = .prettyPrinted
         var stepsWithErrors: [BuildStep] = []
         var stepsWithWarnings: [BuildStep] = []
+        if let buildErrors = build.errors, buildErrors.count > 0 {
+            stepsWithErrors.append(build.with(subSteps: []))
+        }
+        if let buildWarnings = build.warnings, buildWarnings.count > 0 {
+            stepsWithWarnings.append(build.with(subSteps: []))
+        }
         try build.subSteps.forEach { target in
             stepsWithErrors.append(contentsOf: getStepsWithErrors(target: target))
             stepsWithWarnings.append(contentsOf: getStepsWithWarnings(target: target))
