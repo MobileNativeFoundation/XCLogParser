@@ -124,7 +124,7 @@ An example output has been omitted for brevity since it can contain a lot of inf
 
 ### Parse Command
 
-Parses the build information from a `xcactivitylog` and converts it into different representations such as a [JSON file](#JSON-Reporter), [flat JSON file](#FlatJson-Reporter), [summary JSON file](#SummaryJson-Reporter), [Chrome Tracer file](#ChromeTracer-Reporter) or a static [HTML page](#HTML-Reporter).
+Parses the build information from a `xcactivitylog` and converts it into different representations such as a [JSON file](#JSON-Reporter), [flat JSON file](#FlatJson-Reporter), [summary JSON file](#SummaryJson-Reporter), [issues JSON file](#Issues-Reporter), [Chrome Tracer file](#ChromeTracer-Reporter) or a static [HTML page](#HTML-Reporter).
 
 This command supports parsing additional data if some flags are passed to Xcode/xcodebuild: 
 
@@ -210,10 +210,10 @@ Example output:
 The [parse command](#parse-command) has different types of reporters built-in that can represent and visualize the data of the logs:
 
 - [JSON](#json-reporter)
-- [Flat JSON](#flatojson-reporter)
+- [Flat JSON](#flatjson-reporter)
 - [Summary JSON](#summaryjson-reporter)
 - [Chrome Tracer](#chrometracer-reporter)
-- [Issues](#issues)
+- [Issues](#issues-reporter)
 - [HTML](#html-reporter)
 
 ### JSON Reporter
@@ -442,7 +442,7 @@ xclogparser parse --file path/to/log.xcactivitylog --reporter chromeTracer
   <img src="images/kickstarter-ios-chrome-tracer.png">
 </details>
 
-### Issues reporter
+### Issues Reporter
 
 Outputs the list of Errors and Warnings found in the log as a JSON document. Useful when you only want to check the issues found while building.
 
