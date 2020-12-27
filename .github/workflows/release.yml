@@ -33,7 +33,7 @@ jobs:
     name: Add Linux binaries to release
     runs-on: ubuntu-latest
     container:
-      image: swift:5.1
+      image: swift:5.2
     steps:
       - name: Checkout
         uses: actions/checkout@v1
