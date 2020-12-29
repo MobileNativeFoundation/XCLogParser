@@ -8,18 +8,30 @@ jobs:
     name: Add macOS binaries to release
     runs-on: macOS-latest
     env:
-      XCODE_VERSION: ${{ '11.4' }}
+      XCODE_VERSION: ${{ '12.2' }}
     steps:
       - name: Select Xcode
         run: "sudo xcode-select -s /Applications/Xcode_$XCODE_VERSION.app"
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Build
-        run: rake build[release]
       - name: Set tag name
         run: echo "TAG_NAME=$(echo $GITHUB_REF | cut -c 11-)" >> $GITHUB_ENV
-      - name: Zip release
+      - name: Build x86_64-apple-macosx
+        run: rake 'build[release, x86_64-apple-macosx]'
+      - name: Zip x86_64-apple-macosx release
         run: "mkdir releases && zip -j releases/XCLogParser-macOS-x86_64-$TAG_NAME.zip .build/release/xclogparser"
+      - name: Save x86_64 executable to be lipo'd later
+        run: mkdir tmp && cp .build/release/xclogparser tmp/xclogparser-x86_64
+      - name: Zip x86_64-apple-macosx release
+        run: "mkdir releases && zip -j releases/XCLogParser-macOS-x86_64-$TAG_NAME.zip .build/release/xclogparser"
+      - name: Build arm64-apple-macosx
+        run: rake 'build[release, arm64-apple-macosx]'
+      - name: Zip arm64-apple-macosx release
+        run: "zip -j releases/XCLogParser-macOS-arm64-$TAG_NAME.zip .build/release/xclogparser"
+      - name: Lipo macOS executables
+        run: "lipo -create -output tmp/xclogparser tmp/xclogparser-x86_64 .build/release/xclogparser"
+      - name: Zip x86_64-arm64-apple-macosx release
+        run: "zip -j releases/XCLogParser-macOS-x86-64-arm64-$TAG_NAME.zip tmp/xclogparser"
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v1-release
         with:
@@ -33,7 +45,7 @@ jobs:
     name: Add Linux binaries to release
     runs-on: ubuntu-latest
     container:
-      image: swift:5.1
+      image: swift:5.2
     steps:
       - name: Checkout
         uses: actions/checkout@v1

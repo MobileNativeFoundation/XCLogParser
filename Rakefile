@@ -13,7 +13,7 @@ INSTALLATION_PREFIX = '/usr/local'.freeze
 
 
 desc 'Build XCLogParser'
-task :build, [:configuration, :sdks, :is_archive] => ['gen_resources'] do |task, args|
+task :build, [:configuration, :arch, :sdks, :is_archive] => ['gen_resources'] do |task, args|
   # Set task defaults
   args.with_defaults(:configuration => 'debug', :sdks => ['macos'])
 
@@ -27,7 +27,7 @@ task :build, [:configuration, :sdks, :is_archive] => ['gen_resources'] do |task,
   # Build
   build_paths = []
   args.sdks.each do |sdk|
-    spm_build(args.configuration)
+    spm_build(args.configuration, args.arch)
     # path of the executable looks like: `.build/(debug|release)/xclogparser`
     build_path = File.join(BUILD_DIR, args.configuration, EXECUTABLE_NAME)
     build_paths.push(build_path)
@@ -70,9 +70,10 @@ end
 # Helper functions
 ################################
 
-def spm_build(configuration)
+def spm_build(configuration, arch)
   spm_cmd = "swift build "\
             "-c #{configuration} "\
+            "#{arch.nil? ? "" : "--triple #{arch}"}"\
             "--disable-sandbox"
   p spm_cmd
   system(spm_cmd) or abort "Build failure"

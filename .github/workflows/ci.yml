@@ -15,7 +15,7 @@ jobs:
   macOS:
     runs-on: macOS-latest
     env:
-      XCODE_VERSION: ${{ '11.4' }}
+      XCODE_VERSION: ${{ '12.2' }}
     steps:
       - name: Select Xcode
         run: "sudo xcode-select -s /Applications/Xcode_$XCODE_VERSION.app"
@@ -29,7 +29,7 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     container:
-      image: swift:5.1
+      image: swift:5.2
     steps:
       - name: Checkout
         uses: actions/checkout@v1
