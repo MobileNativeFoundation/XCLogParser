@@ -159,6 +159,7 @@ Example output available in the [reporters](#reporters) section.
   | `--without_build_specific_info`  | If specified, build specific information will be removed from the logs (for example `bolnckhlbzxpxoeyfujluasoupft` will be removed from  `DerivedData/Product-bolnckhlbzxpxoeyfujluasoupft/Build` ). Useful for grouping logs by its content.  | No |
   | `--strictProjectName`  | Used in conjunction with `--project`. If specified, a stricter name matching will be done for the project name.  | No |
   | `--machine_name`  | If specified, the machine name will be used to create the `buildIdentifier`. If it is not specified, the host name will be used.  | No |
+  | `--omit_warnings` | Omit the warnings details in the final report. This is useful if there are too many of them and the report's size is too big with them. | No |
 
   >No *: One of `--file`, `--project`, `--workspace`, `--xcodeproj` parameters is required.
 
