@@ -23,7 +23,7 @@ jobs:
       - name: Save x86_64 executable to be lipo'd later
         run: mkdir tmp && cp .build/release/xclogparser tmp/xclogparser-x86_64
       - name: Zip x86_64-apple-macosx release
-        run: "mkdir releases && zip -j releases/XCLogParser-macOS-x86_64-$TAG_NAME.zip .build/release/xclogparser"
+        run: "zip -j releases/XCLogParser-macOS-x86_64-$TAG_NAME.zip .build/release/xclogparser"
       - name: Build arm64-apple-macosx
         run: rake 'build[release, arm64-apple-macosx]'
       - name: Zip arm64-apple-macosx release
