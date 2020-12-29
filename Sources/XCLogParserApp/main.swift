@@ -18,17 +18,5 @@
 // under the License.
 
 import Foundation
-import Commandant
-#if !swift(>=5.0)
-import Result
-#endif
 
-let registry = CommandRegistry<CommandantError<Swift.Error>>()
-registry.register(ParseCommand())
-registry.register(ManifestCommand())
-registry.register(DumpCommand())
-registry.register(VersionCommand())
-registry.register(HelpCommand(registry: registry))
-registry.main(defaultVerb: HelpCommand(registry: registry).verb) { error in
-    print(error)
-}
+MainCommand.main()

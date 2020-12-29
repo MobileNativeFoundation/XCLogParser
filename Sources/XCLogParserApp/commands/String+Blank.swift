@@ -17,18 +17,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ArgumentParser
-import XCLogParser
+import Foundation
 
-struct VersionCommand: ParsableCommand {
+extension String {
 
-    static let configuration = CommandConfiguration(
-        commandName: "version",
-        abstract: "Displays the version of the tool."
-    )
-
-    func run() {
-        print("XCLogParser \(Version.current)")
+    var isBlank: Bool {
+        return allSatisfy({ $0.isWhitespace })
     }
 
 }
