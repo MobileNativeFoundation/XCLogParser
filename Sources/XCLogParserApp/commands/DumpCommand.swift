@@ -17,101 +17,107 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import Foundation
-import Commandant
+import ArgumentParser
 import XCLogParser
-#if !swift(>=5.0)
-import Result
-#endif
 
-struct DumpCommand: CommandProtocol {
-    typealias Options = DumpOptions
-    let verb = "dump"
-    let function = "Dumps the xcactivitylog file into a JSON document"
+struct DumpCommand: ParsableCommand {
 
-    func run(_ options: DumpOptions) -> Result<(), CommandantError<Swift.Error>> {
-        if !options.hasValidLogOptions() {
-            return .failure(.usageError(description:
-                """
-                    Please, provide a way to locate the .xcactivitylog of your project.
-                    You can use --file or --project or --workspace or --xcodeproj. \n
-                    Type `xclogparser help parse` to get more information.`
-                    """))
+    static let configuration = CommandConfiguration(
+        commandName: "dump",
+        abstract: "Dumps the xcactivitylog file into a JSON document"
+    )
+
+    @Option(name: .long, help: "The path to a .xcactivitylog file.")
+    var file: String?
+
+    @Option(name: .customLong("derived_data"),
+            help: """
+    The path to the DerivedData directory.
+    Use it if it's not the default ~/Library/Developer/Xcode/DerivedData/.
+    """)
+    var derivedData: String?
+
+    @Option(name: .long,
+            help: """
+    The name of an Xcode project. The tool will try to find the latest log folder
+    with this prefix in the DerivedData directory. Use with `--strictProjectName`
+    for stricter name matching.
+    """)
+    var project: String?
+
+    @Option(name: .long,
+            help: """
+    The path to the .xcworkspace folder. Used to find the Derived Data project directory
+    if no `--project` flag is present.
+    """)
+    var workspace: String?
+
+    @Option(name: .long,
+            help: """
+    The path to the .xcodeproj folder. Used to find the Derived Data project directory
+    if no `--project` and no `--workspace` flag is present.
+    """)
+    var xcodeproj: String?
+
+    @Flag(help: """
+    Redacts the username of the paths found in the log.
+    For instance, /Users/timcook/project will be /Users/<redacted>/project
+    """)
+    var redacted: Bool = false
+
+    @Flag(name: .customLong("without_build_specific_information"),
+          help: """
+    Removes build specific information from the logs.
+    For instance, DerivedData/Product-bolnckhlbzxpxoeyfujluasoupft/Build
+    will be DerivedData/Product/Build
+    """)
+    var withoutBuildSpecificInformation: Bool = false
+
+    @Flag(name: .customLong("strictProjectName"),
+          help: """
+    Use strict name testing when trying to find the latest version of the project
+    in the DerivedData directory.
+    """)
+    var strictProjectName: Bool = false
+
+    @Option(name: .long,
+            help: """
+    Optional. Path to which the report will be written to. If not specified,
+    the report will be written to the standard output.
+    """)
+    var output: String?
+
+    mutating func validate() throws {
+        if !hasValidLogOptions() {
+            throw ValidationError("""
+            Please, provide a way to locate the .xcactivity log of your project.
+            You can use --file or --project or --workspace or --xcodeproj.
+            Type `xclogparser help dump` to get more information.`
+            """)
         }
-        // Dump command only supports json reporter atm
-        let reporter = Reporter.json
+    }
+
+    func run() throws {
         let commandHandler = CommandHandler()
-        let logOptions = LogOptions(projectName: options.projectName,
-                                    xcworkspacePath: options.workspace,
-                                    xcodeprojPath: options.xcodeproj,
-                                    derivedDataPath: options.derivedData,
-                                    xcactivitylogPath: options.logFile,
-                                    strictProjectName: options.strictProjectName)
-        let actionOptions = ActionOptions(reporter: reporter,
-                                          outputPath: options.output,
-                                          redacted: options.redacted,
-                                          withoutBuildSpecificInformation: options.withoutBuildSpecificInformation)
+        let logOptions = LogOptions(projectName: project ?? "",
+                                    xcworkspacePath: workspace ?? "",
+                                    xcodeprojPath: xcodeproj ?? "",
+                                    derivedDataPath: derivedData ?? "",
+                                    xcactivitylogPath: file ?? "",
+                                    strictProjectName: strictProjectName)
+        let actionOptions = ActionOptions(reporter: .json,
+                                          outputPath: output ?? "",
+                                          redacted: redacted,
+                                          withoutBuildSpecificInformation:
+                                            withoutBuildSpecificInformation
+                                          )
         let action = Action.dump(options: actionOptions)
         let command = Command(logOptions: logOptions, action: action)
-        do {
-            try commandHandler.handle(command: command)
 
-        } catch {
-            return.failure(.commandError(error))
-        }
-        return .success(())
-    }
-}
-
-struct DumpOptions: OptionsProtocol {
-    let logFile: String
-    let derivedData: String
-    let projectName: String
-    let workspace: String
-    let xcodeproj: String
-    let redacted: Bool
-    let withoutBuildSpecificInformation: Bool
-    let strictProjectName: Bool
-    let output: String
-
-    static func create(_ logFile: String)
-        -> (_ derivedData: String)
-        -> (_ projectName: String)
-        -> (_ workspace: String)
-        -> (_ xcodeproj: String)
-        -> (_ redacted: Bool)
-        -> (_ withoutBuildSpecificInformation: Bool)
-        -> (_ strictProjectName: Bool)
-        -> (_ output: String) -> DumpOptions {
-            return { derivedData in { projectName in { workspace in { xcodeproj
-                in { redacted in { withoutBuildSpecificInformation in { strictProjectName in { output in
-                    self.init(logFile: logFile,
-                              derivedData: derivedData,
-                              projectName: projectName,
-                              workspace: workspace,
-                              xcodeproj: xcodeproj,
-                              redacted: redacted,
-                              withoutBuildSpecificInformation: withoutBuildSpecificInformation,
-                              strictProjectName: strictProjectName,
-                              output: output)
-                }}}}}}}}
+        try commandHandler.handle(command: command)
     }
 
-    static func evaluate(_ mode: CommandMode) -> Result<DumpOptions, CommandantError<CommandantError<Swift.Error>>> {
-        return create
-            <*> mode <| fileOption
-            <*> mode <| derivedDataOption
-            <*> mode <| projectOption
-            <*> mode <| workspaceOption
-            <*> mode <| xcodeprojOption
-            <*> mode <| redactedSwitch
-            <*> mode <| withoutBuildSpecificInformationSwitch
-            <*> mode <| strictProjectNameSwitch
-            <*> mode <| outputOption
+    private func hasValidLogOptions() -> Bool {
+        return !file.isBlank || !project.isBlank || !workspace.isBlank || !xcodeproj.isBlank
     }
-
-    func hasValidLogOptions() -> Bool {
-        return !logFile.isEmpty || !projectName.isEmpty || !workspace.isEmpty || !xcodeproj.isEmpty
-    }
-
 }

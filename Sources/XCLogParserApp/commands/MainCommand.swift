@@ -18,17 +18,13 @@
 // under the License.
 
 import ArgumentParser
-import XCLogParser
 
-struct VersionCommand: ParsableCommand {
-
-    static let configuration = CommandConfiguration(
-        commandName: "version",
-        abstract: "Displays the version of the tool."
-    )
-
-    func run() {
-        print("XCLogParser \(Version.current)")
-    }
-
+struct MainCommand: ParsableCommand {
+    static let configuration = CommandConfiguration(commandName: "xclogparser",
+                                                    subcommands: [
+                                                        ParseCommand.self,
+                                                        DumpCommand.self,
+                                                        ManifestCommand.self,
+                                                        VersionCommand.self
+                                                    ])
 }

@@ -17,135 +17,143 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import Foundation
-import Commandant
+import ArgumentParser
 import XCLogParser
-#if !swift(>=5.0)
-import Result
-#endif
 
-struct ParseCommand: CommandProtocol {
-    typealias Options = ParseOptions
-    let verb = "parse"
-    let function = "Parses the content of an xcactivitylog file"
+struct ParseCommand: ParsableCommand {
 
-    func run(_ options: ParseOptions) -> Result<(), CommandantError<Swift.Error>> {
-        if !options.hasValidLogOptions() {
-            return .failure(.usageError(description:
-                """
-                    Please, provide a way to locate the .xcactivity log of your project.
-                    You can use --file or --project or --workspace or --xcodeproj. \n
-                    Type `xclogparser help parse` to get more information.`
-                    """))
+    static let configuration = CommandConfiguration(
+        commandName: "parse",
+        abstract: "Parses the content of an xcactivitylog file"
+    )
+
+    @Option(name: .long, help: "The path to a .xcactivitylog file.")
+    var file: String?
+
+    @Option(name: .customLong("derived_data"),
+            help: """
+    The path to the DerivedData directory.
+    Use it if it's not the default ~/Library/Developer/Xcode/DerivedData/.
+    """)
+    var derivedData: String?
+
+    @Option(name: .long,
+            help: """
+    The name of an Xcode project. The tool will try to find the latest log folder
+    with this prefix in the DerivedData directory. Use with `--strictProjectName`
+    for stricter name matching.
+    """)
+    var project: String?
+
+    @Option(name: .long,
+            help: """
+    The path to the .xcworkspace folder. Used to find the Derived Data project directory
+    if no `--project` flag is present.
+    """)
+    var workspace: String?
+
+    @Option(name: .long,
+            help: """
+    The path to the .xcodeproj folder. Used to find the Derived Data project directory
+    if no `--project` and no `--workspace` flag is present.
+    """)
+    var xcodeproj: String?
+
+    @Option(name: .long,
+            help: """
+    Mandatory. The reporter to use. It could be `json`, `flatJson`, `summaryJson`,
+    `chromeTracer`, `html` or `btr`
+    """)
+    var reporter: String?
+
+    @Option(name: .customLong("machine_name"),
+            help: """
+    Optional. The name of the machine. If not specified, the host name will be used.
+    """)
+    var machineName: String?
+
+    @Flag(help: """
+    Redacts the username of the paths found in the log.
+    For instance, /Users/timcook/project will be /Users/<redacted>/project
+    """)
+    var redacted: Bool = false
+
+    @Flag(name: .customLong("without_build_specific_information"),
+          help: """
+    Removes build specific information from the logs.
+    For instance, DerivedData/Product-bolnckhlbzxpxoeyfujluasoupft/Build
+    will be DerivedData/Product/Build
+    """)
+    var withoutBuildSpecificInformation: Bool = false
+
+    @Flag(name: .customLong("strictProjectName"),
+          help: """
+    Use strict name testing when trying to find the latest version of the project
+    in the DerivedData directory.
+    """)
+    var strictProjectName: Bool = false
+
+    @Option(name: .long,
+            help: """
+    Optional. Path to which the report will be written to. If not specified,
+    the report will be written to the standard output.
+    """)
+    var output: String?
+
+    @Option(name: .customLong("rootOutput"),
+            help: """
+    Optional. Add the project output into the given current path,
+    example: myGivenPath/report.json.
+    """)
+    var rootOutput: String?
+
+    mutating func validate() throws {
+        if !hasValidLogOptions() {
+            throw ValidationError("""
+            Please, provide a way to locate the .xcactivity log of your project.
+            You can use --file or --project or --workspace or --xcodeproj.
+            Type `xclogparser help parse` to get more information.`
+            """)
         }
-        if options.reporter.isEmpty {
-            return .failure(.usageError(description:
-                """
-                You need to specify a reporter. Type `xclogparser help parse` to see the available ones.
-                """))
+        guard let reporter = reporter, reporter.isEmpty == false else {
+            throw ValidationError("""
+            You need to specify a reporter. Type `xclogparser help parse` to see the available ones.
+            """)
         }
-        guard let reporter = Reporter(rawValue: options.reporter) else {
-            return .failure(.usageError(description:
-                """
-                \(options.reporter) is not a valid reporter. Please provide a valid reporter to use.
+        guard Reporter(rawValue: reporter) != nil else {
+            throw ValidationError("""
+                \(reporter) is not a valid reporter. Please provide a valid reporter to use.
                 Type `xclogparser help parse` to see the available ones.
-                """))
+                """)
+        }
+    }
+
+    func run() throws {
+        guard let reporter = reporter else {
+            return
+        }
+        guard let xclReporter = Reporter(rawValue: reporter) else {
+            return
         }
         let commandHandler = CommandHandler()
-        let logOptions = LogOptions(projectName: options.projectName,
-                                    xcworkspacePath: options.workspace,
-                                    xcodeprojPath: options.xcodeproj,
-                                    derivedDataPath: options.derivedData,
-                                    xcactivitylogPath: options.logFile,
-                                    strictProjectName: options.strictProjectName)
-        let actionOptions = ActionOptions(reporter: reporter,
-                                          outputPath: options.output,
-                                          redacted: options.redacted,
-                                          withoutBuildSpecificInformation: options.withoutBuildSpecificInformation,
-                                          machineName: options.machineName.isEmpty ? nil : options.machineName,
-                                          rootOutput: options.rootOutput)
+        let logOptions = LogOptions(projectName: project ?? "",
+                                    xcworkspacePath: workspace ?? "",
+                                    xcodeprojPath: xcodeproj ?? "",
+                                    derivedDataPath: derivedData ?? "",
+                                    xcactivitylogPath: file ?? "",
+                                    strictProjectName: strictProjectName)
+        let actionOptions = ActionOptions(reporter: xclReporter,
+                                          outputPath: output ?? "",
+                                          redacted: redacted,
+                                          withoutBuildSpecificInformation: withoutBuildSpecificInformation,
+                                          machineName: machineName,
+                                          rootOutput: rootOutput ?? "")
         let action = Action.parse(options: actionOptions)
         let command = Command(logOptions: logOptions, action: action)
-        do {
-            try commandHandler.handle(command: command)
-        } catch {
-            return.failure(.commandError(error))
-        }
-        return .success(())
+        try commandHandler.handle(command: command)
     }
 
-}
-
-struct ParseOptions: OptionsProtocol {
-    let logFile: String
-    let derivedData: String
-    let projectName: String
-    let workspace: String
-    let xcodeproj: String
-    let reporter: String
-    let machineName: String
-    let redacted: Bool
-    let withoutBuildSpecificInformation: Bool
-    let strictProjectName: Bool
-    let output: String
-    let rootOutput: String
-
-    static func create(_ logFile: String)
-        -> (_ derivedData: String)
-        -> (_ projectName: String)
-        -> (_ workspace: String)
-        -> (_ xcodeproj: String)
-        -> (_ reporter: String)
-        -> (_ machineName: String)
-        -> (_ redacted: Bool)
-        -> (_ withoutBuildSpecificInformation: Bool)
-        -> (_ strictProjectName: Bool)
-        -> (_ output: String)
-        -> (_ rootOutput: String) -> ParseOptions {
-            return { derivedData in { projectName in { workspace in { xcodeproj in { reporter in { machineName
-                in { redacted in { withoutBuildSpecificInformation in { strictProjectName in { output in { rootOutput in
-            self.init(logFile: logFile,
-                      derivedData: derivedData,
-                      projectName: projectName,
-                      workspace: workspace,
-                      xcodeproj: xcodeproj,
-                      reporter: reporter,
-                      machineName: machineName,
-                      redacted: redacted,
-                      withoutBuildSpecificInformation: withoutBuildSpecificInformation,
-                      strictProjectName: strictProjectName,
-                      output: output,
-                      rootOutput: rootOutput)
-                    }}}}}}}}}}}
+    private func hasValidLogOptions() -> Bool {
+        return !file.isBlank || !project.isBlank || !workspace.isBlank || !xcodeproj.isBlank
     }
-
-    static func evaluate(_ mode: CommandMode) -> Result<ParseOptions, CommandantError<CommandantError<Swift.Error>>> {
-        return create
-            <*> mode <| fileOption
-            <*> mode <| derivedDataOption
-			<*> mode <| projectOption
-            <*> mode <| workspaceOption
-            <*> mode <| xcodeprojOption
-            <*> mode <| Option(
-                key: "reporter",
-                defaultValue: "",
-                usage: "The reporter to use. It could be `json`, `flatJson`, " +
-		"`summaryJson`, `chromeTracer`, `html` or `btr`")
-            <*> mode <| Option(
-                key: "machine_name",
-                defaultValue: "",
-                usage: "Optional. The name of the machine." +
-                "If not specified, the host name will be used.")
-            <*> mode <| redactedSwitch
-            <*> mode <| withoutBuildSpecificInformationSwitch
-            <*> mode <| strictProjectNameSwitch
-            <*> mode <| outputOption
-            <*> mode <| rootOutputOption
-
-    }
-
-    func hasValidLogOptions() -> Bool {
-        return !logFile.isEmpty || !projectName.isEmpty || !workspace.isEmpty || !xcodeproj.isEmpty
-    }
-
 }
