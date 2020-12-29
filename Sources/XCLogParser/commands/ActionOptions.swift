@@ -46,17 +46,22 @@ public struct ActionOptions {
     /// The rootOutput will generate the HTML output in the given folder
     public let rootOutput: String
 
+    /// If true, the parse command won't add the Warnings details to the output.
+    public let omitWarningsDetails: Bool
+
     public init(reporter: Reporter,
                 outputPath: String,
                 redacted: Bool,
                 withoutBuildSpecificInformation: Bool,
                 machineName: String? = nil,
-                rootOutput: String = "") {
+                rootOutput: String = "",
+                omitWarningsDetails: Bool = false) {
         self.reporter = reporter
         self.outputPath = outputPath
         self.redacted = redacted
         self.withoutBuildSpecificInformation = withoutBuildSpecificInformation
         self.machineName = machineName
         self.rootOutput = rootOutput
+        self.omitWarningsDetails = omitWarningsDetails
     }
 }
