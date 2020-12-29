@@ -107,6 +107,13 @@ struct ParseCommand: ParsableCommand {
     """)
     var rootOutput: String?
 
+    @Flag(name: .customLong("omit_warnings"),
+          help: """
+    If present, the report will omit the Warnings found in the log.
+    Useful to reduce the size of the final report.
+    """)
+    var omitWarnings: Bool = false
+
     mutating func validate() throws {
         if !hasValidLogOptions() {
             throw ValidationError("""
@@ -147,7 +154,8 @@ struct ParseCommand: ParsableCommand {
                                           redacted: redacted,
                                           withoutBuildSpecificInformation: withoutBuildSpecificInformation,
                                           machineName: machineName,
-                                          rootOutput: rootOutput ?? "")
+                                          rootOutput: rootOutput ?? "",
+                                          omitWarningsDetails: omitWarnings)
         let action = Action.parse(options: actionOptions)
         let command = Command(logOptions: logOptions, action: action)
         try commandHandler.handle(command: command)

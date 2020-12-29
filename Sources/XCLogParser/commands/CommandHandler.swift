@@ -60,8 +60,11 @@ public struct CommandHandler {
     func handleParse(fromLogURL logURL: URL, options: ActionOptions) throws {
         let activityLog = try activityLogParser.parseActivityLogInURL(logURL,
                                                                       redacted: options.redacted,
-                                                                      withoutBuildSpecificInformation: options.withoutBuildSpecificInformation) // swiftlint:disable:this line_length
-        let buildParser = ParserBuildSteps(machineName: options.machineName)
+                                                                      withoutBuildSpecificInformation:
+                                                                        options.withoutBuildSpecificInformation)
+
+        let buildParser = ParserBuildSteps(machineName: options.machineName,
+                                           omitWarningsDetails: options.omitWarningsDetails)
         let buildSteps = try buildParser.parse(activityLog: activityLog)
         let reporterOutput = ReporterOutputFactory.makeReporterOutput(path: options.outputPath)
         let logReporter = options.reporter.makeLogReporter()
