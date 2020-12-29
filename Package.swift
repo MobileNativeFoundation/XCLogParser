@@ -11,10 +11,10 @@ let package = Package(
         .library(name: "XCLogParser", targets: ["XCLogParser"])
     ],
     dependencies: [
-        .package(url: "https://github.com/1024jp/GzipSwift", from: "5.1.0"),
-        .package(url: "https://github.com/Carthage/Commandant.git", from: "0.17.0"),
+        .package(url: "https://github.com/1024jp/GzipSwift", from: "5.1.0"),        
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.0.0"),
         .package(url: "https://github.com/kylef/PathKit.git", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.3.0")),
     ],
     targets: [
         .target(
@@ -27,7 +27,10 @@ let package = Package(
         ),
         .target(
             name: "XCLogParserApp",
-            dependencies: ["XCLogParser", "Commandant"]
+            dependencies: [
+                "XCLogParser",
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
+            ]
         ),
         .testTarget(
             name: "XCLogParserTests",

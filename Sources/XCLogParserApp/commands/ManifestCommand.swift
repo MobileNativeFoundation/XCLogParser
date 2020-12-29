@@ -17,101 +17,92 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import Foundation
-import Commandant
+import ArgumentParser
 import XCLogParser
-#if !swift(>=5.0)
-import Result
-#endif
 
-struct ManifestCommand: CommandProtocol {
-    typealias Options = ManifestOptions
-    let verb = "manifest"
-    let function = "Shows the content of a LogManifest plist file as a JSON document."
+struct ManifestCommand: ParsableCommand {
 
-    func run(_ options: ManifestOptions) -> Result<(), CommandantError<Swift.Error>> {
-        if !options.isValid() {
-            return .failure(.usageError(description:
-                """
-                Please, provide a way to locate the Log Manifest file.
-                You can use --log_manifest, --project, --workspace or --xcodeproj. \n
-                Type `xclogparser help manifest` to get more information.`
-                """))
+    static let configuration = CommandConfiguration(
+        commandName: "manifest",
+        abstract: "Shows the content of a LogManifest plist file as a JSON document."
+    )
+
+    @Option(name: .customLong("long_manifest"), help: "The path to an existing LogStoreManifest.plist.")
+    var logManifest: String?
+
+    @Option(name: .customLong("derived_data"),
+            help: """
+    The path to the DerivedData directory.
+    Use it if it's not the default ~/Library/Developer/Xcode/DerivedData/.
+    """)
+    var derivedData: String?
+
+    @Option(name: .long,
+            help: """
+    The name of an Xcode project. The tool will try to find the latest log folder
+    with this prefix in the DerivedData directory. Use with `--strictProjectName`
+    for stricter name matching.
+    """)
+    var project: String?
+
+    @Option(name: .long,
+            help: """
+    The path to the .xcworkspace folder. Used to find the Derived Data project directory
+    if no `--project` flag is present.
+    """)
+    var workspace: String?
+
+    @Option(name: .long,
+            help: """
+    The path to the .xcodeproj folder. Used to find the Derived Data project directory
+    if no `--project` and no `--workspace` flag is present.
+    """)
+    var xcodeproj: String?
+
+    @Flag(name: .customLong("strictProjectName"),
+          help: """
+    Use strict name testing when trying to find the latest version of the project
+    in the DerivedData directory.
+    """)
+    var strictProjectName: Bool = false
+
+    @Option(name: .long,
+            help: """
+    Optional. Path to which the report will be written to. If not specified,
+    the report will be written to the standard output.
+    """)
+    var output: String?
+
+    mutating func validate() throws {
+        if !hasValidLogOptions() {
+            throw ValidationError("""
+            Please, provide a way to locate the .xcactivity log of your project.
+            You can use --file or --project or --workspace or --xcodeproj.
+            Type `xclogparser help manifest` to get more information.`
+            """)
         }
-        // Manifest command only supports json reporter atm
-        let reporter = Reporter.json
+    }
+
+    func run() throws {
         let commandHandler = CommandHandler()
-        let logOptions = LogOptions(projectName: options.projectName,
-                                    xcworkspacePath: options.workspace,
-                                    xcodeprojPath: options.xcodeproj,
-                                    derivedDataPath: options.derivedData,
-                                    logManifestPath: options.logManifest,
-                                    strictProjectName: options.strictProjectName)
-        let actionOptions = ActionOptions(reporter: reporter,
-                                          outputPath: options.output,
+        let logOptions = LogOptions(projectName: project ?? "",
+                                    xcworkspacePath: workspace ?? "",
+                                    xcodeprojPath: xcodeproj ?? "",
+                                    derivedDataPath: derivedData ?? "",
+                                    logManifestPath: logManifest ?? "",
+                                    strictProjectName: strictProjectName)
+
+        let actionOptions = ActionOptions(reporter: .json,
+                                          outputPath: output ?? "",
                                           redacted: false,
                                           withoutBuildSpecificInformation: false)
         let action = Action.manifest(options: actionOptions)
         let command = Command(logOptions: logOptions, action: action)
-        do {
-            try commandHandler.handle(command: command)
 
-        } catch {
-            return.failure(.commandError(error))
-        }
-        return .success(())
+        try commandHandler.handle(command: command)
     }
 
-}
-
-struct ManifestOptions: OptionsProtocol {
-    let derivedData: String
-    let projectName: String
-    let workspace: String
-    let xcodeproj: String
-    let logManifest: String
-    let output: String
-    let strictProjectName: Bool
-
-    static func create(_ derivedData: String) ->
-        (_ projectName: String) ->
-        (_ workspace: String) ->
-        (_ xcodeproj: String) ->
-        (_ logManifest: String) ->
-        (_ output: String) ->
-        (_ strictProjectName: Bool) ->
-        ManifestOptions {
-            return { projectName in { workspace in { xcodeproj in { logManifest in { output in { strictProjectName in
-                self.init(derivedData: derivedData,
-                          projectName: projectName,
-                          workspace: workspace,
-                          xcodeproj: xcodeproj,
-                          logManifest: logManifest,
-                          output: output,
-                          strictProjectName: strictProjectName)
-
-                }}}}}}
+    private func hasValidLogOptions() -> Bool {
+        return !logManifest.isBlank || !project.isBlank || !workspace.isBlank || !xcodeproj.isBlank
     }
-
-    static func evaluate(_ mode: CommandMode) -> Result<ManifestOptions,
-        CommandantError<CommandantError<Swift.Error>>> {
-            return create
-                <*> mode <| derivedDataOption
-                <*> mode <| projectOption
-                <*> mode <| workspaceOption
-                <*> mode <| xcodeprojOption
-                <*> mode <| Option(key: "log_manifest",
-                                   defaultValue: "",
-                                   usage: "The path to an existing LogStoreManifest.plist.")
-                <*> mode <| Option(key: "output",
-                                   defaultValue: "",
-                                   usage: "Optional. The path where to write the log entry.\n" +
-                                   "If not specified, it will be writen to the Standard output")
-                <*> mode <| strictProjectNameSwitch
-    }
-
-    func isValid() -> Bool {
-        return !logManifest.isEmpty || !projectName.isEmpty || !workspace.isEmpty || !xcodeproj.isEmpty
-    }
-
 }
