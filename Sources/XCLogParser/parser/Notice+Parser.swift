@@ -56,7 +56,6 @@ extension Notice {
             if var notice = Notice(withType: NoticeType.fromTitle(noticeTypeTitle),
                                    logMessage: message,
                                    detail: logSection.text) {
-
                 // Add the right details to Swift errors
                 if notice.type == NoticeType.swiftError || notice.type == .swiftWarning {
                     // Special case, if Swiftc fails for a whole module,
@@ -68,7 +67,8 @@ extension Notice {
                         errorLocation += ":\(notice.startingLineNumber):\(notice.startingColumnNumber):"
                         // do not report error in a file that it does not belong to (we'll ended
                         // up having duplicated errors)
-                        if logSection.location.documentURLString != notice.documentURL {
+                        if !logSection.location.documentURLString.isEmpty
+                            && logSection.location.documentURLString != notice.documentURL {
                             return nil
                         }
                         notice = notice.with(detail: swiftErrorDetails[errorLocation])
