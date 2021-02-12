@@ -67,7 +67,8 @@ extension Notice {
                         errorLocation += ":\(notice.startingLineNumber):\(notice.startingColumnNumber):"
                         // do not report error in a file that it does not belong to (we'll ended
                         // up having duplicated errors)
-                        if !logSection.location.documentURLString.isEmpty && logSection.location.documentURLString != notice.documentURL {
+                        if !logSection.location.documentURLString.isEmpty
+                            && logSection.location.documentURLString != notice.documentURL {
                             return nil
                         }
                         notice = notice.with(detail: swiftErrorDetails[errorLocation])
