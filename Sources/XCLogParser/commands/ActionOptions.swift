@@ -49,13 +49,17 @@ public struct ActionOptions {
     /// If true, the parse command won't add the Warnings details to the output.
     public let omitWarningsDetails: Bool
 
+    /// If true, the parse command won't add the Notes details to the output.
+    public let omitNotesDetails: Bool
+
     public init(reporter: Reporter,
                 outputPath: String,
                 redacted: Bool,
                 withoutBuildSpecificInformation: Bool,
                 machineName: String? = nil,
                 rootOutput: String = "",
-                omitWarningsDetails: Bool = false) {
+                omitWarningsDetails: Bool = false,
+                omitNotesDetails: Bool = false) {
         self.reporter = reporter
         self.outputPath = outputPath
         self.redacted = redacted
@@ -63,5 +67,6 @@ public struct ActionOptions {
         self.machineName = machineName
         self.rootOutput = rootOutput
         self.omitWarningsDetails = omitWarningsDetails
+        self.omitNotesDetails = omitNotesDetails
     }
 }

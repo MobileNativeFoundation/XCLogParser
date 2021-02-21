@@ -114,6 +114,13 @@ struct ParseCommand: ParsableCommand {
     """)
     var omitWarnings: Bool = false
 
+    @Flag(name: .customLong("omit_notes"),
+          help: """
+    If present, the report will omit the Notes found in the log.
+    Useful to reduce the size of the final report.
+    """)
+    var omitNotes: Bool = false
+
     mutating func validate() throws {
         if !hasValidLogOptions() {
             throw ValidationError("""
