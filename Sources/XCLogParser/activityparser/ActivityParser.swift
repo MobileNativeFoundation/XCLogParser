@@ -239,6 +239,13 @@ public class ActivityParser {
                            withoutBuildSpecificInformation: Bool) throws -> [Token] {
         let logLoader = LogLoader()
         var tokens: [Token] = []
+        #if os(Linux)
+        let content = try logLoader.loadFromURL(logURL)
+        let lexer = Lexer(filePath: logURL.path)
+        tokens = try lexer.tokenize(contents: content,
+                                        redacted: redacted,
+                                        withoutBuildSpecificInformation: withoutBuildSpecificInformation)
+        #else
         try autoreleasepool {
             let content = try logLoader.loadFromURL(logURL)
             let lexer = Lexer(filePath: logURL.path)
@@ -246,6 +253,7 @@ public class ActivityParser {
                                             redacted: redacted,
                                             withoutBuildSpecificInformation: withoutBuildSpecificInformation)
         }
+        #endif
         return tokens
     }
 
