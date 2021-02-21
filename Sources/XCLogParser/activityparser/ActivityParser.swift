@@ -46,12 +46,8 @@ public class ActivityParser {
     public func parseActivityLogInURL(_ logURL: URL,
                                       redacted: Bool,
                                       withoutBuildSpecificInformation: Bool) throws -> IDEActivityLog {
-        let logLoader = LogLoader()
-        let content = try logLoader.loadFromURL(logURL)
-        let lexer = Lexer(filePath: logURL.path)
-        let tokens = try lexer.tokenize(contents: content,
-                                        redacted: redacted,
-                                        withoutBuildSpecificInformation: withoutBuildSpecificInformation)
+        let tokens = try getTokens(logURL, redacted: redacted,
+                                   withoutBuildSpecificInformation: withoutBuildSpecificInformation)
         return try parseIDEActiviyLogFromTokens(tokens)
     }
 
@@ -236,6 +232,21 @@ public class ActivityParser {
         return IDEActivityLogAnalyzerControlFlowStepEdge(
                                      startLocation: try parseDocumentLocation(iterator: &iterator),
                                      endLocation: try parseDocumentLocation(iterator: &iterator))
+    }
+
+    private func getTokens(_ logURL: URL,
+                           redacted: Bool,
+                           withoutBuildSpecificInformation: Bool) throws -> [Token] {
+        let logLoader = LogLoader()
+        var tokens: [Token] = []
+        try autoreleasepool {
+            let content = try logLoader.loadFromURL(logURL)
+            let lexer = Lexer(filePath: logURL.path)
+            tokens = try lexer.tokenize(contents: content,
+                                            redacted: redacted,
+                                            withoutBuildSpecificInformation: withoutBuildSpecificInformation)
+        }
+        return tokens
     }
 
     private func parseMessages(iterator: inout IndexingIterator<[Token]>) throws -> [IDEActivityLogMessage] {
