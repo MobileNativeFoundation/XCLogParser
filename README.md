@@ -160,6 +160,7 @@ Example output available in the [reporters](#reporters) section.
   | `--strictProjectName`  | Used in conjunction with `--project`. If specified, a stricter name matching will be done for the project name.  | No |
   | `--machine_name`  | If specified, the machine name will be used to create the `buildIdentifier`. If it is not specified, the host name will be used.  | No |
   | `--omit_warnings` | Omit the warnings details in the final report. This is useful if there are too many of them and the report's size is too big with them. | No |
+  | `--omit_notes` | Omit the notes details in the final report. This is useful if there are too many of them and the report's size is too big with them. | No |
 
   >No *: One of `--file`, `--project`, `--workspace`, `--xcodeproj` parameters is required.
 

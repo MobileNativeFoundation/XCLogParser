@@ -38,6 +38,10 @@ public final class ParserBuildSteps {
     /// Useful to save space.
     let omitWarningsDetails: Bool
 
+    /// If true, the Notes won't be parsed.
+    /// Usefult to save space.
+    let omitNotesDetails: Bool
+
     public lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.timeZone = TimeZone(abbreviation: "UTC")
@@ -73,13 +77,18 @@ public final class ParserBuildSteps {
 
     /// - parameter machineName: The name of the machine. It will be used to create a unique identifier
     /// for the log. If `nil`, the host name will be used instead.
-    public init(machineName: String? = nil, omitWarningsDetails: Bool) {
+    /// - parameter omitWarningsDetails: if true, the Warnings won't be parsed
+    /// - parameter omitNotesDetails: if true, the Notes won't be parsed
+    public init(machineName: String? = nil,
+                omitWarningsDetails: Bool,
+                omitNotesDetails: Bool) {
         if let machineName = machineName {
             self.machineName = machineName
         } else {
             self.machineName = MacOSMachineNameReader().machineName ?? "unknown"
         }
         self.omitWarningsDetails = omitWarningsDetails
+        self.omitNotesDetails = omitNotesDetails
     }
 
     /// Parses the content from an Xcode log into a `BuildStep`
@@ -154,7 +163,7 @@ public final class ParserBuildSteps {
                                  documentURL: logSection.location.documentURLString,
                                  warnings: omitWarningsDetails ? [] : warnings,
                                  errors: errors,
-                                 notes: notes,
+                                 notes: omitNotesDetails ? [] : notes,
                                  swiftFunctionTimes: nil,
                                  fetchedFromCache: wasFetchedFromCache(parent:
                                     parentSection, section: logSection),

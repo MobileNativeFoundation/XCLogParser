@@ -64,7 +64,8 @@ public struct CommandHandler {
                                                                         options.withoutBuildSpecificInformation)
 
         let buildParser = ParserBuildSteps(machineName: options.machineName,
-                                           omitWarningsDetails: options.omitWarningsDetails)
+                                           omitWarningsDetails: options.omitWarningsDetails,
+                                           omitNotesDetails: options.omitNotesDetails)
         let buildSteps = try buildParser.parse(activityLog: activityLog)
         let reporterOutput = ReporterOutputFactory.makeReporterOutput(path: options.outputPath)
         let logReporter = options.reporter.makeLogReporter()
