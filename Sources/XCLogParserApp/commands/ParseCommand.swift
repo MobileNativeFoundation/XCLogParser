@@ -162,7 +162,8 @@ struct ParseCommand: ParsableCommand {
                                           withoutBuildSpecificInformation: withoutBuildSpecificInformation,
                                           machineName: machineName,
                                           rootOutput: rootOutput ?? "",
-                                          omitWarningsDetails: omitWarnings)
+                                          omitWarningsDetails: omitWarnings,
+                                          omitNotesDetails: omitNotes)
         let action = Action.parse(options: actionOptions)
         let command = Command(logOptions: logOptions, action: action)
         try commandHandler.handle(command: command)
