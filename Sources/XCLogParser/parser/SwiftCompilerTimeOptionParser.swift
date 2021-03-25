@@ -50,7 +50,7 @@ extension SwiftCompilerTimeOptionParser {
             return nil
         }
 
-        guard 
+        guard
             fileAndLocationParts.count == 3,
             let line = Int(fileAndLocationParts[1]),
             let column = Int(fileAndLocationParts[2])
