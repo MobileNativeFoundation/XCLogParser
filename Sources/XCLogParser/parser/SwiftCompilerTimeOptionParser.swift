@@ -50,13 +50,15 @@ extension SwiftCompilerTimeOptionParser {
             return nil
         }
 
-        guard fileAndLocationParts.count == 3 else {
+        guard
+            fileAndLocationParts.count == 3,
+            let line = Int(fileAndLocationParts[1]),
+            let column = Int(fileAndLocationParts[2])
+        else {
             return nil
         }
 
         let file = prefixWithFileURL(fileName: rawFile)
-        let line = Int(fileAndLocationParts[1])!
-        let column = Int(fileAndLocationParts[2])!
 
         return (file, line, column)
     }
