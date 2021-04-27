@@ -27,7 +27,7 @@ public enum Reporter: String {
     case html
     case issues
 
-    func makeLogReporter() -> LogReporter {
+    public func makeLogReporter() -> LogReporter {
         switch self {
         case .chromeTracer:
             return ChromeTracerReporter()

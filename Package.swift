@@ -11,8 +11,8 @@ let package = Package(
         .library(name: "XCLogParser", targets: ["XCLogParser"])
     ],
     dependencies: [
-        .package(url: "https://github.com/1024jp/GzipSwift", from: "5.1.0"),        
-        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.0.0"),
+        .package(url: "https://github.com/1024jp/GzipSwift", from: "5.1.0"),
+        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .exact("1.3.3")),
         .package(url: "https://github.com/kylef/PathKit.git", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.3.0")),
     ],

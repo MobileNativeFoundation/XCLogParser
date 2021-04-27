@@ -170,7 +170,8 @@ public final class ParserBuildSteps {
                                  compilationEndTimestamp: 0,
                                  compilationDuration: 0,
                                  clangTimeTraceFile: nil,
-                                 linkerStatistics: nil
+                                 linkerStatistics: nil,
+                                 swiftTypeCheckTimes: nil
                                  )
 
             step.subSteps = try logSection.subSections.map { subSection -> BuildStep in

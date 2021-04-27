@@ -79,7 +79,8 @@ class IssuesReporterTests: XCTestCase {
                              compilationEndTimestamp: end.timeIntervalSince1970,
                              compilationDuration: 100 * 100,
                              clangTimeTraceFile: nil,
-                             linkerStatistics: nil
+                             linkerStatistics: nil,
+                             swiftTypeCheckTimes: nil
         )
         return root
     }
@@ -130,7 +131,8 @@ class IssuesReporterTests: XCTestCase {
                              compilationEndTimestamp: end.timeIntervalSince1970,
                              compilationDuration: 100 * 100,
                              clangTimeTraceFile: nil,
-                             linkerStatistics: nil
+                             linkerStatistics: nil,
+                             swiftTypeCheckTimes: nil
         )
         return root
     }
@@ -181,7 +183,8 @@ class IssuesReporterTests: XCTestCase {
                          compilationEndTimestamp: end.timeIntervalSince1970,
                          compilationDuration: 100 * 100,
                          clangTimeTraceFile: nil,
-                         linkerStatistics: nil
+                         linkerStatistics: nil,
+                         swiftTypeCheckTimes: nil
         )
     }
 }

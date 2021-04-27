@@ -51,7 +51,8 @@ extension BuildStep {
                          compilationEndTimestamp: compilationEndTimestamp,
                          compilationDuration: compilationDuration,
                          clangTimeTraceFile: clangTimeTraceFile,
-                         linkerStatistics: linkerStatistics
+                         linkerStatistics: linkerStatistics,
+                         swiftTypeCheckTimes: swiftTypeCheckTimes
         )
     }
 
@@ -85,7 +86,8 @@ extension BuildStep {
                          compilationEndTimestamp: compilationEndTimestamp,
                          compilationDuration: compilationDuration,
                          clangTimeTraceFile: clangTimeTraceFile,
-                         linkerStatistics: linkerStatistics)
+                         linkerStatistics: linkerStatistics,
+                         swiftTypeCheckTimes: swiftTypeCheckTimes)
     }
 
     func with(signature newSignature: String) -> BuildStep {
@@ -118,7 +120,8 @@ extension BuildStep {
                          compilationEndTimestamp: compilationEndTimestamp,
                          compilationDuration: compilationDuration,
                          clangTimeTraceFile: clangTimeTraceFile,
-                         linkerStatistics: linkerStatistics)
+                         linkerStatistics: linkerStatistics,
+                         swiftTypeCheckTimes: swiftTypeCheckTimes)
     }
 
     func withFilteredNotices() -> BuildStep {
@@ -154,7 +157,8 @@ extension BuildStep {
                          compilationEndTimestamp: compilationEndTimestamp,
                          compilationDuration: compilationDuration,
                          clangTimeTraceFile: clangTimeTraceFile,
-                         linkerStatistics: linkerStatistics)
+                         linkerStatistics: linkerStatistics,
+                         swiftTypeCheckTimes: swiftTypeCheckTimes)
     }
 
     func with(subSteps newSubSteps: [BuildStep]) -> BuildStep {
@@ -187,7 +191,8 @@ extension BuildStep {
                          compilationEndTimestamp: compilationEndTimestamp,
                          compilationDuration: compilationDuration,
                          clangTimeTraceFile: clangTimeTraceFile,
-                         linkerStatistics: linkerStatistics)
+                         linkerStatistics: linkerStatistics,
+                         swiftTypeCheckTimes: swiftTypeCheckTimes)
     }
 
     func with(newCompilationEndTimestamp: Double,
@@ -221,7 +226,8 @@ extension BuildStep {
                          compilationEndTimestamp: newCompilationEndTimestamp,
                          compilationDuration: newCompilationDuration,
                          clangTimeTraceFile: clangTimeTraceFile,
-                         linkerStatistics: linkerStatistics)
+                         linkerStatistics: linkerStatistics,
+                         swiftTypeCheckTimes: swiftTypeCheckTimes)
     }
 
     func with(identifier newIdentifier: String) -> BuildStep {
@@ -254,7 +260,8 @@ extension BuildStep {
                          compilationEndTimestamp: compilationEndTimestamp,
                          compilationDuration: compilationDuration,
                          clangTimeTraceFile: clangTimeTraceFile,
-                         linkerStatistics: linkerStatistics)
+                         linkerStatistics: linkerStatistics,
+                         swiftTypeCheckTimes: swiftTypeCheckTimes)
     }
 
     func with(parentIdentifier newParentIdentifier: String) -> BuildStep {
@@ -287,7 +294,8 @@ extension BuildStep {
                          compilationEndTimestamp: compilationEndTimestamp,
                          compilationDuration: compilationDuration,
                          clangTimeTraceFile: clangTimeTraceFile,
-                         linkerStatistics: linkerStatistics)
+                         linkerStatistics: linkerStatistics,
+                         swiftTypeCheckTimes: swiftTypeCheckTimes)
     }
 
     private func filterNotices(_ notices: [Notice]?) -> [Notice]? {
