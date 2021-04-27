@@ -281,7 +281,9 @@ public struct BuildStep: Encodable {
                 compilationEndTimestamp: Double,
                 compilationDuration: Double,
                 clangTimeTraceFile: String?,
-                linkerStatistics: LinkerStatistics?) {
+                linkerStatistics: LinkerStatistics?,
+                swiftTypeCheckTimes: [SwiftTypeCheck]?
+                ) {
         self.type = type
         self.machineName = machineName
         self.buildIdentifier = buildIdentifier
@@ -312,6 +314,7 @@ public struct BuildStep: Encodable {
         self.compilationDuration = compilationDuration
         self.clangTimeTraceFile = clangTimeTraceFile
         self.linkerStatistics = linkerStatistics
+        self.swiftTypeCheckTimes = swiftTypeCheckTimes
     }
 }
 

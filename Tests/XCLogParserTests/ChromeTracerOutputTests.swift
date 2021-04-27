@@ -82,7 +82,8 @@ class ChromeTracerOutputTests: XCTestCase {
                              compilationEndTimestamp: end.timeIntervalSince1970,
                              compilationDuration: 100 * 100,
                              clangTimeTraceFile: nil,
-                             linkerStatistics: nil
+                             linkerStatistics: nil,
+                             swiftTypeCheckTimes: nil
                              )
         return root
     }
@@ -119,7 +120,8 @@ class ChromeTracerOutputTests: XCTestCase {
                              compilationEndTimestamp: end.timeIntervalSince1970,
                              compilationDuration: 50 * 100,
                              clangTimeTraceFile: nil,
-                             linkerStatistics: nil
+                             linkerStatistics: nil,
+                             swiftTypeCheckTimes: nil
                              )
 
         let end2 = end.addingTimeInterval(50 * 100)
@@ -152,7 +154,8 @@ class ChromeTracerOutputTests: XCTestCase {
                                 compilationEndTimestamp: end2.timeIntervalSince1970,
                                 compilationDuration: 50 * 100,
                                 clangTimeTraceFile: nil,
-                                linkerStatistics: nil
+                                linkerStatistics: nil,
+                                swiftTypeCheckTimes: nil
                                 )
         return [target1, target2]
 
