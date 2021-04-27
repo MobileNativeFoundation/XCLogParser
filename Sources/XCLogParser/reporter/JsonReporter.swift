@@ -21,6 +21,8 @@ import Foundation
 
 public struct JsonReporter: LogReporter {
 
+    public init() {}
+
     public func report(build: Any, output: ReporterOutput, rootOutput: String) throws {
         switch build {
         case let steps as BuildStep:

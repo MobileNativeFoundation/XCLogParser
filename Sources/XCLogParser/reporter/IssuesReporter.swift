@@ -26,6 +26,8 @@ struct Issues: Codable {
 
 public struct IssuesReporter: LogReporter {
 
+    public init() {}
+
     public func report(build: Any, output: ReporterOutput, rootOutput: String) throws {
         guard let steps = build as? BuildStep else {
             throw XCLogParserError.errorCreatingReport("Type not supported \(type(of: build))")
