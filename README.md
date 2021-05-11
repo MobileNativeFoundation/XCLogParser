@@ -1,6 +1,6 @@
 # XCLogParser
 
-[![Build Status](https://github.com/spotify/XCLogParser/workflows/CI/badge.svg)](https://github.com/spotify/XCLogParser/workflows/CI/badge.svg)
+[![Build Status](https://github.com/MobileNativeFoundation/XCLogParser/workflows/CI/badge.svg)](https://github.com/MobileNativeFoundation/XCLogParser/workflows/CI/badge.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 
@@ -282,7 +282,7 @@ xclogparser parse --project MyApp --reporter json
 </details>
 
 
-For more information regarding each field, check out the [JSON format documentation](https://github.com/spotify/XCLogParser/blob/master/docs/JSON%20Format.md).
+For more information regarding each field, check out the [JSON format documentation](https://github.com/MobileNativeFoundation/XCLogParser/blob/master/docs/JSON%20Format.md).
 
 
 ### FlatJson Reporter
@@ -381,7 +381,7 @@ xclogparser parse --file path/to/log.xcactivitylog --reporter flatJson
   ```
 </details>
 
-For more information regarding each field, check out the [JSON format documentation](https://github.com/spotify/XCLogParser/blob/master/docs/JSON%20Format.md).
+For more information regarding each field, check out the [JSON format documentation](https://github.com/MobileNativeFoundation/XCLogParser/blob/master/docs/JSON%20Format.md).
 
 ### SummaryJson Reporter
 
@@ -426,7 +426,7 @@ xclogparser parse --file path/to/log.xcactivitylog --reporter summaryJson
 </details>
 
 
-For more information regarding each field, check out the [JSON format documentation](https://github.com/spotify/XCLogParser/blob/master/docs/JSON%20Format.md).
+For more information regarding each field, check out the [JSON format documentation](https://github.com/MobileNativeFoundation/XCLogParser/blob/master/docs/JSON%20Format.md).
 
 ### ChromeTracer Reporter
 
@@ -523,7 +523,7 @@ XCLogParser is currently in alpha status. We are using it internally and tested 
 
 MacOS:
 
-1. Clone the repo with `git clone git@github.com:spotify/XCLogParser.git`.
+1. Clone the repo with `git clone git@github.com:MobileNativeFoundation/XCLogParser.git`.
 2. Run `rake gen_resources` to generate a static resource Swift file that is needed to compile the app.
 3. Run `swift package generate-xcodeproj` to generate a Xcode project (or use any text editor).
 4. Run tests in Xcode directly (CMD + U) or using `rake test`.
@@ -535,7 +535,7 @@ Linux:
 1. A Dockerfile is provided, you can create an image with the tag xlogparser: `docker build --tag xclogparser .`
 2. To compile the app in Linux, just run the shell script: `./run-in-docker.sh`
 
-If you find a bug or you would like to propose an improvement, you're welcome to create an [issue](https://github.com/spotify/xclogparser/issues/new).
+If you find a bug or you would like to propose an improvement, you're welcome to create an [issue](https://github.com/MobileNativeFoundation/xclogparser/issues/new).
 
 ## Release
 
