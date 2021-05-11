@@ -48,7 +48,7 @@ class SwiftCompilerFunctionTimeOptionParser: SwiftCompilerTimeOptionParser {
     private func parse(command: String, occurrences: Int) -> [SwiftFunctionTime]? {
         let functions: [SwiftFunctionTime] = command.components(separatedBy: "\r").compactMap { commandLine in
 
-            // 0.14ms   /users/spotify/project/SomeFile.swift:10:12   someMethod(param:)
+            // 0.14ms   /users/mnf/project/SomeFile.swift:10:12   someMethod(param:)
             let parts = commandLine.components(separatedBy: "\t")
 
             guard parts.count == 3 else {
@@ -58,7 +58,7 @@ class SwiftCompilerFunctionTimeOptionParser: SwiftCompilerTimeOptionParser {
             // 0.14ms
             let duration = parseCompileDuration(parts[0])
 
-            // /users/spotify/project/SomeFile.swift:10:12
+            // /users/mnf/project/SomeFile.swift:10:12
             let fileAndLocation = parts[1]
             guard let (file, line, column) = parseNameAndLocation(from: fileAndLocation) else {
                 return nil
