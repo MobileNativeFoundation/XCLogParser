@@ -121,15 +121,15 @@ public final class Lexer {
         if scanner.scanCharacters(from: typeDelimiters, into: &delimiters), let delimiters = delimiters {
             let delimiters = String(delimiters)
             if delimiters.count > 1 {
-                //if we found a string, we discard other type delimiters because there are part of the string
+                // if we found a string, we discard other type delimiters because there are part of the string
                 let tokenString = TokenType.string
                 if let char = delimiters.first, tokenString.rawValue == String(char) {
                     scanner.scanLocation -= delimiters.count - 1
                     return [tokenString]
                 }
             }
-            //sometimes we found one or more nil list (-) next to the type delimiter
-            //in that case we'll return the delimiter and one or more `Token.null`
+            // sometimes we found one or more nil list (-) next to the type delimiter
+            // in that case we'll return the delimiter and one or more `Token.null`
             return delimiters.compactMap { character -> TokenType? in
                 TokenType(rawValue: String(character))
             }

@@ -163,3 +163,32 @@ public class Notice: Codable {
         return number
     }
 }
+
+extension Notice: Hashable {
+    public static func == (lhs: Notice, rhs: Notice) -> Bool {
+        return
+            lhs.characterRangeEnd == rhs.characterRangeEnd &&
+            lhs.characterRangeStart == rhs.characterRangeStart &&
+            lhs.detail == rhs.detail &&
+            lhs.documentURL == rhs.documentURL &&
+            lhs.endingColumnNumber == rhs.endingColumnNumber &&
+            lhs.endingLineNumber == rhs.endingLineNumber &&
+            lhs.startingColumnNumber == rhs.startingColumnNumber &&
+            lhs.startingLineNumber == rhs.startingLineNumber &&
+            lhs.title == rhs.title &&
+            lhs.type == rhs.type
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(characterRangeEnd)
+        hasher.combine(characterRangeStart)
+        hasher.combine(detail)
+        hasher.combine(documentURL)
+        hasher.combine(endingColumnNumber)
+        hasher.combine(endingLineNumber)
+        hasher.combine(startingColumnNumber)
+        hasher.combine(startingLineNumber)
+        hasher.combine(title)
+        hasher.combine(type)
+    }
+}

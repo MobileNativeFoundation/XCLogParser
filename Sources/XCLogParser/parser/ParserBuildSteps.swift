@@ -222,8 +222,8 @@ public final class ParserBuildSteps {
 
     private func getDuration(startTimeInterval: Double, endTimeInterval: Double) -> Double {
         var duration = endTimeInterval - startTimeInterval
-        //If the endtime is almost the same as the endtime, we got a constant
-        //in the tokens and a date in the future (year 4001). Here we normalize it to 0.0 secs
+        // If the endtime is almost the same as the endtime, we got a constant
+        // in the tokens and a date in the future (year 4001). Here we normalize it to 0.0 secs
         if endTimeInterval >= 63113904000.0 {
             duration = 0.0
         }

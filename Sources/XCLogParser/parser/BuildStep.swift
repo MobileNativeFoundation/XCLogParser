@@ -78,7 +78,6 @@ public enum DetailStepType: String, Encodable {
 
     /// Precompile Bridging header
     case precompileBridgingHeader
-    //case PrecompileSwiftBridgingHeader
 
     /// Non categorized step
     case other

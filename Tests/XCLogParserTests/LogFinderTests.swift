@@ -67,7 +67,7 @@ class LogFinderTests: XCTestCase {
         }
     }
 
-    //Swift is crashing in Linux when trying to create a temp directory with a modificationDate
+    // Swift is crashing in Linux when trying to create a temp directory with a modificationDate
     #if !os(Linux)
     func testGetLatestLogForProjectFolder() throws {
         guard let derivedDataDir = derivedDataDir else {
