@@ -124,6 +124,40 @@ extension BuildStep {
                          swiftTypeCheckTimes: swiftTypeCheckTimes)
     }
 
+    func with(errors newErrors: [Notice]?, notes newNotes: [Notice]?, warnings newWarnings: [Notice]?) -> BuildStep {
+        return BuildStep(type: type,
+                         machineName: machineName,
+                         buildIdentifier: buildIdentifier,
+                         identifier: identifier,
+                         parentIdentifier: parentIdentifier,
+                         domain: domain,
+                         title: title,
+                         signature: signature,
+                         startDate: startDate,
+                         endDate: endDate,
+                         startTimestamp: startTimestamp,
+                         endTimestamp: endTimestamp,
+                         duration: duration,
+                         detailStepType: detailStepType,
+                         buildStatus: buildStatus,
+                         schema: schema,
+                         subSteps: subSteps,
+                         warningCount: newWarnings?.count ?? 0,
+                         errorCount: newErrors?.count ?? 0,
+                         architecture: architecture,
+                         documentURL: documentURL,
+                         warnings: newWarnings,
+                         errors: newErrors,
+                         notes: newNotes,
+                         swiftFunctionTimes: swiftFunctionTimes,
+                         fetchedFromCache: fetchedFromCache,
+                         compilationEndTimestamp: compilationEndTimestamp,
+                         compilationDuration: compilationDuration,
+                         clangTimeTraceFile: clangTimeTraceFile,
+                         linkerStatistics: linkerStatistics,
+                         swiftTypeCheckTimes: swiftTypeCheckTimes)
+    }
+
     func withFilteredNotices() -> BuildStep {
         let filteredNotes = filterNotices(notes)
         let filteredWarnings = filterNotices(warnings)
@@ -302,6 +336,6 @@ extension BuildStep {
         guard let notices = notices else {
             return nil
         }
-        return notices.filter { $0.documentURL.isEmpty || $0.documentURL == documentURL }
+        return self.documentURL.isEmpty ? [] : notices
     }
 }

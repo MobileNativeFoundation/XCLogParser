@@ -373,8 +373,8 @@ public class ActivityParser {
         guard let classRefToken = iterator.next() else {
             throw XCLogParserError.parseError("Unexpected EOF parsing ClassRef")
         }
-        //The first time there is a classRef of an specific Type,
-        //There is a className before that defines the Type
+        // The first time there is a classRef of an specific Type,
+        // There is a className before that defines the Type
         if case Token.className = classRefToken {
             guard let classRefToken = iterator.next() else {
                 throw XCLogParserError.parseError("Unexpected EOF parsing ClassRef")

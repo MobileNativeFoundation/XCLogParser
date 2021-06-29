@@ -106,17 +106,23 @@ extension IDEActivityLogSection {
                                      range: NSRange(location: 0, length: parentCommandDetailDesc.count))
             usedParentCommandDesc = true
         }
-        return matches.map { match -> BuildStep in
-            let desc = usedParentCommandDesc ? parentCommandDetailDesc : commandDetailDesc
-            let file = desc.substring(match.range(at: 1))
-            currentIndex += 1
-            return buildStep
-                .with(identifier: "\(buildStep.buildIdentifier)_\(currentIndex)")
-                .with(documentURL: "file://\(file)")
-                .with(title: "Compile \(file)")
-                .with(signature: "\(buildStep.signature) \(file)")
-                .withFilteredNotices()
-        }
+        let desc = usedParentCommandDesc ? parentCommandDetailDesc : commandDetailDesc
+        let swiftSteps = matches
+            .filter { match in
+                let file = desc.substring(match.range(at: 1))
+                return !file.contains("com.apple.xcode.tools.swift")
+            }
+            .map { match -> BuildStep in
+                let file = desc.substring(match.range(at: 1))
+                currentIndex += 1
+                return buildStep
+                    .with(identifier: "\(buildStep.buildIdentifier)_\(currentIndex)")
+                    .with(documentURL: "file://\(file)")
+                    .with(title: "Compile \(file)")
+                    .with(signature: "\(buildStep.signature) \(file)")
+            }
+
+        return assignNoticesFrom(buildStep, to: swiftSteps)
     }
 
     private func getOrBuildTarget(_ name: String,
@@ -152,4 +158,35 @@ extension IDEActivityLogSection {
             xcbuildSignature: "",
             unknown: 0)
     }
+
+    private func assignNoticesFrom(_ buildStep: BuildStep, to swiftSteps: [BuildStep]) -> [BuildStep] {
+        var assignedNotes: Set<Notice> = Set()
+        var assignedWarnings: Set<Notice> = Set()
+        var assignedErrors: Set<Notice> = Set()
+        var updatedSteps = swiftSteps.map { swiftStep -> BuildStep in
+            let stepNotes = buildStep.notes?.filter { $0.documentURL == swiftStep.documentURL }
+            assignedNotes.formUnion(stepNotes ?? [])
+            let stepWarnings = buildStep.warnings?.filter { $0.documentURL == swiftStep.documentURL }
+            assignedWarnings.formUnion(stepWarnings ?? [])
+            let stepErrors = buildStep.errors?.filter { $0.documentURL == swiftStep.documentURL }
+            assignedErrors.formUnion(stepErrors ?? [])
+            return swiftStep.with(errors: stepErrors, notes: stepNotes, warnings: stepWarnings)
+        }
+
+        // Some notices can't be assigned to a step's documentURL, we just put them in the first
+        let remainingErrors = Set(buildStep.errors ?? []).subtracting(assignedErrors)
+        let remainingNotes = Set(buildStep.notes ?? []).subtracting(assignedNotes)
+        let remainingWarnings = Set(buildStep.warnings ?? []).subtracting(assignedWarnings)
+        if !updatedSteps.isEmpty {
+            let first = updatedSteps.remove(at: 0)
+            let errors = Array(remainingErrors.union(Set(first.errors ?? [])))
+            let notes = Array(remainingNotes.union(Set(first.notes ?? [])))
+            let warnings = Array(remainingWarnings.union(Set(first.warnings ?? [])))
+            updatedSteps.insert(first.with(errors: errors,
+                                           notes: notes,
+                                           warnings: warnings), at: 0)
+        }
+        return updatedSteps
+    }
+
 }
