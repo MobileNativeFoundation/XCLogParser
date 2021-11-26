@@ -56,7 +56,7 @@ The Finder will automatically open the output folder after a build completes and
 ### Tips & Tricks
 
 1. Errors thrown in post-action run scripts are silenced, so it could be hard to notice simple mistakes.
-1. Since Xcode 11, `xcodebuild` only generates the .xcactivitylog build logs when the option `-resultBundlePath`. If you're compiling with that command and not with Xcode, be sure to set that option to a valid path.
+1. Since Xcode 11, `xcodebuild` only generates the .xcactivitylog build logs when the option `-resultBundlePath` is present. If you're compiling with that command and not with Xcode, be sure to set that option to a valid path ending in `.xcresult`.
 1. Xcode likes to wait for all subprocesses to exit before completing the build. For this reason, you may notice a delayed "Build Succeeded" message if your post-scheme action is taking too long to execute. You can workaround this by offloading the execution to another script in the background and immediately close the input, output and error streams in order to let Xcode and xcodebuild finish cleanly. Create the following `launcher` script and invoke it from your post-scheme action as follows `launcher command-that-parses-the-log-here`:
     ```sh
     #!/bin/sh
