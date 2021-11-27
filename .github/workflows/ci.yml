@@ -15,7 +15,7 @@ jobs:
   macOS:
     runs-on: macOS-latest
     env:
-      XCODE_VERSION: ${{ '12.2' }}
+      XCODE_VERSION: ${{ '12.5' }}
     steps:
       - name: Select Xcode
         run: "sudo xcode-select -s /Applications/Xcode_$XCODE_VERSION.app"
