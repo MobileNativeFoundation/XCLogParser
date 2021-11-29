@@ -52,6 +52,9 @@ public struct ActionOptions {
     /// If true, the parse command won't add the Notes details to the output.
     public let omitNotesDetails: Bool
 
+    /// If true, tasks with more than a 100 issues (warnings, errors, notes) will be truncated to a 100
+    public let truncLargeIssues: Bool
+
     public init(reporter: Reporter,
                 outputPath: String,
                 redacted: Bool,
@@ -59,7 +62,9 @@ public struct ActionOptions {
                 machineName: String? = nil,
                 rootOutput: String = "",
                 omitWarningsDetails: Bool = false,
-                omitNotesDetails: Bool = false) {
+                omitNotesDetails: Bool = false,
+                truncLargeIssues: Bool = false
+    ) {
         self.reporter = reporter
         self.outputPath = outputPath
         self.redacted = redacted
@@ -68,5 +73,6 @@ public struct ActionOptions {
         self.rootOutput = rootOutput
         self.omitWarningsDetails = omitWarningsDetails
         self.omitNotesDetails = omitNotesDetails
+        self.truncLargeIssues = truncLargeIssues
     }
 }

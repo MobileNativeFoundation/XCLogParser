@@ -42,6 +42,10 @@ public final class ParserBuildSteps {
     /// Usefult to save space.
     let omitNotesDetails: Bool
 
+    /// If true, tasks with more than a 100 issues will be
+    /// truncated to have only 100
+    let truncLargeIssues: Bool
+
     public lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.timeZone = TimeZone(abbreviation: "UTC")
@@ -79,9 +83,11 @@ public final class ParserBuildSteps {
     /// for the log. If `nil`, the host name will be used instead.
     /// - parameter omitWarningsDetails: if true, the Warnings won't be parsed
     /// - parameter omitNotesDetails: if true, the Notes won't be parsed
+    /// - parameter truncLargeIssues: if true, tasks with more than a 100 issues will be truncated to have a 100
     public init(machineName: String? = nil,
                 omitWarningsDetails: Bool,
-                omitNotesDetails: Bool) {
+                omitNotesDetails: Bool,
+                truncLargeIssues: Bool) {
         if let machineName = machineName {
             self.machineName = machineName
         } else {
@@ -89,6 +95,7 @@ public final class ParserBuildSteps {
         }
         self.omitWarningsDetails = omitWarningsDetails
         self.omitNotesDetails = omitNotesDetails
+        self.truncLargeIssues = truncLargeIssues
     }
 
     /// Parses the content from an Xcode log into a `BuildStep`
@@ -298,7 +305,7 @@ public final class ParserBuildSteps {
 
     private func parseWarningsAndErrorsFromLogSection(_ logSection: IDEActivityLogSection, forType type: DetailStepType)
         -> [String: [Notice]]? {
-        let notices = Notice.parseFromLogSection(logSection, forType: type)
+        let notices = Notice.parseFromLogSection(logSection, forType: type, truncLargeIssues: truncLargeIssues)
         return ["warnings": notices.getWarnings(),
                 "errors": notices.getErrors(),
                 "notes": notices.getNotes()]

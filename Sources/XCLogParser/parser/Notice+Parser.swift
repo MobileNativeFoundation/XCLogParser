@@ -27,9 +27,16 @@ extension Notice {
     /// For CLANG warnings, it parses the `IDEActivityLogSection` text property looking for a *-W-warning-name* pattern
     /// - parameter logSection: An `IDEActivityLogSection`
     /// - parameter forType: The `DetailStepType` of the logSection
+    /// - parameter truncLargeIssues: If true, if a task have more than 100 `Notice`, will be truncated to 100
     /// - returns: An Array of `Notice`
-    public static func parseFromLogSection(_ logSection: IDEActivityLogSection, forType type: DetailStepType)
+    public static func parseFromLogSection(_ logSection: IDEActivityLogSection,
+                                           forType type: DetailStepType,
+                                           truncLargeIssues: Bool)
         -> [Notice] {
+        var logSection = logSection
+        if truncLargeIssues && logSection.messages.count > 100 {
+            logSection = self.logSectionWithTruncatedIssues(logSection: logSection)
+        }
         // we look for clangWarnings parsing the text of the logSection
         let clangWarningsFlags = self.parseClangWarningFlags(text: logSection.text)
         let clangWarnings = self.parseClangWarnings(clangFlags: clangWarningsFlags, logSection: logSection)
@@ -186,5 +193,29 @@ extension Notice {
                 || text.contains("has been deprecated")
         }
         return false
+    }
+
+    private static func logSectionWithTruncatedIssues(logSection: IDEActivityLogSection) -> IDEActivityLogSection {
+        let issuesKept = min(99, logSection.messages.count)
+        var truncatedMessages = Array(logSection.messages[0..<issuesKept])
+        truncatedMessages.append(getTruncatedIssuesWarning(logSection: logSection, issuesKept: issuesKept))
+        return logSection.with(messages: truncatedMessages)
+    }
+
+    private static func getTruncatedIssuesWarning(logSection: IDEActivityLogSection, issuesKept: Int)
+    -> IDEActivityLogMessage {
+        let title = "Warning: \(logSection.messages.count - issuesKept) issues were truncated"
+        return IDEActivityLogMessage(title: title,
+                                     shortTitle: "",
+                                     timeEmitted: 0,
+                                     rangeEndInSectionText: 0,
+                                     rangeStartInSectionText: 0,
+                                     subMessages: [],
+                                     severity: 0,
+                                     type: "",
+                                     location: DVTDocumentLocation(documentURLString: "", timestamp: 0),
+                                     categoryIdent: "Warning",
+                                     secondaryLocations: [],
+                                     additionalDescription: "")
     }
 }
