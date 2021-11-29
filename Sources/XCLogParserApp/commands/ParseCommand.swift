@@ -121,6 +121,14 @@ struct ParseCommand: ParsableCommand {
     """)
     var omitNotes: Bool = false
 
+    @Flag(name: .customLong("trunc_large_issues"),
+          help: """
+    If present, for tasks with more than a 100 issues (warnings, notes or errors)
+    Those will be truncated to a 100.
+    Useful to reduce the amount of memory used and the size of the report.
+    """)
+    var truncLargeIssues: Bool = false
+
     mutating func validate() throws {
         if !hasValidLogOptions() {
             throw ValidationError("""
@@ -163,7 +171,8 @@ struct ParseCommand: ParsableCommand {
                                           machineName: machineName,
                                           rootOutput: rootOutput ?? "",
                                           omitWarningsDetails: omitWarnings,
-                                          omitNotesDetails: omitNotes)
+                                          omitNotesDetails: omitNotes,
+                                          truncLargeIssues: truncLargeIssues)
         let action = Action.parse(options: actionOptions)
         let command = Command(logOptions: logOptions, action: action)
         try commandHandler.handle(command: command)

@@ -24,7 +24,8 @@ import XCTest
 class ParserTests: XCTestCase {
 
     let parser = ParserBuildSteps(omitWarningsDetails: false,
-                                  omitNotesDetails: false)
+                                  omitNotesDetails: false,
+                                  truncLargeIssues: false)
 
     func testDateFormatterUsesJSONFormat() {
         let jsonDateString = "2014-09-27T12:30:00.450000Z"
@@ -42,7 +43,8 @@ class ParserTests: XCTestCase {
         let timestamp = Date().timeIntervalSinceNow
         let parser = ParserBuildSteps(machineName: machineName,
                                       omitWarningsDetails: false,
-                                      omitNotesDetails: false)
+                                      omitNotesDetails: false,
+                                      truncLargeIssues: false)
         let fakeMainSection = IDEActivityLogSection(sectionType: 1,
                                                     domainType: "",
                                                     title: "Main",
@@ -70,7 +72,8 @@ class ParserTests: XCTestCase {
         if let hostName = Host.current().localizedName {
             let parserNoMachineName = ParserBuildSteps(machineName: nil,
                                                        omitWarningsDetails: false,
-                                                       omitNotesDetails: false)
+                                                       omitNotesDetails: false,
+                                                       truncLargeIssues: false)
             let buildStepNoMachineName = try parserNoMachineName.parse(activityLog: fakeActivityLog)
             XCTAssertEqual("\(hostName)_\(uniqueIdentifier)", buildStepNoMachineName.buildIdentifier)
         }
@@ -449,7 +452,8 @@ note: use 'updatedDoSomething' instead\r doSomething()\r        ^~~~~~~~~~~\r   
                                                        andText: "This is deprecated, [-Wdeprecated-declarations]",
                                                        loc: textDocumentLocation)
         let parser = ParserBuildSteps(omitWarningsDetails: true,
-                                      omitNotesDetails: false)
+                                      omitNotesDetails: false,
+                                      truncLargeIssues: false)
         let build = try parser.parse(activityLog: fakeLog)
         XCTAssertEqual(0, build.warnings?.count ?? 0, "Warnings should be empty")
         XCTAssertEqual(1, build.warningCount, "Number of warnings should be reported")
@@ -484,9 +488,45 @@ note: use 'updatedDoSomething' instead\r doSomething()\r        ^~~~~~~~~~~\r   
                                                        andText: "Log",
                                                        loc: textDocumentLocation)
         let parser = ParserBuildSteps(omitWarningsDetails: false,
-                                      omitNotesDetails: true)
+                                      omitNotesDetails: true,
+                                      truncLargeIssues: false)
         let build = try parser.parse(activityLog: fakeLog)
         XCTAssertEqual(0, build.notes?.count ?? 0, "Notes should be empty")
+    }
+
+    func testParseTruncateLargeIssues() throws {
+        let timestamp = Date().timeIntervalSinceReferenceDate
+        let textDocumentLocation = DVTTextDocumentLocation(documentURLString: "file://project/file.swift",
+                                                           timestamp: timestamp,
+                                                           startingLineNumber: 10,
+                                                           startingColumnNumber: 11,
+                                                           endingLineNumber: 12,
+                                                           endingColumnNumber: 13,
+                                                           characterRangeEnd: 14,
+                                                           characterRangeStart: 15,
+                                                           locationEncoding: 16)
+        let aThousandWarnings = (0...999).map { _ in
+            IDEActivityLogMessage(title: "Swift Compiler Warning",
+                                  shortTitle: "",
+                                  timeEmitted: timestamp,
+                                  rangeEndInSectionText: 18446744073709551615,
+                                  rangeStartInSectionText: 0,
+                                  subMessages: [],
+                                  severity: 1,
+                                  type: "com.apple.dt.IDE.diagnostic",
+                                  location: textDocumentLocation,
+                                  categoryIdent: "",
+                                  secondaryLocations: [],
+                                  additionalDescription: "")
+        }
+        let fakeLog = getFakeIDEActivityLogWithMessages(aThousandWarnings,
+                                                       andText: "Swift Compiler Warning",
+                                                       loc: textDocumentLocation)
+        let parser = ParserBuildSteps(omitWarningsDetails: false,
+                                      omitNotesDetails: false,
+                                      truncLargeIssues: true)
+        let build = try parser.parse(activityLog: fakeLog)
+        XCTAssertEqual(100, build.warnings?.count ?? 0, "Warnings should be truncated up to 100")
     }
 
     // swiftlint:disable line_length
