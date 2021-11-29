@@ -19,8 +19,12 @@
 
 import Foundation
 
-public struct Version {
-
-    public static let current = "0.2.32"
-
+class BuildStatusSanitizer {
+    static func sanitize(originalStatus: String) -> String {
+        let sanitizedStatus = originalStatus
+            .replacingOccurrences(of: "Build", with: "")
+            .replacingOccurrences(of: "Clean", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return sanitizedStatus
+    }
 }
