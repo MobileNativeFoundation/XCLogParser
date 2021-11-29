@@ -505,7 +505,7 @@ note: use 'updatedDoSomething' instead\r doSomething()\r        ^~~~~~~~~~~\r   
                                                            characterRangeEnd: 14,
                                                            characterRangeStart: 15,
                                                            locationEncoding: 16)
-        let aThousandWarnings = (0...999).map { index in
+        let aThousandWarnings = (0...999).map { _ in
             IDEActivityLogMessage(title: "Swift Compiler Warning",
                                   shortTitle: "",
                                   timeEmitted: timestamp,
