@@ -103,7 +103,7 @@ public final class ParserBuildSteps {
     /// - returns: A `BuildStep` with the parsed content from the log.
     public func parse(activityLog: IDEActivityLog) throws -> BuildStep {
         self.buildIdentifier = "\(machineName)_\(activityLog.mainSection.uniqueIdentifier)"
-        buildStatus = activityLog.mainSection.localizedResultString.replacingOccurrences(of: "Build ", with: "")
+        buildStatus = BuildStatusSanitizer.sanitize(originalStatus: activityLog.mainSection.localizedResultString)
         let mainSectionWithTargets = activityLog.mainSection.groupedByTarget()
         var mainBuildStep = try parseLogSection(logSection: mainSectionWithTargets, type: .main, parentSection: nil)
         mainBuildStep.errorCount = totalErrors
