@@ -62,6 +62,9 @@ public enum NoticeType: String, Codable {
     /// Error running a Build Phase's script
     case scriptPhaseError
 
+    /// Failed command error (e.g. ValidateEmbeddedBinary, CodeSign)
+    case failedCommandError
+
     // swiftlint:disable:next cyclomatic_complexity
     public static func fromTitle(_ title: String) -> NoticeType? {
         switch title {
@@ -89,6 +92,8 @@ public enum NoticeType: String, Codable {
             return .scriptPhaseError
         case Prefix("error: Swiftc"):
             return .swiftError
+        case Suffix("failed with a nonzero exit code"):
+            return .failedCommandError
         default:
             return .note
         }
