@@ -85,6 +85,12 @@ public enum DetailStepType: String, Encodable {
     /// For steps that are not a detail step
     case none
 
+    /// Validate watch, extensions binaries
+    case validateEmbeddedBinary
+
+    /// Validate app
+    case validate
+
     // swiftlint:disable:next cyclomatic_complexity
     public static func getDetailType(signature: String) -> DetailStepType {
         switch signature {
@@ -118,6 +124,10 @@ public enum DetailStepType: String, Encodable {
             return .swiftAggregatedCompilation
         case Prefix("PrecompileSwiftBridgingHeader "):
             return .precompileBridgingHeader
+        case Prefix("ValidateEmbeddedBinary "):
+            return .validateEmbeddedBinary
+        case Prefix("Validate "):
+            return .validate
         default:
             return .other
         }

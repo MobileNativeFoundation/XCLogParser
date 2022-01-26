@@ -339,4 +339,13 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual("file:///project/Project.xcodeproj", documentLocation.documentURLString)
         XCTAssertEqual(2.2, documentLocation.timestamp)
     }
+
+    func testTrimmingWhiteCharsInStrings() throws {
+        var locationTokens = textDocumentLocationTokens
+        locationTokens[0] = Token.string(" file:///project/EntityComponentView.m\n")
+        var iterator = locationTokens.makeIterator()
+        let documentLocation = try parser.parseDVTTextDocumentLocation(iterator: &iterator)
+
+        XCTAssertEqual("file:///project/EntityComponentView.m", documentLocation.documentURLString)
+    }
 }

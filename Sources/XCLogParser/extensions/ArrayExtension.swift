@@ -50,7 +50,8 @@ extension Array where Element: Notice {
             $0.type == .clangError ||
             $0.type == .linkerError ||
             $0.type == .packageLoadingError ||
-            $0.type == .scriptPhaseError
+            $0.type == .scriptPhaseError ||
+            $0.type == .failedCommandError
         }
     }
 
