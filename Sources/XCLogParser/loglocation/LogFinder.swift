@@ -32,7 +32,7 @@ public struct LogFinder {
 
     let logManifestFile = "LogStoreManifest.plist"
 
-    let emmptyDirResponseMessage = """
+    let emptyDirResponseMessage = """
     Error. Couldn't find the derived data directory.
     Please use the --filePath option to specify the path to the xcactivitylog file you want to parse.
     """
@@ -199,7 +199,7 @@ public struct LogFinder {
         if let result = try executeXcodeBuild(args: arguments) {
             return try parseXcodeBuildDir(result)
         }
-        throw LogError.xcodeBuildError(emmptyDirResponseMessage)
+        throw LogError.xcodeBuildError(emptyDirResponseMessage)
     }
 
     /// Gets the latest xcactivitylog file path for the given projectFolder
@@ -248,7 +248,7 @@ public struct LogFinder {
         if let result = try executeXcodeBuild(args: arguments) {
             return try parseXcodeBuildDir(result)
         }
-        throw LogError.xcodeBuildError(emmptyDirResponseMessage)
+        throw LogError.xcodeBuildError(emptyDirResponseMessage)
     }
 
     /// Returns the latest xcactivitylog file path in the given directory
@@ -317,6 +317,6 @@ public struct LogFinder {
                 .replacingOccurrences(of: buildDirSettingsPrefix, with: "")
                 .replacingOccurrences(of: "Build/Products", with: logsDir)
         }
-        throw LogError.xcodeBuildError(emmptyDirResponseMessage)
+        throw LogError.xcodeBuildError(emptyDirResponseMessage)
     }
 }
