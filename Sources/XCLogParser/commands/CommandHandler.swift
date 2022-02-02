@@ -21,10 +21,16 @@ import Foundation
 
 public struct CommandHandler {
 
-    let logFinder = LogFinder()
-    let activityLogParser = ActivityParser()
+    let logFinder: LogFinder
+    let activityLogParser: ActivityParser
 
-    public init() { }
+    public init(
+        logFinder: LogFinder = .init(),
+        activityLogParser: ActivityParser = .init()
+    ) {
+        self.logFinder = logFinder
+        self.activityLogParser = activityLogParser
+    }
 
     public func handle(command: Command) throws {
         switch command.action {
