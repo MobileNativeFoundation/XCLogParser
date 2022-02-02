@@ -24,13 +24,13 @@ import XcodeHasher
 /// Helper methods to locate Xcode's Log directory and its content
 public struct LogFinder {
 
-    let buildDirSettingsPrefix: String
+    let buildDirSettingsPrefix = "BUILD_DIR = "
 
     let xcodebuildPath: String
 
     let logType: LogType
 
-    let logManifestFile: String
+    let logManifestFile = "LogStoreManifest.plist"
 
     let emptyDirResponseMessage = """
     Error. Couldn't find the derived data directory.
@@ -45,15 +45,11 @@ public struct LogFinder {
     }
 
     public init(
-        buildDirSettingsPrefix: String = "BUILD_DIR = ",
         xcodebuildPath: String = "/usr/bin/xcodebuild",
-        logType: LogType  = .build,
-        logManifestFile: String = "LogStoreManifest.plist"
+        logType: LogType  = .build
     ) {
-        self.buildDirSettingsPrefix = buildDirSettingsPrefix
         self.xcodebuildPath = xcodebuildPath
         self.logType = logType
-        self.logManifestFile = logManifestFile
     }
 
     public func findLatestLogWithLogOptions(_ logOptions: LogOptions) throws -> URL {
