@@ -28,7 +28,7 @@ public struct LogFinder {
 
     let xcodebuildPath: String
 
-    let logsDir: String
+    let logType: LogType
 
     let logManifestFile: String
 
@@ -47,12 +47,12 @@ public struct LogFinder {
     public init(
         buildDirSettingsPrefix: String = "BUILD_DIR = ",
         xcodebuildPath: String = "/usr/bin/xcodebuild",
-        logsDir: String  = "/Logs/Build/",
+        logType: LogType  = .build,
         logManifestFile: String = "LogStoreManifest.plist"
     ) {
         self.buildDirSettingsPrefix = buildDirSettingsPrefix
         self.xcodebuildPath = xcodebuildPath
-        self.logsDir = logsDir
+        self.logType = logType
         self.logManifestFile = logManifestFile
     }
 
@@ -121,8 +121,8 @@ public struct LogFinder {
         // when xcodebuild is run with -derivedDataPath the logs are at the root level
         if logOptions.derivedDataPath.isEmpty == false {
             if FileManager.default.fileExists(atPath:
-                derivedData.appendingPathComponent(logsDir).path) {
-                return derivedData.appendingPathComponent(logsDir)
+                                                derivedData.appendingPathComponent(logType.path).path) {
+                return derivedData.appendingPathComponent(logType.path)
             }
         }
         if logOptions.projectLocation.isEmpty == false {
@@ -195,7 +195,7 @@ public struct LogFinder {
                 with --file or the right DerivedData folder with --derived_data
                 """)
         }
-        return match.appendingPathComponent(logsDir)
+        return match.appendingPathComponent(logType.path)
     }
 
     /// Gets the full path of the Build/Logs directory for the given project
@@ -294,7 +294,7 @@ public struct LogFinder {
             .replacingOccurrences(of: ".xcworkspace", with: "")
             .replacingOccurrences(of: ".xcodeproj", with: "")
         let hash = try XcodeHasher.hashString(for: path.string)
-        return "\(projectName)-\(hash)".appending(logsDir)
+        return "\(projectName)-\(hash)".appending(logType.path)
     }
 
     private func executeXcodeBuild(args: [String]) throws -> String? {
@@ -325,7 +325,7 @@ public struct LogFinder {
         if let settings = buildDirSettings.first {
             return settings.trimmingCharacters(in: .whitespacesAndNewlines)
                 .replacingOccurrences(of: buildDirSettingsPrefix, with: "")
-                .replacingOccurrences(of: "Build/Products", with: logsDir)
+                .replacingOccurrences(of: "Build/Products", with: logType.path)
         }
         throw LogError.xcodeBuildError(emptyDirResponseMessage)
     }

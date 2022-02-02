@@ -26,6 +26,9 @@ struct ParseCommand: ParsableCommand {
         commandName: "parse",
         abstract: "Parses the content of an xcactivitylog file"
     )
+    
+    @Option(name: .long, help: "Type of .xactivitylog file to look for.")
+    var logs: LogType = .build
 
     @Option(name: .long, help: "The path to a .xcactivitylog file.")
     var file: String?
@@ -157,7 +160,9 @@ struct ParseCommand: ParsableCommand {
         guard let xclReporter = Reporter(rawValue: reporter) else {
             return
         }
-        let commandHandler = CommandHandler()
+        let commandHandler = CommandHandler(
+            logFinder: .init(logType: logs)
+        )
         let logOptions = LogOptions(projectName: project ?? "",
                                     xcworkspacePath: workspace ?? "",
                                     xcodeprojPath: xcodeproj ?? "",
