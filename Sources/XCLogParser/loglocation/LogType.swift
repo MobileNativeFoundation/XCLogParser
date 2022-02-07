@@ -22,6 +22,6 @@ public enum LogType: String {
 public extension LogType {
 
     var path: String {
-        "/Logs/\(self)/"
+        "/Logs/\(self.rawValue)/"
     }
 }
