@@ -38,6 +38,9 @@ public struct LogOptions {
 
     /// The path to a LogManifest.plist file
     let logManifestPath: String
+    
+    /// Type of logs to search for
+    let logType: LogType
 
     /// Use strict Xcode project naming.
     let strictProjectName: Bool
@@ -56,6 +59,7 @@ public struct LogOptions {
                 xcodeprojPath: String,
                 derivedDataPath: String,
                 xcactivitylogPath: String,
+                logType: LogType,
                 strictProjectName: Bool = false,
                 newerThan: Date? = nil) {
         self.projectName = projectName
@@ -63,6 +67,7 @@ public struct LogOptions {
         self.xcodeprojPath = xcodeprojPath
         self.derivedDataPath = derivedDataPath
         self.xcactivitylogPath = xcactivitylogPath
+        self.logType = logType
         self.logManifestPath  = String()
         self.strictProjectName = strictProjectName
         self.newerThan = newerThan
@@ -72,6 +77,7 @@ public struct LogOptions {
                 xcworkspacePath: String,
                 xcodeprojPath: String,
                 derivedDataPath: String,
+                logType: LogType,
                 logManifestPath: String,
                 strictProjectName: Bool = false,
                 newerThan: Date? = nil) {
@@ -80,6 +86,7 @@ public struct LogOptions {
         self.xcodeprojPath = xcodeprojPath
         self.derivedDataPath = derivedDataPath
         self.logManifestPath = logManifestPath
+        self.logType = logType
         self.xcactivitylogPath = String()
         self.strictProjectName = strictProjectName
         self.newerThan = newerThan

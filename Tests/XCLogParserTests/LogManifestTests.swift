@@ -78,6 +78,7 @@ class LogManifestTests: XCTestCase {
                    xcworkspacePath: "",
                    xcodeprojPath: "",
                    derivedDataPath: "",
+                   logType: .build,
                    logManifestPath: logURL.path)
         let logEntries = try LogManifest().getWithLogOptions(logOptions)
         XCTAssertEqual(1, logEntries.count)

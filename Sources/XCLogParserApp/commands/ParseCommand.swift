@@ -160,14 +160,13 @@ struct ParseCommand: ParsableCommand {
         guard let xclReporter = Reporter(rawValue: reporter) else {
             return
         }
-        let commandHandler = CommandHandler(
-            logFinder: .init(logType: logs)
-        )
+        let commandHandler = CommandHandler()
         let logOptions = LogOptions(projectName: project ?? "",
                                     xcworkspacePath: workspace ?? "",
                                     xcodeprojPath: xcodeproj ?? "",
                                     derivedDataPath: derivedData ?? "",
                                     xcactivitylogPath: file ?? "",
+                                    logType: logs,
                                     strictProjectName: strictProjectName)
         let actionOptions = ActionOptions(reporter: xclReporter,
                                           outputPath: output ?? "",
