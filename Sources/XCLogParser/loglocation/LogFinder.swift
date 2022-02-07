@@ -69,7 +69,7 @@ public struct LogFinder {
         let projectDir = try getProjectDirWithLogOptions(logOptions)
 
         // get latestLog
-        return try getLatestLogsInDir(projectDir)
+        return try getLatestLogsInDir(projectDir, since: logOptions.newerThan)
     }
 
     public func findLogManifestWithLogOptions(_ logOptions: LogOptions) throws -> URL {
@@ -291,13 +291,20 @@ public struct LogFinder {
     /// - parameter dir: The full path for the directory
     /// - returns: The paths of the latest xcactivitylog file in it since given date.
     /// - throws: An `Error` if the directory doesn't exist or if there are no xcactivitylog files in it.
-    public func getLatestLogsInDir(_ dir: URL) throws -> [URL] {
+    public func getLatestLogsInDir(_ dir: URL, since date: Date?) throws -> [URL] {
         let fileManager = FileManager.default
         let files = try fileManager.contentsOfDirectory(at: dir,
                                                         includingPropertiesForKeys: [.contentModificationDateKey],
                                                         options: .skipsHiddenFiles)
         let sorted = try files
             .filter { $0.path.hasSuffix(".xcactivitylog") }
+            .filter {
+                guard let timestamp = date else { return true }
+                guard
+                    let lastModified = try? $0.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
+                else { return false }
+                return lastModified > timestamp
+            }
             .sorted {
                 let lhv = try $0.resourceValues(forKeys: [.contentModificationDateKey])
                 let rhv = try $1.resourceValues(forKeys: [.contentModificationDateKey])

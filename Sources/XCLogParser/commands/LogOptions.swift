@@ -41,6 +41,9 @@ public struct LogOptions {
 
     /// Use strict Xcode project naming.
     let strictProjectName: Bool
+    
+    /// Timestamp to check
+    let newerThan: Date?
 
     /// Computed property, return the xcworkspacePath if not empty or
     /// the xcodeprojPath if xcworkspacePath is empty
@@ -53,7 +56,8 @@ public struct LogOptions {
                 xcodeprojPath: String,
                 derivedDataPath: String,
                 xcactivitylogPath: String,
-                strictProjectName: Bool = false) {
+                strictProjectName: Bool = false,
+                newerThan: Date? = nil) {
         self.projectName = projectName
         self.xcworkspacePath = xcworkspacePath
         self.xcodeprojPath = xcodeprojPath
@@ -61,6 +65,7 @@ public struct LogOptions {
         self.xcactivitylogPath = xcactivitylogPath
         self.logManifestPath  = String()
         self.strictProjectName = strictProjectName
+        self.newerThan = newerThan
     }
 
     public init(projectName: String,
@@ -68,7 +73,8 @@ public struct LogOptions {
                 xcodeprojPath: String,
                 derivedDataPath: String,
                 logManifestPath: String,
-                strictProjectName: Bool = false) {
+                strictProjectName: Bool = false,
+                newerThan: Date? = nil) {
         self.projectName = projectName
         self.xcworkspacePath = xcworkspacePath
         self.xcodeprojPath = xcodeprojPath
@@ -76,6 +82,7 @@ public struct LogOptions {
         self.logManifestPath = logManifestPath
         self.xcactivitylogPath = String()
         self.strictProjectName = strictProjectName
+        self.newerThan = newerThan
     }
 
 }
