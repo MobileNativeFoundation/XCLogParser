@@ -60,9 +60,16 @@ public struct LogFinder {
         let projectDir = try getProjectDirWithLogOptions(logOptions)
 
         // get latestLog
-
         return try URL(fileURLWithPath: getLatestLogInDir(projectDir))
 
+    }
+    
+    public func findLatestLogsWithLogOptions(_ logOptions: LogOptions) throws -> [URL] {
+        // get project dir
+        let projectDir = try getProjectDirWithLogOptions(logOptions)
+
+        // get latestLog
+        return try getLatestLogsInDir(projectDir)
     }
 
     public func findLogManifestWithLogOptions(_ logOptions: LogOptions) throws -> URL {
@@ -278,6 +285,31 @@ public struct LogFinder {
             throw LogError.noLogFound(dir: dir.path)
         }
         return logPath.path
+    }
+    
+    /// Returns the latest xcactivitylog file path in the given directory
+    /// - parameter dir: The full path for the directory
+    /// - returns: The paths of the latest xcactivitylog file in it since given date.
+    /// - throws: An `Error` if the directory doesn't exist or if there are no xcactivitylog files in it.
+    public func getLatestLogsInDir(_ dir: URL) throws -> [URL] {
+        let fileManager = FileManager.default
+        let files = try fileManager.contentsOfDirectory(at: dir,
+                                                        includingPropertiesForKeys: [.contentModificationDateKey],
+                                                        options: .skipsHiddenFiles)
+        let sorted = try files
+            .filter { $0.path.hasSuffix(".xcactivitylog") }
+            .sorted {
+                let lhv = try $0.resourceValues(forKeys: [.contentModificationDateKey])
+                let rhv = try $1.resourceValues(forKeys: [.contentModificationDateKey])
+                guard let lhDate = lhv.contentModificationDate, let rhDate = rhv.contentModificationDate else {
+                    return false
+                }
+                return lhDate.compare(rhDate) == .orderedDescending
+            }
+        guard !sorted.isEmpty else {
+            throw LogError.noLogFound(dir: dir.path)
+        }
+        return sorted
     }
 
     /// Generates the Derived Data Build Logs Folder name for the given project path
