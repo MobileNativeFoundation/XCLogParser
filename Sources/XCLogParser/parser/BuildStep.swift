@@ -332,33 +332,15 @@ public extension BuildStep {
 
     /// Traverse a tree of BuildStep and returns a flatten Array.
     /// Used in some `BuildReporter` because is easy to handle an Array. <br>
-    /// This used to be a recursive function, but it was taken too long.
-    /// Since it's not recursive, it only flattens the first 3 levels of the tree.
     func flatten() -> [BuildStep] {
         var steps = [BuildStep]()
         var noSubSteps = self
         noSubSteps.subSteps = [BuildStep]()
         steps.append(noSubSteps)
         for subStep in self.subSteps {
-            steps.append(contentsOf: flattenSubstep(subStep: subStep))
+            steps.append(contentsOf: subStep.flatten())
         }
         return steps
-    }
-
-    func flattenSubstep(subStep: BuildStep) -> [BuildStep] {
-        var details = [BuildStep]()
-        var noSubSteps = subStep
-        noSubSteps.subSteps = [BuildStep]()
-        details.append(noSubSteps)
-        for detail in subStep.subSteps {
-            var noSubSteps = detail
-            noSubSteps.subSteps = [BuildStep]()
-            details.append(noSubSteps)
-            if detail.subSteps.isEmpty == false {
-                details.append(contentsOf: detail.subSteps)
-            }
-        }
-        return details
     }
 
     func summarize() -> BuildStep {
