@@ -333,6 +333,17 @@ public class DVTDocumentLocation: Encodable {
 
 }
 
+public class DVTMemberDocumentLocation: DVTDocumentLocation {
+    public let some: String // Sample: irs-zY-n9e
+    
+    public init(documentURLString: String, timestamp: Double, some: String) {
+        self.some = some
+        
+        super.init(documentURLString: documentURLString,
+                   timestamp: timestamp)
+    }
+}
+
 public class DVTTextDocumentLocation: DVTDocumentLocation {
     public let startingLineNumber: UInt64
     public let startingColumnNumber: UInt64
