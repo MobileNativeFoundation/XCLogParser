@@ -568,3 +568,25 @@ public class IBDocumentMemberLocation: DVTDocumentLocation {
         try container.encode(attributeSearchLocation, forKey: .attributeSearchLocation)
     }
 }
+
+// MARK: Added in Xcode 14
+
+////  From DVTFoundation.framework
+public class DVTMemberDocumentLocation: DVTDocumentLocation, Equatable {
+
+    public let member: String
+
+    public init(documentURLString: String, timestamp: Double, member: String) {
+        self.member = member
+        super.init(documentURLString: documentURLString, timestamp: timestamp)
+    }
+
+    // MARK: Equatable method
+
+    public static func == (lhs: DVTMemberDocumentLocation, rhs: DVTMemberDocumentLocation) -> Bool {
+        return lhs.documentURLString == rhs.documentURLString &&
+        lhs.timestamp == rhs.timestamp &&
+        lhs.member == rhs.member
+    }
+
+}
