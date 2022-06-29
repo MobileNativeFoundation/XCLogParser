@@ -310,6 +310,8 @@ public class ActivityParser {
             return try parseDVTDocumentLocation(iterator: &iterator)
         } else if className == String(describing: IBDocumentMemberLocation.self) {
             return try parseIBDocumentMemberLocation(iterator: &iterator)
+        } else if className == String(describing: DVTMemberDocumentLocation.self) {
+            return try parseDVTMemberDocumentLocation(iterator: &iterator)
         }
         throw XCLogParserError.parseError("Unexpected className found parsing DocumentLocation \(className)")
     }
@@ -563,6 +565,13 @@ public class ActivityParser {
             return value == 1
         }
         throw XCLogParserError.parseError("Unexpected token parsing Bool: \(token)")
+    }
+
+    private func parseDVTMemberDocumentLocation(iterator: inout IndexingIterator<[Token]>)
+    throws -> DVTMemberDocumentLocation {
+        return DVTMemberDocumentLocation(documentURLString: try parseAsString(token: iterator.next()),
+                                         timestamp: try parseAsDouble(token: iterator.next()),
+                                         member: try parseAsString(token: iterator.next()))
     }
 
 }

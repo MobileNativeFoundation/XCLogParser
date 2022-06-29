@@ -348,4 +348,31 @@ class ActivityParserTests: XCTestCase {
 
         XCTAssertEqual("file:///project/EntityComponentView.m", documentLocation.documentURLString)
     }
+
+    let expectedDVTMemberDocumentLocation: DVTMemberDocumentLocation = DVTMemberDocumentLocation(
+        documentURLString: "file:///project/EntityComponentView.m",
+        timestamp: 2.2,
+        member: "abcdef")
+
+    let memberDocumentLocationTokens: [Token] = {
+        return [
+            Token.className("DVTMemberDocumentLocation"),
+            Token.classNameRef("DVTMemberDocumentLocation"),
+            Token.string("file:///project/EntityComponentView.m"),
+            Token.double(2.2),
+            Token.string("abcdef")]
+    }()
+
+    func testParseDVTMemberDocumentLocation() throws {
+        var iterator = memberDocumentLocationTokens.makeIterator()
+        let documentLocation = try parser.parseDocumentLocation(iterator: &iterator)
+        XCTAssert(documentLocation is DVTMemberDocumentLocation,
+                  "Document location should be a DVTMemberDocumentLocation")
+
+        guard let documentMemberLocation = documentLocation as? DVTMemberDocumentLocation else {
+            return
+        }
+        XCTAssertEqual(expectedDVTMemberDocumentLocation, documentMemberLocation)
+    }
+
 }
