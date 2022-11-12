@@ -23,9 +23,13 @@ let package = Package(
         ),
         .target(
             name: "XCLogParser",
-            dependencies: ["Gzip", "XcodeHasher", "PathKit"]
+            dependencies: [
+                .product(name: "Gzip", package: "GzipSwift"),
+                "XcodeHasher",
+                "PathKit"
+            ]
         ),
-        .target(
+        .executableTarget(
             name: "XCLogParserApp",
             dependencies: [
                 "XCLogParser",
