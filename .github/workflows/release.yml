@@ -6,9 +6,9 @@ on:
 jobs:
   macOS:
     name: Add macOS binaries to release
-    runs-on: macOS-latest
+    runs-on: macos-12
     env:
-      XCODE_VERSION: ${{ '12.5' }}
+      XCODE_VERSION: ${{ '14.1' }}
     steps:
       - name: Select Xcode
         run: "sudo xcode-select -s /Applications/Xcode_$XCODE_VERSION.app"
@@ -45,7 +45,7 @@ jobs:
     name: Add Linux binaries to release
     runs-on: ubuntu-latest
     container:
-      image: swift:5.2
+      image: swift:5.7.1
     steps:
       - name: Checkout
         uses: actions/checkout@v1
