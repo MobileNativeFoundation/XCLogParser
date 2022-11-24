@@ -187,7 +187,8 @@ extension Notice {
             return true
         }
         // Support for Swift and ObjC code marked as deprecated
-        if type == .swiftError || type == .swiftWarning || type == .projectWarning || type == .clangWarning {
+        if type == .swiftError || type == .swiftWarning || type == .projectWarning || type == .clangWarning
+            || type == .note {
             return text.contains(" deprecated:")
                 || text.contains("was deprecated in")
                 || text.contains("has been deprecated")
