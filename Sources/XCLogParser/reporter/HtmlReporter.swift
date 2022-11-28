@@ -125,6 +125,7 @@ public struct HtmlReporter: LogReporter {
             stepsWithErrors.append(contentsOf: getStepsWithErrors(target: target))
             stepsWithWarnings.append(contentsOf: getStepsWithWarnings(target: target))
             let targetName = target.identifier.replacingOccurrences(of: " ", with: "_")
+                .replacingOccurrences(of: "'", with: "_")
             let name = "\(targetName).js"
             let json = try encoder.encode(target.flatten())
             guard let jsonString = String(data: json, encoding: .utf8) else {
