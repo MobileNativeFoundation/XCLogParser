@@ -96,7 +96,7 @@ public enum DetailStepType: String, Encodable {
         switch signature {
         case Prefix("CompileC "):
             return .cCompilation
-        case Prefix("CompileSwift "):
+        case Prefix("CompileSwift "), Prefix("SwiftCompile "):
             return .swiftCompilation
         case Prefix("Ld "):
             return .linker
