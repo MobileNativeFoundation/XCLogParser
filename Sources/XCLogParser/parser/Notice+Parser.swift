@@ -192,6 +192,7 @@ extension Notice {
             return text.contains(" deprecated:")
                 || text.contains("was deprecated in")
                 || text.contains("has been deprecated")
+                || text.contains("is deprecated")
         }
         return false
     }
