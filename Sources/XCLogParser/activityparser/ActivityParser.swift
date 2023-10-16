@@ -234,6 +234,24 @@ public class ActivityParser {
                                      endLocation: try parseDocumentLocation(iterator: &iterator))
     }
 
+    public func parseIDEActivityLogActionMessage(iterator: inout IndexingIterator<[Token]>) throws
+        -> IDEActivityLogActionMessage {
+        return IDEActivityLogActionMessage(
+                                     title: try parseAsString(token: iterator.next()),
+                                     shortTitle: try parseAsString(token: iterator.next()),
+                                     timeEmitted: try Double(parseAsInt(token: iterator.next())),
+                                     rangeEndInSectionText: try parseAsInt(token: iterator.next()),
+                                     rangeStartInSectionText: try parseAsInt(token: iterator.next()),
+                                     subMessages: try parseMessages(iterator: &iterator),
+                                     severity: Int(try parseAsInt(token: iterator.next())),
+                                     type: try parseAsString(token: iterator.next()),
+                                     location: try parseDocumentLocation(iterator: &iterator),
+                                     categoryIdent: try parseAsString(token: iterator.next()),
+                                     secondaryLocations: try parseDocumentLocations(iterator: &iterator),
+                                     additionalDescription: try parseAsString(token: iterator.next()),
+                                     action: try parseAsString(token: iterator.next()))
+    }
+
     private func getTokens(_ logURL: URL,
                            redacted: Bool,
                            withoutBuildSpecificInformation: Bool) throws -> [Token] {
@@ -336,6 +354,9 @@ public class ActivityParser {
         }
         if className == String(describing: IDEActivityLogAnalyzerEventStepMessage.self) {
             return try parseIDEActivityLogAnalyzerEventStepMessage(iterator: &iterator)
+        }
+        if className == String(describing: IDEActivityLogActionMessage.self) {
+            return try parseIDEActivityLogActionMessage(iterator: &iterator)
         }
         throw XCLogParserError.parseError("Unexpected className found parsing IDEActivityLogMessage \(className)")
     }
