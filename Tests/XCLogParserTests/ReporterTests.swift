@@ -38,6 +38,9 @@ class ReporterTests: XCTestCase {
 
         let issuesReporter = Reporter.issues.makeLogReporter()
         XCTAssertTrue(issuesReporter is IssuesReporter)
+        
+        let otelReporter = Reporter.otel.makeLogReporter()
+        XCTAssertTrue(otelReporter is OTELReporter)
     }
 
 }

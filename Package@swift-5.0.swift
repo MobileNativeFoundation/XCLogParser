@@ -15,6 +15,7 @@ let package = Package(
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .exact("1.3.3")),
         .package(url: "https://github.com/kylef/PathKit.git", from: "1.0.1"),
         .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.3.0")),
+        .package(url: "https://github.com/open-telemetry/opentelemetry-swift", from: "1.7.0"),
     ],
     targets: [
         .target(
@@ -23,7 +24,7 @@ let package = Package(
         ),
         .target(
             name: "XCLogParser",
-            dependencies: ["Gzip", "XcodeHasher", "PathKit"]
+            dependencies: ["Gzip", "XcodeHasher", "PathKit", "OpenTelemetrySdk"]
         ),
         .target(
             name: "XCLogParserApp",
