@@ -39,10 +39,10 @@ extension LogError: CustomStringConvertible {
         switch self {
         case .noDerivedDataFound:
             return "We couldn't find the derivedData directory. " +
-            "If you use a custom derivedData directory, use the --derivedData option to pass it. "
+            "If you use a custom derivedData directory, use the --derived_data option to pass it. "
         case .noLogFound(let dir):
             return "We couldn't find a log in the directory \(dir). " +
-                "If the log is in a custom derivedData dir, use the --derivedData option. " +
+                "If the log is in a custom derivedData dir, use the --derived_data option. " +
                 "You can also pass the full path to the xcactivity log with the --file option"
         case .xcodeBuildError(let error):
             return error
@@ -52,7 +52,7 @@ extension LogError: CustomStringConvertible {
             return "\(path) is not a valid xcactivitylog file"
         case .noLogManifestFound(let path):
             return "We couldn't find a logManifest in the path \(path). " +
-            "If the LogManifest is in a custom derivedData directory, use the --derivedData option."
+            "If the LogManifest is in a custom derivedData directory, use the --derived_data option."
         case .invalidLogManifest(let path):
             return "\(path) is not a valid LogManifest file"
         }
