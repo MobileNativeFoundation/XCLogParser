@@ -521,6 +521,51 @@ public class IDEActivityLogAnalyzerEventStepMessage: IDEActivityLogMessage {
     }
 }
 
+public class IDEActivityLogActionMessage: IDEActivityLogMessage {
+
+    public let action: String
+
+    public init(title: String,
+                shortTitle: String,
+                timeEmitted: Double,
+                rangeEndInSectionText: UInt64,
+                rangeStartInSectionText: UInt64,
+                subMessages: [IDEActivityLogMessage],
+                severity: Int,
+                type: String,
+                location: DVTDocumentLocation,
+                categoryIdent: String,
+                secondaryLocations: [DVTDocumentLocation],
+                additionalDescription: String,
+                action: String) {
+
+        self.action = action
+
+        super.init(title: title,
+                   shortTitle: shortTitle,
+                   timeEmitted: timeEmitted,
+                   rangeEndInSectionText: rangeEndInSectionText,
+                   rangeStartInSectionText: rangeStartInSectionText,
+                   subMessages: subMessages,
+                   severity: severity,
+                   type: type,
+                   location: location,
+                   categoryIdent: categoryIdent,
+                   secondaryLocations: secondaryLocations,
+                   additionalDescription: additionalDescription)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case action
+    }
+
+    override public func encode(to encoder: Encoder) throws {
+        try super.encode(to: encoder)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(action, forKey: .action)
+    }
+}
+
 // MARK: IDEInterfaceBuilderKit
 
 public class IBMemberID: Encodable {
