@@ -18,7 +18,7 @@
 // under the License.
 
 import Foundation
-import CryptoSwift
+import CryptoKit
 
 // Thanks to https://pewpewthespells.com/blog/xcode_deriveddata_hashes.html for
 // the initial Objective-C implementation.
@@ -33,7 +33,13 @@ public class XcodeHasher {
         var result = Array(repeating: "", count: 28)
 
         // Compute md5 hash of the path
-        let digest = path.bytes.md5()
+        let pathAsData = path.data(using: String.Encoding.utf8, allowLossyConversion: true)
+        let pathBytes = pathAsData != nil ? Array(pathAsData!) : Array(path.utf8)
+        let hash = Insecure.MD5.hash(data: pathBytes)
+        var digest: [UInt8] = []
+        hash.withUnsafeBytes { bufferPointer in
+            digest = Array(bufferPointer[0..<Insecure.MD5.byteCount])
+        }
 
         // Split 16 bytes into two chunks of 8 bytes each.
         let partitions = stride(from: 0, to: digest.count, by: 8).map {
