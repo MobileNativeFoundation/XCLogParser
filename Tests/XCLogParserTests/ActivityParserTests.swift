@@ -21,6 +21,7 @@ import XCTest
 @testable import XCLogParser
 
 // swiftlint:disable type_body_length
+// swiftlint:disable file_length
 class ActivityParserTests: XCTestCase {
 
     let parser = ActivityParser()
