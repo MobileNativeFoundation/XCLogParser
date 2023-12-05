@@ -49,18 +49,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Install Ruby
-        run: apt-get update && apt-get install -y ruby zlib1g-dev
+
+      # Build with dynamically linked stdlib
       - name: Build
-        run: LANG=en_US.UTF-8 LC_CTYPE=UTF-8 rake build[release]
+        run: swift build -c release
       - name: Set tag name
         run: echo "TAG_NAME=$(echo $GITHUB_REF | cut -c 11-)" >> $GITHUB_ENV
       - name: Zip release
         uses: montudor/action-zip@v0.1.0
         with:
           args: zip -j XCLogParser-linux-amd64.zip .build/release/xclogparser
-      - name: Rename zip
-        run: "mkdir releases && mv XCLogParser-linux-amd64.zip releases/XCLogParser-linux-amd64-$TAG_NAME.zip"
+
+      # Build standalone
+      - name: Build
+        run: swift build -c release --static-swift-stdlib
+      - name: Zip release
+        uses: montudor/action-zip@v0.1.0
+        with:
+          args: zip -j XCLogParser-linux-amd64-standalone.zip .build/release/xclogparser
+
+      # Package
+      - name: Rename Zip Files
+        run: "mkdir -p releases && mv *.zip releases/"
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v1-release
         with:
