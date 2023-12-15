@@ -26,7 +26,7 @@ public struct LogLoader {
         do {
             let data = try Data(contentsOf: url)
             let unzipped = try data.gunzipped()
-            guard let contents =  String(data: unzipped, encoding: .ascii) else {
+            guard let contents =  String(data: unzipped, encoding: .utf8) else {
                 throw LogError.readingFile(url.path)
             }
             return contents
