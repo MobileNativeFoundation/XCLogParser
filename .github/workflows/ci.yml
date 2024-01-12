@@ -33,9 +33,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Install Ruby
-        run: apt-get update && apt-get install -y ruby zlib1g-dev
       - name: Build and Run
-        run: LANG=en_US.UTF-8 LC_CTYPE=UTF-8 rake build[release]
+        run: swift build
       - name: Test
-        run: LANG=en_US.UTF-8 LC_CTYPE=UTF-8 rake test
+        run: swift test
