@@ -64,6 +64,7 @@ class ParserTests: XCTestCase {
                                                     uniqueIdentifier: uniqueIdentifier,
                                                     localizedResultString: "",
                                                     xcbuildSignature: "",
+                                                    attachments: [],
                                                     unknown: 0)
         let fakeActivityLog = IDEActivityLog(version: 10, mainSection: fakeMainSection)
         let buildStep = try parser.parse(activityLog: fakeActivityLog)
@@ -260,6 +261,7 @@ note: use 'updatedDoSomething' instead\r doSomething()\r        ^~~~~~~~~~~\r   
                                                 uniqueIdentifier: "ABC",
                                                 localizedResultString: "",
                                                 xcbuildSignature: "",
+                                                attachments: [],
                                                 unknown: 0)
 
         let parsedTarget = fakeSection.getTargetFromCommand()
@@ -310,6 +312,7 @@ note: use 'updatedDoSomething' instead\r doSomething()\r        ^~~~~~~~~~~\r   
                                                  uniqueIdentifier: "uniqueIdentifier",
                                                  localizedResultString: "",
                                                  xcbuildSignature: "",
+                                                 attachments: [],
                                                  unknown: 0)
         return IDEActivityLog(version: 10, mainSection: fakeMainStep)
     }
@@ -555,6 +558,7 @@ CompileSwift normal x86_64 (in target 'Alamofire' from project 'Pods')
                                      uniqueIdentifier: "uniqueIdentifier",
                                      localizedResultString: "",
                                      xcbuildSignature: "",
+                                     attachments: [],
                                      unknown: 0)
     }()
 }

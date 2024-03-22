@@ -28,7 +28,7 @@ class LogManifestTests: XCTestCase {
 <plist version="1.0">
 <dict>
 <key>logFormatVersion</key>
-<integer>10</integer>
+<integer>11</integer>
 <key>logs</key>
 <dict>
 <key>E8557234-04E4-40E7-A6D6-920AC64BCF21</key>

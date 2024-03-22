@@ -40,6 +40,7 @@ extension IDEActivityLogSection {
                                      uniqueIdentifier: self.uniqueIdentifier,
                                      localizedResultString: self.localizedResultString,
                                      xcbuildSignature: self.xcbuildSignature,
+                                     attachments: self.attachments,
                                      unknown: self.unknown)
     }
 
