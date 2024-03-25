@@ -97,6 +97,12 @@ class ActivityParserTests: XCTestCase {
                          Token.string("501796C4-6BE4-4F80-9F9D-3269617ECC17"),
                          Token.string("localizedResultString"),
                          Token.string("xcbuildSignature"),
+                         Token.list(1),
+                         Token.classNameRef("IDEFoundation.IDEActivityLogSectionAttachment"),
+                         Token.string("com.apple.dt.ActivityLogSectionAttachment.TaskMetrics"),
+                         Token.int(1),
+                         Token.int(0),
+                         Token.json("{\"wcStartTime\":1,\"maxRSS\":1,\"utime\":1,\"wcDuration\":1,\"stime\":1}"),
                          Token.int(0)
         ]
         return startTokens + logMessageTokens + endTokens
@@ -129,7 +135,13 @@ class ActivityParserTests: XCTestCase {
                            Token.string("79D9C1DE-F736-4743-A7C6-B08ED42A1DFE"),
                            Token.null,
                            Token.null,
-                           Token.list(1)
+                           Token.list(1),
+                           Token.classNameRef("IDEFoundation.IDEActivityLogSectionAttachment"),
+                           Token.string("com.apple.dt.ActivityLogSectionAttachment.TaskMetrics"),
+                           Token.int(1),
+                           Token.int(0),
+                           Token.json("{\"wcStartTime\":1,\"maxRSS\":1,\"utime\":1,\"wcDuration\":1,\"stime\":1}"),
+                           Token.list(1),
         ]
         return startTokens + IDEConsoleItemTokens
     }()

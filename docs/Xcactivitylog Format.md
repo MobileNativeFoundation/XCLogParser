@@ -15,6 +15,7 @@ A `SLF` document starts with the header `SLF0`. After the header, the document h
 - Class names
 - Class instances
 - Null
+- JSON
 
 A value encoded is formed by 3 parts:
 
@@ -81,6 +82,14 @@ In this case, there are three encoded values:
 
 The elements of an `Array` are `Class instances`
 
+### JSON
+
+- Character type delimiter: `*`
+- Example: `"{\"wcStartTime\":732791618924407,\"maxRSS\":0,\"utime\":798,\"wcDuration\":852,\"stime\":798}"`
+- Left hand side value: An `Integer` with the number of characters that are part of the `JSON` string.
+
+The JSON is of the type `IDEFoundation.IDEActivityLogSectionAttachment`
+
 ### Class name
 
 - Character type delimiter: `%`
@@ -142,6 +151,7 @@ Inside the logs you can find these classes:
 - `DVTTextDocumentLocation`
 - `IDEActivityLogCommandInvocationSection`
 - `IDEActivityLogMajorGroupSection`
+- `IDEFoundation.IDEActivityLogSectionAttachment`
 
 If you search for them, you will find that they belong to the IDEFoundation.framework. A private framework part of Xcode. You can class dump it to get the headers of those classes. Once you have the headers, you will have the name and type of the properties that belong to the class. Now, you can match them to the tokens you got from the log. Some of them are in the same order than in the headers, but for others it will be about trial and error.
 
