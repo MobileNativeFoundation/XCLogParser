@@ -163,6 +163,11 @@ public final class Lexer {
             return .null
         case .list:
             return handleListTokenTypeCase(payload: payload)
+        case .json:
+            return handleJSONTokenTypeCase(scanner: scanner,
+                                           payload: payload,
+                                           redacted: redacted,
+                                           withoutBuildSpecificInformation: withoutBuildSpecificInformation)
         }
     }
 
@@ -213,6 +218,20 @@ public final class Lexer {
         return .string(content)
     }
 
+    private func handleJSONTokenTypeCase(scanner: Scanner,
+                                         payload: String,
+                                         redacted: Bool,
+                                         withoutBuildSpecificInformation: Bool) -> Token? {
+        guard let content = scanString(length: payload,
+                                       scanner: scanner,
+                                       redacted: redacted,
+                                       withoutBuildSpecificInformation: withoutBuildSpecificInformation) else {
+                                        print("error parsing string")
+                                        return nil
+        }
+        return .json(content)
+    }
+    
     private func handleDoubleTokenTypeCase(payload: String) -> Token? {
         guard let double = hexToInt(payload) else {
             print("error parsing double")
