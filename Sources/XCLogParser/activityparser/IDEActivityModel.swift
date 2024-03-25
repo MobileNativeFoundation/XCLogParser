@@ -653,17 +653,21 @@ public class IDEActivityLogSectionAttachment: Encodable {
         public let wcStartTime: UInt64
         public let wcDuration: UInt64
     }
-        
+
     public let identifier: String
     public let majorVersion: UInt64
     public let minorVersion: UInt64
     public let metrics: BuildOperationTaskMetrics?
-    
-    public init(identifier: String, majorVersion: UInt64, minorVersion: UInt64, metrics: BuildOperationTaskMetrics?) throws {
+
+    public init(
+        identifier: String,
+        majorVersion: UInt64,
+        minorVersion: UInt64,
+        metrics: BuildOperationTaskMetrics?
+    ) throws {
         self.identifier = identifier
         self.majorVersion = majorVersion
         self.minorVersion = minorVersion
         self.metrics = metrics
     }
 }
-

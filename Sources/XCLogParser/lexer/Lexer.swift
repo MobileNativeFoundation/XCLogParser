@@ -217,7 +217,7 @@ public final class Lexer {
         }
         return .string(content)
     }
-    
+
     private func handleJSONTokenTypeCase(scanner: Scanner,
                                          payload: String,
                                          redacted: Bool,
