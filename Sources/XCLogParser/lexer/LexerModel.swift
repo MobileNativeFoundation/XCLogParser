@@ -27,6 +27,7 @@ public enum TokenType: String, CaseIterable {
     case double = "^"
     case null = "-"
     case list = "("
+    case json = "*"
 
     static func all() -> String {
         return TokenType.allCases.reduce(String()) {
@@ -43,6 +44,7 @@ public enum Token: CustomDebugStringConvertible, Equatable {
     case double(Double)
     case null
     case list(Int)
+    case json(String)
 }
 
 extension Token {
@@ -62,6 +64,8 @@ extension Token {
             return "[type: nil]"
         case .list(let count):
             return "[type: list, count: \(count)]"
+        case .json(let json):
+            return "[type: json, value: \(json)]"
         }
     }
 }
