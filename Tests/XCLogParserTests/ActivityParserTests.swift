@@ -108,6 +108,34 @@ class ActivityParserTests: XCTestCase {
         return startTokens + logMessageTokens + endTokens
     }()
 
+    lazy var IDEActivityLogSectionTokensWithoutAttachments: [Token] = {
+        let startTokens = [Token.int(2),
+                           Token.string("com.apple.dt.IDE.BuildLogSection"),
+                           Token.string("Prepare build"),
+                           Token.string("Prepare build"),
+                           Token.double(575479851.278759),
+                           Token.double(575479851.778325),
+                           Token.null,
+                           Token.string("note: Using legacy build system"),
+                           Token.list(1),
+                           Token.className("IDEActivityLogMessage"),
+                           Token.classNameRef("IDEActivityLogMessage"),
+        ]
+        let logMessageTokens = IDEActivityLogMessageTokens
+        let endTokens = [Token.int(1),
+                         Token.int(0),
+                         Token.int(1),
+                         Token.string("subtitle"),
+                         Token.null,
+                         Token.string("commandDetailDesc"),
+                         Token.string("501796C4-6BE4-4F80-9F9D-3269617ECC17"),
+                         Token.string("localizedResultString"),
+                         Token.string("xcbuildSignature"),
+                         Token.int(0)
+        ]
+        return startTokens + logMessageTokens + endTokens
+    }()
+
     let IDEConsoleItemTokens: [Token] = [
         Token.className("IDEConsoleItem"),
         Token.classNameRef("IDEConsoleItem"),
@@ -288,6 +316,7 @@ class ActivityParserTests: XCTestCase {
     }
 
     func testParseIDEActivityLogSection() throws {
+        parser.logVersion = 11
         let tokens = IDEActivityLogSectionTokens
         var iterator = tokens.makeIterator()
         let logSection = try parser.parseIDEActivityLogSection(iterator: &iterator)
@@ -310,15 +339,46 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual("501796C4-6BE4-4F80-9F9D-3269617ECC17", logSection.uniqueIdentifier)
         XCTAssertEqual("localizedResultString", logSection.localizedResultString)
         XCTAssertEqual("xcbuildSignature", logSection.xcbuildSignature)
+        XCTAssertEqual(1, logSection.attachments.count)
+        XCTAssertEqual(0, logSection.unknown)
+    }
+
+    func testParseIDEActivityLogSection_version10() throws {
+        parser.logVersion = 10
+        let tokens = IDEActivityLogSectionTokensWithoutAttachments
+        var iterator = tokens.makeIterator()
+        let logSection = try parser.parseIDEActivityLogSection(iterator: &iterator)
+        XCTAssertEqual(2, logSection.sectionType)
+        XCTAssertEqual("com.apple.dt.IDE.BuildLogSection", logSection.domainType)
+        XCTAssertEqual("Prepare build", logSection.title)
+        XCTAssertEqual("Prepare build", logSection.signature)
+        XCTAssertEqual(575479851.278759, logSection.timeStartedRecording)
+        XCTAssertEqual(575479851.778325, logSection.timeStoppedRecording)
+        XCTAssertEqual(0, logSection.subSections.count)
+        XCTAssertEqual("note: Using legacy build system", logSection.text)
+        XCTAssertEqual(1, logSection.messages.count)
+        XCTAssertTrue(logSection.wasCancelled)
+        XCTAssertFalse(logSection.isQuiet)
+        XCTAssertTrue(logSection.wasFetchedFromCache)
+        XCTAssertEqual("subtitle", logSection.subtitle)
+        XCTAssertEqual("", logSection.location.documentURLString)
+        XCTAssertEqual(0, logSection.location.timestamp)
+        XCTAssertEqual("commandDetailDesc", logSection.commandDetailDesc)
+        XCTAssertEqual("501796C4-6BE4-4F80-9F9D-3269617ECC17", logSection.uniqueIdentifier)
+        XCTAssertEqual("localizedResultString", logSection.localizedResultString)
+        XCTAssertEqual("xcbuildSignature", logSection.xcbuildSignature)
+        XCTAssertEqual(0, logSection.attachments.count)
         XCTAssertEqual(0, logSection.unknown)
     }
 
     func testParseActivityLog() throws {
         let activityLog = try parser.parseIDEActiviyLogFromTokens(IDEActivityLogTokens)
         XCTAssertEqual(10, activityLog.version)
+        XCTAssertEqual(10, parser.logVersion)
     }
 
     func testParseDBGConsoleLog() throws {
+        parser.logVersion = 11
         let tokens = DBGConsoleLogTokens
         var iterator = tokens.makeIterator()
         let DBGConsoleLog = try parser.parseDBGConsoleLog(iterator: &iterator)
