@@ -95,6 +95,7 @@ class ClangCompilerParserTests: XCTestCase {
                                      uniqueIdentifier: "",
                                      localizedResultString: "",
                                      xcbuildSignature: "",
+                                     attachments: [],
                                      unknown: 0)
     }
 }

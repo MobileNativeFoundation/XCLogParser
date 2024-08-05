@@ -110,6 +110,7 @@ public class ActivityParser {
                                      uniqueIdentifier: try parseAsString(token: iterator.next()),
                                      localizedResultString: try parseAsString(token: iterator.next()),
                                      xcbuildSignature: try parseAsString(token: iterator.next()),
+                                     attachments: try parseIDEActivityLogSectionAttachments(iterator: &iterator),
                                      unknown: isCommandLineLog ? Int(try parseAsInt(token: iterator.next())) : 0)
     }
 
@@ -133,6 +134,7 @@ public class ActivityParser {
                                          uniqueIdentifier: try parseAsString(token: iterator.next()),
                                          localizedResultString: try parseAsString(token: iterator.next()),
                                          xcbuildSignature: try parseAsString(token: iterator.next()),
+                                         attachments: try parseIDEActivityLogSectionAttachments(iterator: &iterator),
                                          unknown: isCommandLineLog ? Int(try parseAsInt(token: iterator.next())) : 0,
                                          testsPassedString: try parseAsString(token: iterator.next()),
                                          durationString: try parseAsString(token: iterator.next()),
@@ -162,6 +164,8 @@ public class ActivityParser {
                                                  uniqueIdentifier: try parseAsString(token: iterator.next()),
                                                  localizedResultString: try parseAsString(token: iterator.next()),
                                                  xcbuildSignature: try parseAsString(token: iterator.next()),
+                                                 // swiftlint:disable:next line_length
+                                                 attachments: try parseIDEActivityLogSectionAttachments(iterator: &iterator),
                                                  // swiftlint:disable:next line_length
                                                  unknown: isCommandLineLog ? Int(try parseAsInt(token: iterator.next())) : 0,
                                                  logConsoleItems: try parseIDEConsoleItems(iterator: &iterator)
@@ -232,6 +236,24 @@ public class ActivityParser {
         return IDEActivityLogAnalyzerControlFlowStepEdge(
                                      startLocation: try parseDocumentLocation(iterator: &iterator),
                                      endLocation: try parseDocumentLocation(iterator: &iterator))
+    }
+
+    public func parseIDEActivityLogActionMessage(iterator: inout IndexingIterator<[Token]>) throws
+        -> IDEActivityLogActionMessage {
+        return IDEActivityLogActionMessage(
+                                     title: try parseAsString(token: iterator.next()),
+                                     shortTitle: try parseAsString(token: iterator.next()),
+                                     timeEmitted: try Double(parseAsInt(token: iterator.next())),
+                                     rangeEndInSectionText: try parseAsInt(token: iterator.next()),
+                                     rangeStartInSectionText: try parseAsInt(token: iterator.next()),
+                                     subMessages: try parseMessages(iterator: &iterator),
+                                     severity: Int(try parseAsInt(token: iterator.next())),
+                                     type: try parseAsString(token: iterator.next()),
+                                     location: try parseDocumentLocation(iterator: &iterator),
+                                     categoryIdent: try parseAsString(token: iterator.next()),
+                                     secondaryLocations: try parseDocumentLocations(iterator: &iterator),
+                                     additionalDescription: try parseAsString(token: iterator.next()),
+                                     action: try parseAsString(token: iterator.next()))
     }
 
     private func getTokens(_ logURL: URL,
@@ -310,6 +332,8 @@ public class ActivityParser {
             return try parseDVTDocumentLocation(iterator: &iterator)
         } else if className == String(describing: IBDocumentMemberLocation.self) {
             return try parseIBDocumentMemberLocation(iterator: &iterator)
+        } else if className == String(describing: DVTMemberDocumentLocation.self) {
+            return try parseDVTMemberDocumentLocation(iterator: &iterator)
         }
         throw XCLogParserError.parseError("Unexpected className found parsing DocumentLocation \(className)")
     }
@@ -335,7 +359,29 @@ public class ActivityParser {
         if className == String(describing: IDEActivityLogAnalyzerEventStepMessage.self) {
             return try parseIDEActivityLogAnalyzerEventStepMessage(iterator: &iterator)
         }
+        if className == String(describing: IDEActivityLogActionMessage.self) {
+            return try parseIDEActivityLogActionMessage(iterator: &iterator)
+        }
         throw XCLogParserError.parseError("Unexpected className found parsing IDEActivityLogMessage \(className)")
+    }
+
+    private func parseLogSectionAttachment(iterator: inout IndexingIterator<[Token]>)
+        throws -> IDEActivityLogSectionAttachment {
+            let classRefToken = try getClassRefToken(iterator: &iterator)
+            guard case Token.classNameRef(let className) = classRefToken else {
+                throw XCLogParserError.parseError("Unexpected token found parsing " +
+                                                  "IDEActivityLogSectionAttachment \(classRefToken)")
+            }
+
+            if className == "IDEFoundation.\(String(describing: IDEActivityLogSectionAttachment.self))" {
+                let jsonType = IDEActivityLogSectionAttachment.BuildOperationTaskMetrics.self
+                return try IDEActivityLogSectionAttachment(identifier: try parseAsString(token: iterator.next()),
+                                                           majorVersion: try parseAsInt(token: iterator.next()),
+                                                           minorVersion: try parseAsInt(token: iterator.next()),
+                                                           metrics: try parseAsJson(token: iterator.next(),
+                                                                                    type: jsonType))
+            }
+            throw XCLogParserError.parseError("Unexpected className found parsing IDEConsoleItem \(className)")
     }
 
     private func parseLogSection(iterator: inout IndexingIterator<[Token]>)
@@ -407,6 +453,27 @@ public class ActivityParser {
             default:
                 throw XCLogParserError.parseError("Unexpected token parsing array of " +
                                                   "IDEActivityLogSection: \(listToken)")
+            }
+    }
+
+    private func parseIDEActivityLogSectionAttachments(iterator: inout IndexingIterator<[Token]>)
+        throws -> [IDEActivityLogSectionAttachment] {
+            guard let listToken = iterator.next() else {
+                throw XCLogParserError.parseError("Unexpected EOF parsing array of IDEActivityLogSectionAttachment")
+            }
+            switch listToken {
+            case .null:
+                return []
+            case .list(let count):
+                var sections = [IDEActivityLogSectionAttachment]()
+                for _ in 0..<count {
+                    let section = try parseLogSectionAttachment(iterator: &iterator)
+                    sections.append(section)
+                }
+                return sections
+            default:
+                throw XCLogParserError.parseError("Unexpected token parsing array of " +
+                                                  "IDEActivityLogSectionAttachment: \(listToken)")
             }
     }
 
@@ -532,6 +599,23 @@ public class ActivityParser {
         }
     }
 
+    private func parseAsJson<T: Decodable>(token: Token?, type: T.Type) throws -> T? {
+        guard let token = token else {
+            throw XCLogParserError.parseError("Unexpected EOF parsing JSON String")
+        }
+        switch token {
+        case .json(let string):
+            guard let data = string.data(using: .utf8) else {
+                throw XCLogParserError.parseError("Unexpected JSON string \(string)")
+            }
+            return try JSONDecoder().decode(type, from: data)
+        case .null:
+            return nil
+        default:
+            throw XCLogParserError.parseError("Unexpected token parsing JSON String: \(token)")
+        }
+    }
+
     private func parseAsInt(token: Token?) throws -> UInt64 {
         guard let token = token else {
             throw XCLogParserError.parseError("Unexpected EOF parsing Int")
@@ -563,6 +647,13 @@ public class ActivityParser {
             return value == 1
         }
         throw XCLogParserError.parseError("Unexpected token parsing Bool: \(token)")
+    }
+
+    private func parseDVTMemberDocumentLocation(iterator: inout IndexingIterator<[Token]>)
+    throws -> DVTMemberDocumentLocation {
+        return DVTMemberDocumentLocation(documentURLString: try parseAsString(token: iterator.next()),
+                                         timestamp: try parseAsDouble(token: iterator.next()),
+                                         member: try parseAsString(token: iterator.next()))
     }
 
 }

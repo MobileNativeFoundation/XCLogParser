@@ -49,6 +49,7 @@ public class IDEActivityLogSection: Encodable {
     public let uniqueIdentifier: String
     public let localizedResultString: String
     public let xcbuildSignature: String
+    public let attachments: [IDEActivityLogSectionAttachment]
     public let unknown: Int
 
     public init(sectionType: Int8,
@@ -69,6 +70,7 @@ public class IDEActivityLogSection: Encodable {
                 uniqueIdentifier: String,
                 localizedResultString: String,
                 xcbuildSignature: String,
+                attachments: [IDEActivityLogSectionAttachment],
                 unknown: Int) {
         self.sectionType = sectionType
         self.domainType = domainType
@@ -88,6 +90,7 @@ public class IDEActivityLogSection: Encodable {
         self.uniqueIdentifier = uniqueIdentifier
         self.localizedResultString = localizedResultString
         self.xcbuildSignature = xcbuildSignature
+        self.attachments = attachments
         self.unknown = unknown
     }
 
@@ -119,6 +122,7 @@ public class IDEActivityLogUnitTestSection: IDEActivityLogSection {
                 uniqueIdentifier: String,
                 localizedResultString: String,
                 xcbuildSignature: String,
+                attachments: [IDEActivityLogSectionAttachment],
                 unknown: Int,
                 testsPassedString: String,
                 durationString: String,
@@ -151,6 +155,7 @@ public class IDEActivityLogUnitTestSection: IDEActivityLogSection {
                    uniqueIdentifier: uniqueIdentifier,
                    localizedResultString: localizedResultString,
                    xcbuildSignature: xcbuildSignature,
+                   attachments: attachments,
                    unknown: unknown)
     }
 
@@ -421,6 +426,7 @@ public class DBGConsoleLog: IDEActivityLogSection {
                 uniqueIdentifier: String,
                 localizedResultString: String,
                 xcbuildSignature: String,
+                attachments: [IDEActivityLogSectionAttachment],
                 unknown: Int,
                 logConsoleItems: [IDEConsoleItem]) {
         self.logConsoleItems = logConsoleItems
@@ -442,6 +448,7 @@ public class DBGConsoleLog: IDEActivityLogSection {
                    uniqueIdentifier: uniqueIdentifier,
                    localizedResultString: localizedResultString,
                    xcbuildSignature: xcbuildSignature,
+                   attachments: attachments,
                    unknown: unknown)
     }
 
@@ -521,6 +528,51 @@ public class IDEActivityLogAnalyzerEventStepMessage: IDEActivityLogMessage {
     }
 }
 
+public class IDEActivityLogActionMessage: IDEActivityLogMessage {
+
+    public let action: String
+
+    public init(title: String,
+                shortTitle: String,
+                timeEmitted: Double,
+                rangeEndInSectionText: UInt64,
+                rangeStartInSectionText: UInt64,
+                subMessages: [IDEActivityLogMessage],
+                severity: Int,
+                type: String,
+                location: DVTDocumentLocation,
+                categoryIdent: String,
+                secondaryLocations: [DVTDocumentLocation],
+                additionalDescription: String,
+                action: String) {
+
+        self.action = action
+
+        super.init(title: title,
+                   shortTitle: shortTitle,
+                   timeEmitted: timeEmitted,
+                   rangeEndInSectionText: rangeEndInSectionText,
+                   rangeStartInSectionText: rangeStartInSectionText,
+                   subMessages: subMessages,
+                   severity: severity,
+                   type: type,
+                   location: location,
+                   categoryIdent: categoryIdent,
+                   secondaryLocations: secondaryLocations,
+                   additionalDescription: additionalDescription)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case action
+    }
+
+    override public func encode(to encoder: Encoder) throws {
+        try super.encode(to: encoder)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(action, forKey: .action)
+    }
+}
+
 // MARK: IDEInterfaceBuilderKit
 
 public class IBMemberID: Encodable {
@@ -566,5 +618,56 @@ public class IBDocumentMemberLocation: DVTDocumentLocation {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(memberIdentifier, forKey: .memberIdentifier)
         try container.encode(attributeSearchLocation, forKey: .attributeSearchLocation)
+    }
+}
+
+// MARK: Added in Xcode 14
+
+////  From DVTFoundation.framework
+public class DVTMemberDocumentLocation: DVTDocumentLocation, Equatable {
+
+    public let member: String
+
+    public init(documentURLString: String, timestamp: Double, member: String) {
+        self.member = member
+        super.init(documentURLString: documentURLString, timestamp: timestamp)
+    }
+
+    // MARK: Equatable method
+
+    public static func == (lhs: DVTMemberDocumentLocation, rhs: DVTMemberDocumentLocation) -> Bool {
+        return lhs.documentURLString == rhs.documentURLString &&
+        lhs.timestamp == rhs.timestamp &&
+        lhs.member == rhs.member
+    }
+
+}
+
+// MARK: Added in Xcode 15.3
+
+public class IDEActivityLogSectionAttachment: Encodable {
+    public struct BuildOperationTaskMetrics: Codable {
+        public let utime: UInt64
+        public let stime: UInt64
+        public let maxRSS: UInt64
+        public let wcStartTime: UInt64
+        public let wcDuration: UInt64
+    }
+
+    public let identifier: String
+    public let majorVersion: UInt64
+    public let minorVersion: UInt64
+    public let metrics: BuildOperationTaskMetrics?
+
+    public init(
+        identifier: String,
+        majorVersion: UInt64,
+        minorVersion: UInt64,
+        metrics: BuildOperationTaskMetrics?
+    ) throws {
+        self.identifier = identifier
+        self.majorVersion = majorVersion
+        self.minorVersion = minorVersion
+        self.metrics = metrics
     }
 }

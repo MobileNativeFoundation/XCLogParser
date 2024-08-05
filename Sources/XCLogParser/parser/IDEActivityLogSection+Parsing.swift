@@ -156,6 +156,7 @@ extension IDEActivityLogSection {
             uniqueIdentifier: "",
             localizedResultString: "",
             xcbuildSignature: "",
+            attachments: section.attachments,
             unknown: 0)
     }
 

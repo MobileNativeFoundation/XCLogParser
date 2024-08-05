@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -14,7 +14,7 @@ let package = Package(
         .package(url: "https://github.com/1024jp/GzipSwift", from: "5.1.0"),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .exact("1.3.3")),
         .package(url: "https://github.com/kylef/PathKit.git", from: "1.0.1"),
-        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.2.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.3.0")),
     ],
     targets: [
         .target(
@@ -23,13 +23,9 @@ let package = Package(
         ),
         .target(
             name: "XCLogParser",
-            dependencies: [
-                .product(name: "Gzip", package: "GzipSwift"),
-                "XcodeHasher",
-                "PathKit"
-            ]
+            dependencies: ["Gzip", "XcodeHasher", "PathKit"]
         ),
-        .executableTarget(
+        .target(
             name: "XCLogParserApp",
             dependencies: [
                 "XCLogParser",

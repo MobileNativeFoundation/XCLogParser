@@ -21,6 +21,7 @@ import XCTest
 @testable import XCLogParser
 
 // swiftlint:disable type_body_length
+// swiftlint:disable file_length
 class ActivityParserTests: XCTestCase {
 
     let parser = ActivityParser()
@@ -96,6 +97,12 @@ class ActivityParserTests: XCTestCase {
                          Token.string("501796C4-6BE4-4F80-9F9D-3269617ECC17"),
                          Token.string("localizedResultString"),
                          Token.string("xcbuildSignature"),
+                         Token.list(1),
+                         Token.classNameRef("IDEFoundation.IDEActivityLogSectionAttachment"),
+                         Token.string("com.apple.dt.ActivityLogSectionAttachment.TaskMetrics"),
+                         Token.int(1),
+                         Token.int(0),
+                         Token.json("{\"wcStartTime\":1,\"maxRSS\":1,\"utime\":1,\"wcDuration\":1,\"stime\":1}"),
                          Token.int(0)
         ]
         return startTokens + logMessageTokens + endTokens
@@ -128,7 +135,13 @@ class ActivityParserTests: XCTestCase {
                            Token.string("79D9C1DE-F736-4743-A7C6-B08ED42A1DFE"),
                            Token.null,
                            Token.null,
-                           Token.list(1)
+                           Token.list(1),
+                           Token.classNameRef("IDEFoundation.IDEActivityLogSectionAttachment"),
+                           Token.string("com.apple.dt.ActivityLogSectionAttachment.TaskMetrics"),
+                           Token.int(1),
+                           Token.int(0),
+                           Token.json("{\"wcStartTime\":1,\"maxRSS\":1,\"utime\":1,\"wcDuration\":1,\"stime\":1}"),
+                           Token.list(1),
         ]
         return startTokens + IDEConsoleItemTokens
     }()
@@ -226,6 +239,22 @@ class ActivityParserTests: XCTestCase {
             Token.double(2.2)]
     }()
 
+    lazy var IDEActivityLogActionMessageTokens: [Token] = {
+        let startTokens = [Token.string("The identity of “XYZ.xcframework” is not recorded in your project."),
+                           Token.null,
+                           Token.int(9),
+                           Token.int(18446744073709551615),
+                           Token.int(575479851),
+                           Token.null,
+                           Token.int(0),
+                           Token.null,
+                           Token.classNameRef("DVTTextDocumentLocation")]
+       let endTokens = [Token.string("categoryIdent"),
+                        Token.null,
+                        Token.string("additionalDescription")]
+        return startTokens + textDocumentLocationTokens + endTokens + [Token.string("action")]
+    }()
+
     func testParseDVTTextDocumentLocation() throws {
         let tokens = textDocumentLocationTokens
         var iterator = tokens.makeIterator()
@@ -318,6 +347,30 @@ class ActivityParserTests: XCTestCase {
         }
     }
 
+    func testParseIDEActivityLogActionMessage() throws {
+        var iterator = IDEActivityLogActionMessageTokens.makeIterator()
+        let logActionMessage = try parser.parseIDEActivityLogActionMessage(iterator: &iterator)
+        XCTAssertEqual("The identity of “XYZ.xcframework” is not recorded in your project.", logActionMessage.title)
+        XCTAssertEqual("", logActionMessage.shortTitle)
+        XCTAssertEqual(9.0, logActionMessage.timeEmitted)
+        XCTAssertEqual(575479851, logActionMessage.rangeStartInSectionText)
+        XCTAssertEqual(18446744073709551615, logActionMessage.rangeEndInSectionText)
+        XCTAssertEqual(0, logActionMessage.subMessages.count)
+        XCTAssertEqual(0, logActionMessage.severity)
+        XCTAssertEqual("", logActionMessage.type)
+        XCTAssertNotNil(logActionMessage.location)
+        guard let documentLocation = logActionMessage.location as? DVTTextDocumentLocation else {
+            XCTFail("documentLocation is nil")
+            return
+        }
+        XCTAssertEqual(expectedDVTTextDocumentLocation.documentURLString, documentLocation.documentURLString)
+        XCTAssertEqual(expectedDVTTextDocumentLocation.timestamp, documentLocation.timestamp)
+        XCTAssertEqual("categoryIdent", logActionMessage.categoryIdent)
+        XCTAssertEqual(0, logActionMessage.secondaryLocations.count)
+        XCTAssertEqual("additionalDescription", logActionMessage.additionalDescription)
+        XCTAssertEqual(logActionMessage.action, "action")
+    }
+
     func testParseIBDocumentMemberLocation() throws {
         var iterator = IBDocumentMemberLocationTokens.makeIterator()
         let documentLocation = try parser.parseDocumentLocation(iterator: &iterator)
@@ -348,4 +401,31 @@ class ActivityParserTests: XCTestCase {
 
         XCTAssertEqual("file:///project/EntityComponentView.m", documentLocation.documentURLString)
     }
+
+    let expectedDVTMemberDocumentLocation: DVTMemberDocumentLocation = DVTMemberDocumentLocation(
+        documentURLString: "file:///project/EntityComponentView.m",
+        timestamp: 2.2,
+        member: "abcdef")
+
+    let memberDocumentLocationTokens: [Token] = {
+        return [
+            Token.className("DVTMemberDocumentLocation"),
+            Token.classNameRef("DVTMemberDocumentLocation"),
+            Token.string("file:///project/EntityComponentView.m"),
+            Token.double(2.2),
+            Token.string("abcdef")]
+    }()
+
+    func testParseDVTMemberDocumentLocation() throws {
+        var iterator = memberDocumentLocationTokens.makeIterator()
+        let documentLocation = try parser.parseDocumentLocation(iterator: &iterator)
+        XCTAssert(documentLocation is DVTMemberDocumentLocation,
+                  "Document location should be a DVTMemberDocumentLocation")
+
+        guard let documentMemberLocation = documentLocation as? DVTMemberDocumentLocation else {
+            return
+        }
+        XCTAssertEqual(expectedDVTMemberDocumentLocation, documentMemberLocation)
+    }
+
 }

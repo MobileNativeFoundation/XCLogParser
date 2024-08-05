@@ -545,10 +545,10 @@ function showWarnings(target) {
 
 function itemSelected(target, selectedItem) {
     if (selectedItem.type === 'target') {
-        const fileName = selectedItem.identifier.replaceAll(' ', '_');
+        const fileName = selectedItem.identifier.replaceAll(' ', '_').replaceAll('\\\'', '_');
         window.location.href = window.location.href.replace('index.html', fileName + '.html');
     } else if (selectedItem.type === 'detail') {
-        const targetId = selectedItem.parentIdentifier.replaceAll(' ', '_');
+        const targetId = selectedItem.parentIdentifier.replaceAll(' ', '_').replaceAll('\\\'', '_');
         if (target === 'main') {
             const stepUrl = window.location.href.replace(encodeURI('{{file_name}}'), targetId + '.html');
             window.location.href = stepUrl + "?step=" + selectedItem.identifier;
