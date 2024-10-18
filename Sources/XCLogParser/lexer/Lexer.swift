@@ -75,11 +75,11 @@ public final class Lexer {
         return tokens
     }
 
-    private func scanSLFHeader(contentSequence: inout String.SubSequence) -> Bool {
+    private func scanSLFHeader(contentSequence: inout Substring) -> Bool {
         return contentSequence.scan(prefix: Lexer.SLFHeader)
     }
 
-    private func scanSLFType(contentSequence: inout String.SubSequence,
+    private func scanSLFType(contentSequence: inout Substring,
                              content: String,
                              redacted: Bool,
                              withoutBuildSpecificInformation: Bool) -> [Token]? {
@@ -98,13 +98,13 @@ public final class Lexer {
         }
     }
 
-    private func scanPayload(contentSequence: inout String.SubSequence) -> String {
+    private func scanPayload(contentSequence: inout Substring) -> String {
         let hexChars = "abcdef0123456789"
         let characterSet = Set(hexChars)
         return contentSequence.scanCharacters(in: characterSet) ?? ""
     }
 
-    private func scanTypeDelimiter(contentSequence: inout String.SubSequence,
+    private func scanTypeDelimiter(contentSequence: inout Substring,
                                    content: String) -> [TokenType]? {
         guard let delimiters = contentSequence.scanCharacters(in: Set(self.typeDelimiters)) else {
             return nil
@@ -167,7 +167,7 @@ public final class Lexer {
         return .int(value)
     }
 
-    private func handleClassNameTokenTypeCase(contentSequence: inout String.SubSequence,
+    private func handleClassNameTokenTypeCase(contentSequence: inout Substring,
                                               payload: String,
                                               redacted: Bool,
                                               withoutBuildSpecificInformation: Bool) -> Token? {
@@ -192,7 +192,7 @@ public final class Lexer {
         return .classNameRef(className)
     }
 
-    private func handleStringTokenTypeCase(contentSequence: inout String.SubSequence,
+    private func handleStringTokenTypeCase(contentSequence: inout Substring,
                                            payload: String,
                                            redacted: Bool,
                                            withoutBuildSpecificInformation: Bool) -> Token? {
@@ -206,7 +206,7 @@ public final class Lexer {
         return .string(content)
     }
 
-    private func handleJSONTokenTypeCase(contentSequence: inout String.SubSequence,
+    private func handleJSONTokenTypeCase(contentSequence: inout Substring,
                                          payload: String,
                                          redacted: Bool,
                                          withoutBuildSpecificInformation: Bool) -> Token? {
@@ -237,7 +237,7 @@ public final class Lexer {
     }
 
     private func scanString(length: String,
-                            contentSequence: inout String.SubSequence,
+                            contentSequence: inout Substring,
                             redacted: Bool,
                             withoutBuildSpecificInformation: Bool) -> String? {
         guard let value = Int(length), let scannedResult = contentSequence.scan(count: value) else {
@@ -266,7 +266,7 @@ public final class Lexer {
     }
 }
 
-private extension String.SubSequence {
+private extension Substring {
     func makeApproximateLine(in content: String) -> String {
         let currentLocation = content.distance(from: content.startIndex, to: self.startIndex)
         let contentSize = content.count
