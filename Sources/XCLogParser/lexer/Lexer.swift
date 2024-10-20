@@ -157,6 +157,7 @@ public final class Lexer {
 
     private func handleIntTokenTypeCase(payload: String) -> Token? {
         guard let value = UInt64(payload) else {
+            print("error parsing int")
             return nil
         }
         return .int(value)
