@@ -59,15 +59,14 @@ public final class Lexer {
         }
 
         var tokens = [Token]()
-        while scanner.isAtEnd {
+        while !scanner.isAtEnd {
 
             guard let logTokens = scanSLFType(scanner: scanner,
-                                              content: contents,
                                               redacted: redacted,
                                               withoutBuildSpecificInformation: withoutBuildSpecificInformation),
                   logTokens.isEmpty == false else {
                 print(tokens)
-                throw XCLogParserError.invalidLine(scanner.makeApproximateLine)
+                throw XCLogParserError.invalidLine(scanner.approximateLine)
             }
             tokens.append(contentsOf: logTokens)
         }
@@ -75,16 +74,15 @@ public final class Lexer {
     }
 
     private func scanSLFHeader(scanner: Scanner) -> Bool {
-        return scanner.scan(prefix: Lexer.SLFHeader)
+        return scanner.scan(string: Lexer.SLFHeader)
     }
 
     private func scanSLFType(scanner: Scanner,
-                             content: String,
                              redacted: Bool,
                              withoutBuildSpecificInformation: Bool) -> [Token]? {
         let payload = self.scanPayload(scanner: scanner)
 
-        guard let tokenTypes = self.scanTypeDelimiter(scanner: scanner, content: content), tokenTypes.count > 0 else {
+        guard let tokenTypes = self.scanTypeDelimiter(scanner: scanner), tokenTypes.count > 0 else {
             return nil
         }
 
@@ -100,21 +98,19 @@ public final class Lexer {
     private func scanPayload(scanner: Scanner) -> String {
         let hexChars = "abcdef0123456789"
         let characterSet = Set(hexChars)
-        return scanner.scanCharacters(in: characterSet) ?? ""
+        return scanner.scanCharacters(from: characterSet) ?? ""
     }
 
-    private func scanTypeDelimiter(scanner: Scanner,
-                                   content: String) -> [TokenType]? {
-        guard let delimiters = scanner.scanCharacters(in: Set(self.typeDelimiters)) else {
+    private func scanTypeDelimiter(scanner: Scanner) -> [TokenType]? {
+        guard let delimiters = scanner.scanCharacters(from: self.typeDelimiters) else {
             return nil
         }
 
         if delimiters.count > 1 {
             // if we found a string, we discard other type delimiters because there are part of the string
             let tokenString = TokenType.string
-            
             if let char = delimiters.first, tokenString.rawValue == String(char) {
-                scanner.moveStartIndex(offset: -(delimiters.count - 1), originalString: content)
+                scanner.moveOffset(by: -(delimiters.count - 1))
                 return [tokenString]
             }
         }
@@ -239,8 +235,7 @@ public final class Lexer {
                             scanner: Scanner,
                             redacted: Bool,
                             withoutBuildSpecificInformation: Bool) -> String? {
-        let value = (length as NSString).integerValue
-        guard let scannedResult = scanner.scan(count: value) else {
+        guard let value = Int(length), let scannedResult = scanner.scan(count: value) else {
             print("error parsing string")
             return nil
         }
@@ -267,7 +262,7 @@ public final class Lexer {
 }
 
 private extension Scanner {
-    var makeApproximateLine: String {
+    var approximateLine: String {
         let currentLocation = self.offset
         let contentSize = self.string.count
 

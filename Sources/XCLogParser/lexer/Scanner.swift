@@ -27,7 +27,7 @@ final class Scanner {
     private(set) lazy var stringEndIndex: String.Index = self.string.endIndex
 
     var isAtEnd: Bool {
-        String.Index(compilerSafeOffset: self.offset, in: self.string) < self.stringEndIndex
+        String.Index(compilerSafeOffset: self.offset, in: self.string) >= self.stringEndIndex
     }
 
     init(string: String) {
@@ -48,14 +48,14 @@ final class Scanner {
         return String(result)
     }
 
-    func scan(prefix: String) -> Bool {
-        guard self.string.starts(with: prefix) else { return false }
+    func scan(string value: String) -> Bool {
+        guard self.string.starts(with: value) else { return false }
 
-        self.offset = self.offset + prefix.count
+        self.offset = self.offset + value.count
         return true
     }
 
-    func scanCharacters(in allowedCharacters: Set<Character>) -> String? {
+    func scanCharacters(from allowedCharacters: Set<Character>) -> String? {
         var prefix: String = ""
         var characterIndex = String.Index(compilerSafeOffset: self.offset, in: self.string)
 
@@ -74,7 +74,7 @@ final class Scanner {
         return prefix
     }
 
-    func moveStartIndex(offset: Int, originalString: String) {
-        self.offset = self.offset + offset
+    func moveOffset(by value: Int) {
+        self.offset = self.offset + value
     }
 }
