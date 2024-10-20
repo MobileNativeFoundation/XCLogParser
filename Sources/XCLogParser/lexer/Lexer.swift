@@ -52,45 +52,44 @@ public final class Lexer {
     public func tokenize(contents: String,
                          redacted: Bool,
                          withoutBuildSpecificInformation: Bool) throws -> [Token] {
-        var contentSequence = contents[...]
-        let contentsCount = contents.endIndex
+        let scanner = Scanner(string: contents)
 
-        guard scanSLFHeader(contentSequence: &contentSequence) else {
+        guard scanSLFHeader(scanner: scanner) else {
             throw XCLogParserError.invalidLogHeader(filePath)
         }
 
         var tokens = [Token]()
-        while contentSequence.startIndex < contentsCount {
+        while scanner.isAtEnd {
 
-            guard let logTokens = scanSLFType(contentSequence: &contentSequence,
+            guard let logTokens = scanSLFType(scanner: scanner,
                                               content: contents,
                                               redacted: redacted,
                                               withoutBuildSpecificInformation: withoutBuildSpecificInformation),
                   logTokens.isEmpty == false else {
                 print(tokens)
-                throw XCLogParserError.invalidLine(contentSequence.makeApproximateLine(in: contents))
+                throw XCLogParserError.invalidLine(scanner.makeApproximateLine)
             }
             tokens.append(contentsOf: logTokens)
         }
         return tokens
     }
 
-    private func scanSLFHeader(contentSequence: inout Substring) -> Bool {
-        return contentSequence.scan(prefix: Lexer.SLFHeader)
+    private func scanSLFHeader(scanner: Scanner) -> Bool {
+        return scanner.scan(prefix: Lexer.SLFHeader)
     }
 
-    private func scanSLFType(contentSequence: inout Substring,
+    private func scanSLFType(scanner: Scanner,
                              content: String,
                              redacted: Bool,
                              withoutBuildSpecificInformation: Bool) -> [Token]? {
-        let payload = self.scanPayload(contentSequence: &contentSequence)
+        let payload = self.scanPayload(scanner: scanner)
 
-        guard let tokenTypes = self.scanTypeDelimiter(contentSequence: &contentSequence, content: content), tokenTypes.count > 0 else {
+        guard let tokenTypes = self.scanTypeDelimiter(scanner: scanner, content: content), tokenTypes.count > 0 else {
             return nil
         }
 
         return tokenTypes.compactMap { tokenType -> Token? in
-            scanToken(contentSequence: &contentSequence,
+            scanToken(scanner: scanner,
                       payload: payload,
                       tokenType: tokenType,
                       redacted: redacted,
@@ -98,15 +97,15 @@ public final class Lexer {
         }
     }
 
-    private func scanPayload(contentSequence: inout Substring) -> String {
+    private func scanPayload(scanner: Scanner) -> String {
         let hexChars = "abcdef0123456789"
         let characterSet = Set(hexChars)
-        return contentSequence.scanCharacters(in: characterSet) ?? ""
+        return scanner.scanCharacters(in: characterSet) ?? ""
     }
 
-    private func scanTypeDelimiter(contentSequence: inout Substring,
+    private func scanTypeDelimiter(scanner: Scanner,
                                    content: String) -> [TokenType]? {
-        guard let delimiters = contentSequence.scanCharacters(in: Set(self.typeDelimiters)) else {
+        guard let delimiters = scanner.scanCharacters(in: Set(self.typeDelimiters)) else {
             return nil
         }
 
@@ -115,7 +114,7 @@ public final class Lexer {
             let tokenString = TokenType.string
             
             if let char = delimiters.first, tokenString.rawValue == String(char) {
-                contentSequence.moveStartIndex(offset: -(delimiters.count - 1), originalString: content)
+                scanner.moveStartIndex(offset: -(delimiters.count - 1), originalString: content)
                 return [tokenString]
             }
         }
@@ -126,7 +125,7 @@ public final class Lexer {
         }
     }
 
-    private func scanToken(contentSequence: inout String.SubSequence,
+    private func scanToken(scanner: Scanner,
                            payload: String,
                            tokenType: TokenType,
                            redacted: Bool,
@@ -135,14 +134,14 @@ public final class Lexer {
         case .int:
             return handleIntTokenTypeCase(payload: payload)
         case .className:
-            return handleClassNameTokenTypeCase(contentSequence: &contentSequence,
+            return handleClassNameTokenTypeCase(scanner: scanner,
                                                 payload: payload,
                                                 redacted: redacted,
                                                 withoutBuildSpecificInformation: withoutBuildSpecificInformation)
         case .classNameRef:
             return handleClassNameRefTokenTypeCase(payload: payload)
         case .string:
-            return handleStringTokenTypeCase(contentSequence: &contentSequence,
+            return handleStringTokenTypeCase(scanner: scanner,
                                              payload: payload,
                                              redacted: redacted,
                                              withoutBuildSpecificInformation: withoutBuildSpecificInformation)
@@ -153,7 +152,7 @@ public final class Lexer {
         case .list:
             return handleListTokenTypeCase(payload: payload)
         case .json:
-            return handleJSONTokenTypeCase(contentSequence: &contentSequence,
+            return handleJSONTokenTypeCase(scanner: scanner,
                                            payload: payload,
                                            redacted: redacted,
                                            withoutBuildSpecificInformation: withoutBuildSpecificInformation)
@@ -167,12 +166,12 @@ public final class Lexer {
         return .int(value)
     }
 
-    private func handleClassNameTokenTypeCase(contentSequence: inout Substring,
+    private func handleClassNameTokenTypeCase(scanner: Scanner,
                                               payload: String,
                                               redacted: Bool,
                                               withoutBuildSpecificInformation: Bool) -> Token? {
         guard let className = scanString(length: payload,
-                                         contentSequence: &contentSequence,
+                                         scanner: scanner,
                                          redacted: redacted,
                                          withoutBuildSpecificInformation: withoutBuildSpecificInformation) else {
                                             print("error parsing string")
@@ -192,12 +191,12 @@ public final class Lexer {
         return .classNameRef(className)
     }
 
-    private func handleStringTokenTypeCase(contentSequence: inout Substring,
+    private func handleStringTokenTypeCase(scanner: Scanner,
                                            payload: String,
                                            redacted: Bool,
                                            withoutBuildSpecificInformation: Bool) -> Token? {
         guard let content = scanString(length: payload,
-                                       contentSequence: &contentSequence,
+                                       scanner: scanner,
                                        redacted: redacted,
                                        withoutBuildSpecificInformation: withoutBuildSpecificInformation) else {
                                         print("error parsing string")
@@ -206,12 +205,12 @@ public final class Lexer {
         return .string(content)
     }
 
-    private func handleJSONTokenTypeCase(contentSequence: inout Substring,
+    private func handleJSONTokenTypeCase(scanner: Scanner,
                                          payload: String,
                                          redacted: Bool,
                                          withoutBuildSpecificInformation: Bool) -> Token? {
         guard let content = scanString(length: payload,
-                                       contentSequence: &contentSequence,
+                                       scanner: scanner,
                                        redacted: redacted,
                                        withoutBuildSpecificInformation: withoutBuildSpecificInformation) else {
                                         print("error parsing string")
@@ -237,15 +236,16 @@ public final class Lexer {
     }
 
     private func scanString(length: String,
-                            contentSequence: inout Substring,
+                            scanner: Scanner,
                             redacted: Bool,
                             withoutBuildSpecificInformation: Bool) -> String? {
-        guard let value = Int(length), let scannedResult = contentSequence.scan(count: value) else {
+        let value = (length as NSString).integerValue
+        guard let scannedResult = scanner.scan(count: value) else {
             print("error parsing string")
             return nil
         }
 
-        var result = String(scannedResult)
+        var result = scannedResult
         if redacted {
             result = redactor.redactUserDir(string: result)
         }
@@ -266,21 +266,18 @@ public final class Lexer {
     }
 }
 
-private extension Substring {
-    func makeApproximateLine(in content: String) -> String {
-        let currentLocation = content.distance(from: content.startIndex, to: self.startIndex)
-        let contentSize = content.count
+private extension Scanner {
+    var makeApproximateLine: String {
+        let currentLocation = self.offset
+        let contentSize = self.string.count
 
+        let start = String.Index(compilerSafeOffset: currentLocation, in: self.string)
         let endCount = contentSize - currentLocation > 21 ? currentLocation + 21 : contentSize - currentLocation
-        let start = self.startIndex
-#if swift(>=5.0)
-        let end = String.Index(utf16Offset: endCount, in: content)
-#else
-        let end = String.Index(encodedOffset: endCount)
-#endif
+        let end = String.Index(compilerSafeOffset: endCount, in: self.string)
+
         if end <= start {
-            return String(content[start..<content.endIndex])
+            return String(self.string[start..<self.stringEndIndex])
         }
-        return String(content[start..<end])
+        return String(self.string[start..<end])
     }
 }
