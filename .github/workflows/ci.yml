@@ -6,7 +6,7 @@ jobs:
   SwiftLint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: SwiftLint
         uses: norio-nomura/action-swiftlint@3.1.0
         with:
@@ -20,7 +20,7 @@ jobs:
       - name: Select Xcode
         run: "sudo xcode-select -s /Applications/Xcode_$XCODE_VERSION.app"
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
       - name: Build and Run
         run: rake build[release]
       - name: Test
@@ -32,7 +32,7 @@ jobs:
       image: swift:5.7.1
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
       - name: Install Ruby
         run: apt-get update && apt-get install -y ruby zlib1g-dev
       - name: Build and Run
