@@ -46,16 +46,28 @@ public struct LogManifest {
                 let timeStartedRecording = entry.value["timeStartedRecording"] as? Double,
                 let timeStoppedRecording = entry.value["timeStoppedRecording"] as? Double,
                 let className = entry.value["className"] as? String,
-                let type = LogManifestEntryType.buildFromClassName(className)
+                let type = LogManifestEntryType.buildFromClassName(className),
+                let primaryObservable = entry.value["primaryObservable"] as? [String: Any],
+                let totalNumberOfAnalyzerIssues = primaryObservable["totalNumberOfAnalyzerIssues"] as? Int,
+                let totalNumberOfErrors = primaryObservable["totalNumberOfErrors"] as? Int,
+                let totalNumberOfWarnings = primaryObservable["totalNumberOfWarnings"] as? Int,
+                let totalNumberOfTestFailures = primaryObservable["totalNumberOfTestFailures"] as? Int,
+                let highLevelStatus = primaryObservable["highLevelStatus"] as? String
                 else {
                     throw LogError.invalidLogManifest("The file at \(path) is not a valid " +
                         "LogManifest file.")
             }
             let startDate = Date(timeIntervalSinceReferenceDate: timeStartedRecording)
             let endDate = Date(timeIntervalSinceReferenceDate: timeStoppedRecording)
-            let timestampStart = Int(startDate.timeIntervalSince1970.rounded())
-            let timestampEnd = Int(endDate.timeIntervalSince1970.rounded())
-
+            let timestampStart = startDate.timeIntervalSince1970
+            let timestampEnd = endDate.timeIntervalSince1970
+            let statistics = LogManifestEntryStatistics(
+                totalNumberOfErrors: totalNumberOfErrors,
+                totalNumberOfAnalyzerIssues: totalNumberOfAnalyzerIssues,
+                highLevelStatus: highLevelStatus,
+                totalNumberOfTestFailures: totalNumberOfTestFailures,
+                totalNumberOfWarnings: totalNumberOfWarnings
+            )
             return LogManifestEntry(uniqueIdentifier: uniqueIdentifier,
                                     title: title,
                                     scheme: scheme,
@@ -63,7 +75,9 @@ public struct LogManifest {
                                     timestampStart: timestampStart,
                                     timestampEnd: timestampEnd,
                                     duration: timestampEnd - timestampStart,
-                                    type: type)
+                                    type: type,
+                                    statistics: statistics
+            )
             }.sorted(by: { lhs, rhs -> Bool in
                 return lhs.timestampStart > rhs.timestampStart
             })
