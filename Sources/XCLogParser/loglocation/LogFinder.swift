@@ -26,13 +26,11 @@ public struct LogFinder {
 
     let buildDirSettingsPrefix = "BUILD_DIR = "
 
-    let xcodebuildPath = "/usr/bin/xcodebuild"
-
-    let logsDir = "/Logs/Build/"
+    let xcodebuildPath: String
 
     let logManifestFile = "LogStoreManifest.plist"
 
-    let emmptyDirResponseMessage = """
+    let emptyDirResponseMessage = """
     Error. Couldn't find the derived data directory.
     Please use the --filePath option to specify the path to the xcactivitylog file you want to parse.
     """
@@ -44,7 +42,11 @@ public struct LogFinder {
         return homeDirURL.appendingPathComponent("Library/Developer/Xcode/DerivedData", isDirectory: true)
     }
 
-    public init() {}
+    public init(
+        xcodebuildPath: String = "/usr/bin/xcodebuild"
+    ) {
+        self.xcodebuildPath = xcodebuildPath
+    }
 
     public func findLatestLogWithLogOptions(_ logOptions: LogOptions) throws -> URL {
         guard logOptions.xcactivitylogPath.isEmpty else {
@@ -54,9 +56,16 @@ public struct LogFinder {
         let projectDir = try getProjectDirWithLogOptions(logOptions)
 
         // get latestLog
-
         return try URL(fileURLWithPath: getLatestLogInDir(projectDir))
 
+    }
+    
+    public func findLatestLogsWithLogOptions(_ logOptions: LogOptions) throws -> [URL] {
+        // get project dir
+        let projectDir = try getProjectDirWithLogOptions(logOptions)
+
+        // get latestLog
+        return try getLatestLogsInDir(projectDir, since: logOptions.newerThan)
     }
 
     public func findLogManifestWithLogOptions(_ logOptions: LogOptions) throws -> URL {
@@ -111,17 +120,18 @@ public struct LogFinder {
         // when xcodebuild is run with -derivedDataPath the logs are at the root level
         if logOptions.derivedDataPath.isEmpty == false {
             if FileManager.default.fileExists(atPath:
-                derivedData.appendingPathComponent(logsDir).path) {
-                return derivedData.appendingPathComponent(logsDir)
+                                                derivedData.appendingPathComponent(logOptions.logType.path).path) {
+                return derivedData.appendingPathComponent(logOptions.logType.path)
             }
         }
         if logOptions.projectLocation.isEmpty == false {
-            let folderName = try getProjectFolderWithHash(logOptions.projectLocation)
+            let folderName = try getProjectFolderWithHash(logOptions.projectLocation, logType: logOptions.logType)
             return derivedData.appendingPathComponent(folderName)
         }
         if logOptions.projectName.isEmpty == false {
             return try findDerivedDataForProject(logOptions.projectName,
                                                  inDir: derivedData,
+                                                 logType: logOptions.logType,
                                                  strictProjectName: logOptions.strictProjectName)
         }
         throw LogError.noLogFound(dir: derivedData.path)
@@ -143,9 +153,12 @@ public struct LogFinder {
     /// - parameter name: Name of the project
     /// - parameter inDir: URL of the derived data directory
     /// - returns: The path to the derived data of the project or nil if it is not found.
-    public func findDerivedDataForProject(_ name: String,
-                                          inDir derivedDataDir: URL,
-                                          strictProjectName: Bool) throws -> URL {
+    public func findDerivedDataForProject(
+        _ name: String,
+        inDir derivedDataDir: URL,
+        logType: LogType,
+        strictProjectName: Bool
+    ) throws -> URL {
 
         let fileManager = FileManager.default
 
@@ -185,7 +198,7 @@ public struct LogFinder {
                 with --file or the right DerivedData folder with --derived_data
                 """)
         }
-        return match.appendingPathComponent(logsDir)
+        return match.appendingPathComponent(logType.path)
     }
 
     /// Gets the full path of the Build/Logs directory for the given project
@@ -194,12 +207,12 @@ public struct LogFinder {
     /// - parameter projectPath: The path to the .xcodeproj folder
     /// - returns: The full path to the `Build/Logs` directory
     /// - throws: An error if the derived data directory couldn't be found
-    public func logsDirectoryForXcodeProject(projectPath: String) throws -> String {
+    public func logsDirectoryForXcodeProject(projectPath: String, logType: LogType) throws -> String {
         let arguments = ["-project", projectPath, "-showBuildSettings"]
         if let result = try executeXcodeBuild(args: arguments) {
-            return try parseXcodeBuildDir(result)
+            return try parseXcodeBuildDir(result, logType: logType)
         }
-        throw LogError.xcodeBuildError(emmptyDirResponseMessage)
+        throw LogError.xcodeBuildError(emptyDirResponseMessage)
     }
 
     /// Gets the latest xcactivitylog file path for the given projectFolder
@@ -243,12 +256,12 @@ public struct LogFinder {
     /// - parameter andScheme: The name of the scheme
     /// - returns: The full path to the `Build/Logs` directory
     /// - throws: An error if the derived data directory can't be found.
-    public func logsDirectoryForWorkspace(_ workspace: String, andScheme scheme: String) throws -> String {
+    public func logsDirectoryForWorkspace(_ workspace: String, andScheme scheme: String, logType: LogType) throws -> String {
         let arguments = ["-workspace", workspace, "-scheme", scheme, "-showBuildSettings"]
         if let result = try executeXcodeBuild(args: arguments) {
-            return try parseXcodeBuildDir(result)
+            return try parseXcodeBuildDir(result, logType: logType)
         }
-        throw LogError.xcodeBuildError(emmptyDirResponseMessage)
+        throw LogError.xcodeBuildError(emptyDirResponseMessage)
     }
 
     /// Returns the latest xcactivitylog file path in the given directory
@@ -273,18 +286,50 @@ public struct LogFinder {
         }
         return logPath.path
     }
+    
+    /// Returns the latest xcactivitylog file path in the given directory
+    /// - parameter dir: The full path for the directory
+    /// - returns: The paths of the latest xcactivitylog file in it since given date.
+    /// - throws: An `Error` if the directory doesn't exist or if there are no xcactivitylog files in it.
+    public func getLatestLogsInDir(_ dir: URL, since date: Date?) throws -> [URL] {
+        let fileManager = FileManager.default
+        let files = try fileManager.contentsOfDirectory(at: dir,
+                                                        includingPropertiesForKeys: [.contentModificationDateKey],
+                                                        options: .skipsHiddenFiles)
+        let sorted = try files
+            .filter { $0.path.hasSuffix(".xcactivitylog") }
+            .filter {
+                guard let timestamp = date else { return true }
+                guard
+                    let lastModified = try? $0.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
+                else { return false }
+                return lastModified > timestamp
+            }
+            .sorted {
+                let lhv = try $0.resourceValues(forKeys: [.contentModificationDateKey])
+                let rhv = try $1.resourceValues(forKeys: [.contentModificationDateKey])
+                guard let lhDate = lhv.contentModificationDate, let rhDate = rhv.contentModificationDate else {
+                    return false
+                }
+                return lhDate.compare(rhDate) == .orderedDescending
+            }
+        guard !sorted.isEmpty else {
+            throw LogError.noLogFound(dir: dir.path)
+        }
+        return sorted
+    }
 
     /// Generates the Derived Data Build Logs Folder name for the given project path
     /// - parameter projectFilePath: A path (relative or absolut) to an .xcworkspace or an .xcodeproj directory
     /// - returns The name of the folder with the same hash Xcode generates.
     /// For instance MyApp-dtpdmwoqyxcbrmauwqvycvmftqah/Logs/Build
-    public func getProjectFolderWithHash(_ projectFilePath: String) throws -> String {
+    public func getProjectFolderWithHash(_ projectFilePath: String, logType: LogType) throws -> String {
         let path = Path(projectFilePath).absolute()
         let projectName = path.lastComponent
             .replacingOccurrences(of: ".xcworkspace", with: "")
             .replacingOccurrences(of: ".xcodeproj", with: "")
         let hash = try XcodeHasher.hashString(for: path.string)
-        return "\(projectName)-\(hash)".appending(logsDir)
+        return "\(projectName)-\(hash)".appending(logType.path)
     }
 
     private func executeXcodeBuild(args: [String]) throws -> String? {
@@ -305,7 +350,7 @@ public struct LogFinder {
         return String(data: data, encoding: .utf8)
     }
 
-    private func parseXcodeBuildDir(_ response: String) throws -> String {
+    private func parseXcodeBuildDir(_ response: String, logType: LogType) throws -> String {
         guard !response.starts(with: "xcodebuild: error: ") else {
             throw LogError.xcodeBuildError(response.replacingOccurrences(of: "xcodebuild: ", with: ""))
         }
@@ -315,8 +360,8 @@ public struct LogFinder {
         if let settings = buildDirSettings.first {
             return settings.trimmingCharacters(in: .whitespacesAndNewlines)
                 .replacingOccurrences(of: buildDirSettingsPrefix, with: "")
-                .replacingOccurrences(of: "Build/Products", with: logsDir)
+                .replacingOccurrences(of: "Build/Products", with: logType.path)
         }
-        throw LogError.xcodeBuildError(emmptyDirResponseMessage)
+        throw LogError.xcodeBuildError(emptyDirResponseMessage)
     }
 }
