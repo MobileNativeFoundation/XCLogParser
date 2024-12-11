@@ -13,7 +13,7 @@ jobs:
           args: --strict
 
   macOS:
-    runs-on: macos-12
+    runs-on: macos-13
     env:
       XCODE_VERSION: ${{ '14.1' }}
     steps:
