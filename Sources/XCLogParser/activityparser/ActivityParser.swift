@@ -30,6 +30,10 @@ public class ActivityParser {
     /// that into account
     var isCommandLineLog = false
 
+    /// The version of the parsed `IDEActivityLog`.
+    /// Used to skip parsing of the `IDEActivityLogSectionAttachment` list on version less than 11.
+    var logVersion: Int8?
+
     public init() {}
 
     /// Parses the xcacticitylog argument into a `IDEActivityLog`
@@ -53,7 +57,9 @@ public class ActivityParser {
 
     public func parseIDEActiviyLogFromTokens(_ tokens: [Token]) throws -> IDEActivityLog {
         var iterator = tokens.makeIterator()
-        return IDEActivityLog(version: Int8(try parseAsInt(token: iterator.next())),
+        let logVersion = Int8(try parseAsInt(token: iterator.next()))
+        self.logVersion = logVersion
+        return IDEActivityLog(version: logVersion,
                               mainSection: try parseLogSection(iterator: &iterator))
     }
 
@@ -458,6 +464,14 @@ public class ActivityParser {
 
     private func parseIDEActivityLogSectionAttachments(iterator: inout IndexingIterator<[Token]>)
         throws -> [IDEActivityLogSectionAttachment] {
+            guard let logVersion else {
+                throw XCLogParserError.parseError("Log version not parsed before parsing " +
+                                                  "array of IDEActivityLogSectionAttachment")
+            }
+            /// The list of IDEActivityLogSectionAttachment was introduced with version 11
+            guard logVersion >= 11 else {
+                return []
+            }
             guard let listToken = iterator.next() else {
                 throw XCLogParserError.parseError("Unexpected EOF parsing array of IDEActivityLogSectionAttachment")
             }
