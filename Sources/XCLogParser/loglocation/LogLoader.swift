@@ -29,7 +29,7 @@ public struct LogLoader {
             let string: String? = unzipped.withUnsafeBytes { pointer in
                 guard let charPointer = pointer
                     .assumingMemoryBound(to: CChar.self)
-                    .baseAddress 
+                    .baseAddress
                 else {
                     return nil
                 }
