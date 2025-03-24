@@ -20,7 +20,7 @@
 import Foundation
 
 /// Represents the time it took to the Swift Compiler to type check an expression
-public struct SwiftTypeCheck: Encodable {
+public struct SwiftTypeCheck: Encodable, Hashable {
 
     /// URL of the file where the function is
     public let file: String
