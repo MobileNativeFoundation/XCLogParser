@@ -45,6 +45,14 @@ class LogManifestTests: XCTestCase {
 <dict>
 <key>highLevelStatus</key>
 <string>W</string>
+<key>totalNumberOfAnalyzerIssues</key>
+<integer>0</integer>
+<key>totalNumberOfErrors</key>
+<integer>0</integer>
+<key>totalNumberOfTestFailures</key>
+<integer>0</integer>
+<key>totalNumberOfWarnings</key>
+<integer>2</integer>
 </dict>
 <key>schemeIdentifier-containerName</key>
 <string>MyApp</string>
@@ -95,7 +103,13 @@ class LogManifestTests: XCTestCase {
              "documentTypeString": "&lt;nil&gt;",
              "domainType": "Xcode.IDEActivityLogDomainType.BuildLog",
              "fileName": "599BC5A8-5E6A-4C16-A71E-A8D6301BAC07.xcactivitylog",
-             "highLevelStatus": "E",
+             "primaryObservable": [
+                 "highLevelStatus": "E",
+                 "totalNumberOfErrors": 1,
+                 "totalNumberOfAnalyzerIssues": 0,
+                 "totalNumberOfTestFailures": 0,
+                 "totalNumberOfWarnings": 2
+             ],
              "schemeIdentifier-containerName": "MyApp project",
              "schemeIdentifier-schemeName": "MyApp",
              "schemeIdentifier-sharedScheme": 1,
@@ -109,7 +123,13 @@ class LogManifestTests: XCTestCase {
                  "documentTypeString": "&lt;nil&gt;",
                  "domainType": "Xcode.IDEActivityLogDomainType.BuildLog",
                  "fileName": "D1FEAFFA-2E88-4221-9CD2-AB607529381D.xcactivitylog",
-                 "highLevelStatus": "E",
+                 "primaryObservable": [
+                     "highLevelStatus": "E",
+                     "totalNumberOfErrors": 1,
+                     "totalNumberOfAnalyzerIssues": 0,
+                     "totalNumberOfTestFailures": 0,
+                     "totalNumberOfWarnings": 2
+                 ],
                  "schemeIdentifier-containerName": "MyApp project",
                  "schemeIdentifier-schemeName": "MyApp",
                  "schemeIdentifier-sharedScheme": 1,
@@ -128,13 +148,10 @@ class LogManifestTests: XCTestCase {
             return
         }
 
+        
         let startDate = Date(timeIntervalSinceReferenceDate: firstStartedRecording)
         let endDate = Date(timeIntervalSinceReferenceDate: firstStoppedRecording)
-        let calendar = Calendar.current
-        guard let expectedDuration = calendar.dateComponents([.second], from: startDate, to: endDate).second else {
-            XCTFail("Error creating an expected duration field")
-            return
-        }
+        let expectedDuration = endDate.timeIntervalSince1970 - startDate.timeIntervalSince1970
         XCTAssertEqual(expectedDuration, latestLog.duration)
     }
 
