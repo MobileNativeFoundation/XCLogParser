@@ -18,32 +18,13 @@
 // under the License.
 
 import Foundation
-import Gzip
 
-public struct LogLoader {
-
-    func loadFromURL(_ url: URL) throws -> String {
-        do {
-            let data = try Data(contentsOf: url)
-            let unzipped = try data.gunzipped()
-            let string: String? = unzipped.withUnsafeBytes { pointer in
-                guard let charPointer = pointer
-                    .assumingMemoryBound(to: CChar.self)
-                    .baseAddress
-                else {
-                    return nil
-                }
-
-                return String(cString: charPointer, encoding: .ascii)
-            }
-            guard let contents = string else {
-                throw LogError.readingFile(url.path)
-            }
-            return contents
-        } catch {
-            throw LogError.invalidFile(url.path)
-        }
+extension String.Index {
+    init(compilerSafeOffset offset: Int, in string: String) {
+#if swift(>=5.0)
+        self = String.Index(utf16Offset: offset, in: string)
+#else
+        self = String.Index(encodedOffset: offset)
+#endif
     }
-
 }
-
