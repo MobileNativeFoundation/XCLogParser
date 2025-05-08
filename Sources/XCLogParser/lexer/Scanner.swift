@@ -39,7 +39,7 @@ final class Scanner {
         let start = String.Index(compilerSafeOffset: self.offset, in: self.string)
         let end = String.Index(compilerSafeOffset: self.offset + count, in: self.string)
 
-        var result = self.string.substring(with: (start..<end))
+        let result = self.string.substring(with: (start..<end))
 
         guard result.count == count else { return nil }
 
