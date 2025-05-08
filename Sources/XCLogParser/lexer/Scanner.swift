@@ -39,11 +39,11 @@ final class Scanner {
         let start = String.Index(compilerSafeOffset: self.offset, in: self.string)
         let end = String.Index(compilerSafeOffset: self.offset + count, in: self.string)
 
-        let result = self.string.substring(with: (start..<end))
+        let result = self.string[start..<end]
 
         guard result.count == count else { return nil }
 
-        self.offset = self.offset + count
+        self.offset += count
 
         return String(result)
     }
@@ -51,7 +51,7 @@ final class Scanner {
     func scan(string value: String) -> Bool {
         guard self.string.starts(with: value) else { return false }
 
-        self.offset = self.offset + value.count
+        self.offset += value.count
         return true
     }
 
@@ -61,13 +61,13 @@ final class Scanner {
 
         while characterIndex < self.stringEndIndex {
             let character = self.string[characterIndex]
-            
+
             guard allowedCharacters.contains(character) else {
                 break
             }
 
             prefix.append(character)
-            self.offset = self.offset + 1
+            self.offset += 1
             characterIndex = String.Index(utf16Offset: self.offset, in: self.string)
         }
 
@@ -75,6 +75,6 @@ final class Scanner {
     }
 
     func moveOffset(by value: Int) {
-        self.offset = self.offset + value
+        self.offset += value
     }
 }
