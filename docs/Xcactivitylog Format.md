@@ -155,4 +155,4 @@ Inside the logs you can find these classes:
 
 If you search for them, you will find that they belong to the IDEFoundation.framework. A private framework part of Xcode. You can class dump it to get the headers of those classes. Once you have the headers, you will have the name and type of the properties that belong to the class. Now, you can match them to the tokens you got from the log. Some of them are in the same order than in the headers, but for others it will be about trial and error.
 
-In the project you can find those classes with their properties in the order in which they appear in the log in the file (IDEActivityModel.swift)[https://github.com/MobileNativeFoundation/XCLogParser/blob/master/Sources/XCLogParser/activityparser/IDEActivityModel.swift].
+In the project you can find those classes with their properties in the order in which they appear in the log in the file [IDEActivityModel.swift](../Sources/XCLogParser/activityparser/IDEActivityModel.swift).
