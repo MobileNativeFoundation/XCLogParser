@@ -203,39 +203,38 @@ public struct HtmlReporter: LogReporter {
         let steps = build.subSteps.map { $0.subSteps }.joined()
         let aggretatedAndSwiftSteps = steps.filter { !$0.fetchedFromCache &&
             ($0.detailStepType == .swiftCompilation || $0.detailStepType == .swiftAggregatedCompilation) }
-        var swiftFunctionTimes: [SwiftFunctionTime] = []
-        var swiftTypeCheckTimes: [SwiftTypeCheck] = []
+        var _swiftFunctionTimes: Set<SwiftFunctionTime> = []
+        var _swiftTypeCheckTimes: Set<SwiftTypeCheck> = []
         var swiftSteps: [BuildStep] = []
 
         aggretatedAndSwiftSteps.forEach { step in
-            if step.detailStepType == .swiftAggregatedCompilation {
-                let swiftSubSteps = step.subSteps.filter { $0.detailStepType == .swiftCompilation}
-                    .map { subStep in
-                        subStep.with(parentIdentifier: step.parentIdentifier)
-                    }
-                swiftSteps.append(contentsOf: swiftSubSteps)
-                let functions = swiftSubSteps
-                    .compactMap { $0.swiftFunctionTimes }
-                    .joined()
-                let typeChecks = swiftSubSteps
-                    .compactMap { $0.swiftTypeCheckTimes }
-                    .joined()
-                swiftFunctionTimes.append(contentsOf: functions)
-                swiftTypeCheckTimes.append(contentsOf: typeChecks)
-            } else {
-                swiftSteps.append(step)
-                if let functions = step.swiftFunctionTimes {
-                    swiftFunctionTimes.append(contentsOf: functions)
+            let swiftSubSteps = step.subSteps.filter { $0.detailStepType == .swiftCompilation}
+                .map { subStep in
+                    subStep.with(parentIdentifier: step.parentIdentifier)
                 }
-                if let typeChecks = step.swiftTypeCheckTimes {
-                    swiftTypeCheckTimes.append(contentsOf: typeChecks)
-                }
+            swiftSteps.append(contentsOf: swiftSubSteps)
+            let functions = swiftSubSteps
+                .compactMap { $0.swiftFunctionTimes }
+                .joined()
+            let typeChecks = swiftSubSteps
+                .compactMap { $0.swiftTypeCheckTimes }
+                .joined()
+            if let functionTimes = step.swiftFunctionTimes {
+                functionTimes.forEach { _swiftFunctionTimes.insert($0) }
             }
+            if let typeCheckTimes = step.swiftTypeCheckTimes {
+                typeCheckTimes.forEach { _swiftTypeCheckTimes.insert($0) }
+            }
+            functions.forEach { _swiftFunctionTimes.insert($0) }
+            typeChecks.forEach { _swiftTypeCheckTimes.insert($0) }
         }
 
         swiftSteps.sort { $0.compilationDuration > $1.compilationDuration }
         let cSteps = steps.filter { !$0.fetchedFromCache && $0.detailStepType == .cCompilation }
             .sorted { $0.compilationDuration > $1.compilationDuration }
+
+        var swiftFunctionTimes: [SwiftFunctionTime] = Array(_swiftFunctionTimes)
+        var swiftTypeCheckTimes: [SwiftTypeCheck] = Array(_swiftTypeCheckTimes)
 
         swiftFunctionTimes.sort { $0.durationMS > $1.durationMS }
         let topFunctions = Array(swiftFunctionTimes.prefix(Self.maxSwifTypeChecks))
