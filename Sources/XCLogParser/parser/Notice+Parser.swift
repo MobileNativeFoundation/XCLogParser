@@ -60,7 +60,9 @@ extension Notice {
             // Special case, Interface builder warning can only be spotted by checking the whole text of the
             // log section
             let noticeTypeTitle = message.categoryIdent.isEmpty ? logSection.text : message.categoryIdent
-            if var notice = Notice(withType: NoticeType.fromTitle(noticeTypeTitle),
+            let initialType = NoticeType.fromTitleAndSeverity(noticeTypeTitle, severity: message.severity)
+            
+            if var notice = Notice(withType: initialType,
                                    logMessage: message,
                                    detail: logSection.text) {
                 // Add the right details to Swift errors
