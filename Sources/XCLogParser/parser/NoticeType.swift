@@ -101,18 +101,37 @@ public enum NoticeType: String, Codable {
     
     /// Returns a NoticeType based on both categoryIdent title and severity level
     /// This method handles ambiguous categories that can be either warnings or errors
+    /// Severity levels: 0 = note, 1 = warning, 2+ = error (treated as error by compiler)
     public static func fromTitleAndSeverity(_ title: String, severity: Int) -> NoticeType? {
         // First get the initial type from title
         guard let initialType = fromTitle(title) else {
             return nil
         }
         
-        // If the initial type is clangError, check if severity suggests it should be a warning
-        if initialType == .clangError && severity <= 1 {
-            return .clangWarning
+        // Use severity to override type classification when needed
+        switch severity {
+        case 0:
+            return .note
+        case 1:
+            switch initialType {
+            case .clangError:
+                return .clangWarning
+            case .swiftError:
+                return .swiftWarning
+            default:
+                return initialType
+            }
+        case 2...:
+            switch initialType {
+            case .clangWarning, .projectWarning:
+                return .clangError
+            case .swiftWarning:
+                return .swiftError
+            default:
+                return initialType
+            }
+        default:
+            return initialType
         }
-        
-        // For all other cases, use the original logic
-        return initialType
     }
 }

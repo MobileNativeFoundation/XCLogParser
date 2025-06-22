@@ -166,8 +166,17 @@ extension Notice {
         }
         return zip(logSection.messages, clangFlags)
             .compactMap { (message, warningFlag) -> Notice? in
-                // If the warning is treated as error, we marked the issue as error
-                let type: NoticeType = warningFlag.contains("-Werror") ? .clangError : .clangWarning
+                // Determine type based on both flags and severity
+                var type: NoticeType
+                if warningFlag.contains("-Werror") {
+                    type = .clangError
+                } else {
+                    // Use severity to determine if this should be treated as error or warning
+                    // Severity 2+ = error (treated as error by compiler)
+                    // Severity 1 = warning
+                    type = message.severity >= 2 ? .clangError : .clangWarning
+                }
+                
                 let notice = Notice(withType: type, logMessage: message, clangFlag: warningFlag)
 
                 if let notice = notice,
