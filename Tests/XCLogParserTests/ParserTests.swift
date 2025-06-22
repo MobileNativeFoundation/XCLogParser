@@ -655,4 +655,89 @@ CompileSwift normal x86_64 (in target 'Alamofire' from project 'Pods')
                                      attachments: [],
                                      unknown: 0)
     }()
+    
+    func testSwiftCompilationErrorInSubsection() throws {
+        // Test that Swift compilation errors in subsections are properly detected
+        let errorMessage = IDEActivityLogMessage(
+            title: "Cannot find type 'UnknownType' in scope",
+            shortTitle: "",
+            timeEmitted: 1.0,
+            rangeEndInSectionText: UInt64.max,
+            rangeStartInSectionText: 0,
+            subMessages: [],
+            severity: 2,
+            type: "com.apple.dt.IDE.diagnostic",
+            location: DVTTextDocumentLocation(
+                documentURLString: "file:///path/to/TestFile.swift",
+                timestamp: 1.0,
+                startingLineNumber: 10,
+                startingColumnNumber: 20,
+                endingLineNumber: 10,
+                endingColumnNumber: 30,
+                characterRangeEnd: 100,
+                characterRangeStart: 90,
+                locationEncoding: 0
+            ),
+            categoryIdent: "Swift Compiler Error",
+            secondaryLocations: [],
+            additionalDescription: ""
+        )
+        
+        let subsection = IDEActivityLogSection(
+            sectionType: 2,
+            domainType: "",
+            title: "Compile TestFile.swift (arm64)",
+            signature: "",
+            timeStartedRecording: 1.0,
+            timeStoppedRecording: 2.0,
+            subSections: [],
+            text: "",
+            messages: [errorMessage],
+            wasCancelled: false,
+            isQuiet: false,
+            wasFetchedFromCache: false,
+            subtitle: "",
+            location: DVTDocumentLocation(documentURLString: "", timestamp: 0),
+            commandDetailDesc: "",
+            uniqueIdentifier: "",
+            localizedResultString: "",
+            xcbuildSignature: "",
+            attachments: [],
+            unknown: 0
+        )
+        
+        let swiftCompileSection = IDEActivityLogSection(
+            sectionType: 2,
+            domainType: "",
+            title: "Compiling TestFile.swift",
+            signature: "SwiftCompile normal arm64 Compiling\\ TestFile.swift /path/to/TestFile.swift (in target 'TestTarget' from project 'TestProject')",
+            timeStartedRecording: 1.0,
+            timeStoppedRecording: 2.0,
+            subSections: [subsection],
+            text: "",
+            messages: [],
+            wasCancelled: false,
+            isQuiet: false,
+            wasFetchedFromCache: false,
+            subtitle: "",
+            location: DVTDocumentLocation(documentURLString: "", timestamp: 0),
+            commandDetailDesc: "",
+            uniqueIdentifier: "",
+            localizedResultString: "",
+            xcbuildSignature: "",
+            attachments: [],
+            unknown: 0
+        )
+        
+        let step = try parser.parseLogSection(
+            logSection: swiftCompileSection,
+            type: .detail,
+            parentSection: nil
+        )
+        
+        // Should detect the error from the subsection
+        XCTAssertEqual(step.errorCount, 1, "Should detect 1 error from subsection")
+        XCTAssertEqual(step.errors?.count, 1, "Should have 1 error in errors array")
+        XCTAssertEqual(step.errors?.first?.title, "Cannot find type 'UnknownType' in scope", "Should have correct error title")
+    }
 }

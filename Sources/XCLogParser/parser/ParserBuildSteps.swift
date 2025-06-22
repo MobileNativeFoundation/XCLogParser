@@ -131,7 +131,39 @@ public final class ParserBuildSteps {
                 targetErrors = 0
                 targetWarnings = 0
             }
-            let notices = parseWarningsAndErrorsFromLogSection(logSection, forType: detailType)
+            var notices = parseWarningsAndErrorsFromLogSection(logSection, forType: detailType)
+            
+            // For Swift compilations, also check subsections for errors/warnings
+            if detailType == .swiftCompilation && !logSection.subSections.isEmpty {
+                // Initialize notices if nil
+                if notices == nil {
+                    notices = ["warnings": [], "errors": [], "notes": []]
+                }
+                
+                for subSection in logSection.subSections {
+                    if let subNotices = parseWarningsAndErrorsFromLogSectionAsSubsection(subSection, forType: detailType) {
+                        // Merge subsection notices with parent section notices
+                        if let parentWarnings = notices?["warnings"], let subWarnings = subNotices["warnings"] {
+                            notices?["warnings"] = parentWarnings + subWarnings
+                        } else if let subWarnings = subNotices["warnings"] {
+                            notices?["warnings"] = subWarnings
+                        }
+                        
+                        if let parentErrors = notices?["errors"], let subErrors = subNotices["errors"] {
+                            notices?["errors"] = parentErrors + subErrors
+                        } else if let subErrors = subNotices["errors"] {
+                            notices?["errors"] = subErrors
+                        }
+                        
+                        if let parentNotes = notices?["notes"], let subNotes = subNotices["notes"] {
+                            notices?["notes"] = parentNotes + subNotes
+                        } else if let subNotes = subNotices["notes"] {
+                            notices?["notes"] = subNotes
+                        }
+                    }
+                }
+            }
+            
             let warnings: [Notice]? = notices?["warnings"]
             let errors: [Notice]? = notices?["errors"]
             let notes: [Notice]? = notices?["notes"]
@@ -306,6 +338,14 @@ public final class ParserBuildSteps {
     private func parseWarningsAndErrorsFromLogSection(_ logSection: IDEActivityLogSection, forType type: DetailStepType)
         -> [String: [Notice]]? {
         let notices = Notice.parseFromLogSection(logSection, forType: type, truncLargeIssues: truncLargeIssues)
+        return ["warnings": notices.getWarnings(),
+                "errors": notices.getErrors(),
+                "notes": notices.getNotes()]
+    }
+    
+    private func parseWarningsAndErrorsFromLogSectionAsSubsection(_ logSection: IDEActivityLogSection, forType type: DetailStepType)
+        -> [String: [Notice]]? {
+        let notices = Notice.parseFromLogSection(logSection, forType: type, truncLargeIssues: truncLargeIssues, isSubsection: true)
         return ["warnings": notices.getWarnings(),
                 "errors": notices.getErrors(),
                 "notes": notices.getNotes()]

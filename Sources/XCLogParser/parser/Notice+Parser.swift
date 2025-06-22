@@ -31,7 +31,8 @@ extension Notice {
     /// - returns: An Array of `Notice`
     public static func parseFromLogSection(_ logSection: IDEActivityLogSection,
                                            forType type: DetailStepType,
-                                           truncLargeIssues: Bool)
+                                           truncLargeIssues: Bool,
+                                           isSubsection: Bool = false)
         -> [Notice] {
         var logSection = logSection
         if truncLargeIssues && logSection.messages.count > 100 {
@@ -75,8 +76,8 @@ extension Notice {
                         var errorLocation = notice.documentURL.replacingOccurrences(of: "file://", with: "")
                         errorLocation += ":\(notice.startingLineNumber):\(notice.startingColumnNumber):"
                         // do not report error in a file that it does not belong to (we'll ended
-                        // up having duplicated errors)
-                        if !logSection.location.documentURLString.isEmpty
+                        // up having duplicated errors) - but only for main sections, not subsections
+                        if !isSubsection && !logSection.location.documentURLString.isEmpty
                             && logSection.location.documentURLString != notice.documentURL {
                             return nil
                         }
