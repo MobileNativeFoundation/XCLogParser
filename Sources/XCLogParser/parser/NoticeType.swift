@@ -94,6 +94,8 @@ public enum NoticeType: String, Codable {
             return .swiftError
         case Suffix("failed with a nonzero exit code"):
             return .failedCommandError
+        case "No-usage":
+            return .swiftWarning
         default:
             return .note
         }

@@ -133,8 +133,10 @@ public final class ParserBuildSteps {
             }
             var notices = parseWarningsAndErrorsFromLogSection(logSection, forType: detailType)
             
-            // For Swift compilations, also check subsections for errors/warnings
-            if detailType == .swiftCompilation && !logSection.subSections.isEmpty {
+            
+            // For Swift compilations and other compilation types, also check subsections for errors/warnings
+            // Also ensure Swift file-level compilations are processed correctly
+            if (detailType == .swiftCompilation || detailType == .cCompilation || detailType == .other) && !logSection.subSections.isEmpty {
                 // Initialize notices if nil
                 if notices == nil {
                     notices = ["warnings": [], "errors": [], "notes": []]
@@ -178,6 +180,7 @@ public final class ParserBuildSteps {
                 totalWarnings += warnings.count
                 targetWarnings += warnings.count
             }
+            
             var step = BuildStep(type: type,
                                  machineName: machineName,
                                  buildIdentifier: self.buildIdentifier,
