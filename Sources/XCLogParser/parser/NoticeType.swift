@@ -129,6 +129,8 @@ public enum NoticeType: String, Codable {
                 return .clangError
             case .swiftWarning:
                 return .swiftError
+            case .note:
+                return .error
             default:
                 return initialType
             }
