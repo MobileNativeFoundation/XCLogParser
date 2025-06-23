@@ -98,6 +98,31 @@ public final class ParserBuildSteps {
         self.truncLargeIssues = truncLargeIssues
     }
 
+    /// Collects all warnings and errors from a BuildStep tree and deduplicates them
+    /// - parameter buildStep: The root BuildStep to collect notices from
+    /// - returns: A tuple of (warnings, errors) arrays with duplicates removed
+    private func collectAndDeduplicateNotices(from buildStep: BuildStep) -> ([Notice], [Notice]) {
+        var allWarnings: [Notice] = []
+        var allErrors: [Notice] = []
+        
+        func collectNotices(from step: BuildStep) {
+            if let warnings = step.warnings {
+                allWarnings.append(contentsOf: warnings)
+            }
+            if let errors = step.errors {
+                allErrors.append(contentsOf: errors)
+            }
+            
+            for subStep in step.subSteps {
+                collectNotices(from: subStep)
+            }
+        }
+        
+        collectNotices(from: buildStep)
+        
+        return (allWarnings.removingDuplicates(), allErrors.removingDuplicates())
+    }
+
     /// Parses the content from an Xcode log into a `BuildStep`
     /// - parameter activityLog: An `IDEActivityLog`
     /// - returns: A `BuildStep` with the parsed content from the log.
@@ -106,8 +131,12 @@ public final class ParserBuildSteps {
         buildStatus = BuildStatusSanitizer.sanitize(originalStatus: activityLog.mainSection.localizedResultString)
         let mainSectionWithTargets = activityLog.mainSection.groupedByTarget()
         var mainBuildStep = try parseLogSection(logSection: mainSectionWithTargets, type: .main, parentSection: nil)
-        mainBuildStep.errorCount = totalErrors
-        mainBuildStep.warningCount = totalWarnings
+        
+        // Collect and deduplicate all warnings and errors from the entire build tree
+        let (deduplicatedWarnings, deduplicatedErrors) = collectAndDeduplicateNotices(from: mainBuildStep)
+        mainBuildStep.errorCount = deduplicatedErrors.count
+        mainBuildStep.warningCount = deduplicatedWarnings.count
+        
         mainBuildStep = decorateWithSwiftcTimes(mainBuildStep)
         return mainBuildStep
     }
