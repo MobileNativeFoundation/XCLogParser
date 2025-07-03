@@ -658,16 +658,77 @@ public class IDEActivityLogSectionAttachment: Encodable {
     public let majorVersion: UInt64
     public let minorVersion: UInt64
     public let metrics: BuildOperationTaskMetrics?
+    public let backtraces: [BuildOperationTaskBacktrace]
 
     public init(
         identifier: String,
         majorVersion: UInt64,
         minorVersion: UInt64,
-        metrics: BuildOperationTaskMetrics?
+        metrics: BuildOperationTaskMetrics?,
+        backtraces: [BuildOperationTaskBacktrace]
     ) throws {
         self.identifier = identifier
         self.majorVersion = majorVersion
         self.minorVersion = minorVersion
         self.metrics = metrics
+        self.backtraces = backtraces
+    }
+
+    public struct BuildOperationTaskBacktrace: Codable {
+        public let category: BuildOperationTaskBacktraceCategory
+        public let description: String
+    }
+
+    public enum BuildOperationTaskBacktraceCategory: String, Codable {
+        case ruleHadInvalidValue
+        case ruleSignatureChanged
+        case ruleNeverBuilt
+        case ruleInputRebuilt
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: BuildOperationTaskBacktraceCategoryCodingKeys.self)
+
+            if container.contains(.ruleHadInvalidValue) {
+                self = .ruleHadInvalidValue
+            } else if container.contains(.ruleSignatureChanged) {
+                self = .ruleSignatureChanged
+            } else if container.contains(.ruleNeverBuilt) {
+                self = .ruleNeverBuilt
+            } else if container.contains(.ruleInputRebuilt) {
+                self = .ruleInputRebuilt
+            } else {
+                throw DecodingError.dataCorrupted(
+                    DecodingError.Context(
+                        codingPath: decoder.codingPath,
+                        debugDescription: "Unknown task backtrace category"
+                    )
+                )
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: BuildOperationTaskBacktraceCategoryCodingKeys.self)
+            switch self {
+            case .ruleHadInvalidValue:
+                try container.encode(EmptyObject(), forKey: .ruleHadInvalidValue)
+            case .ruleSignatureChanged:
+                try container.encode(EmptyObject(), forKey: .ruleSignatureChanged)
+            case .ruleNeverBuilt:
+                try container.encode(EmptyObject(), forKey: .ruleNeverBuilt)
+            case .ruleInputRebuilt:
+                try container.encode(EmptyObject(), forKey: .ruleInputRebuilt)
+            }
+        }
+    }
+
+    private enum BuildOperationTaskBacktraceCategoryCodingKeys: String, CodingKey {
+        case ruleHadInvalidValue
+        case ruleSignatureChanged
+        case ruleNeverBuilt
+        case ruleInputRebuilt
+    }
+
+    private struct EmptyObject: Codable {
+        // Empty struct for objects with no properties
     }
 }
