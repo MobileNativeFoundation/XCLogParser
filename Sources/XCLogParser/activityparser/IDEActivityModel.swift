@@ -658,23 +658,37 @@ public class IDEActivityLogSectionAttachment: Encodable {
     public let majorVersion: UInt64
     public let minorVersion: UInt64
     public let metrics: BuildOperationTaskMetrics?
-    public let backtraces: [BuildOperationTaskBacktrace]
+    public let backtrace: BuildOperationTaskBacktrace?
 
     public init(
         identifier: String,
         majorVersion: UInt64,
         minorVersion: UInt64,
         metrics: BuildOperationTaskMetrics?,
-        backtraces: [BuildOperationTaskBacktrace]
+        backtrace: BuildOperationTaskBacktrace?
     ) throws {
         self.identifier = identifier
         self.majorVersion = majorVersion
         self.minorVersion = minorVersion
         self.metrics = metrics
-        self.backtraces = backtraces
+        self.backtrace = backtrace
     }
 
     public struct BuildOperationTaskBacktrace: Codable {
+        public let frames: [BuildOperationTaskBacktraceFrame]
+
+        public init(from decoder: any Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            self.frames = try container.decode([BuildOperationTaskBacktraceFrame].self)
+        }
+
+        public func encode(to encoder: any Encoder) throws {
+            var container = encoder.singleValueContainer()
+            try container.encode(frames)
+        }
+    }
+
+    public struct BuildOperationTaskBacktraceFrame: Codable {
         public let category: BuildOperationTaskBacktraceCategory
         public let description: String
     }
@@ -684,6 +698,10 @@ public class IDEActivityLogSectionAttachment: Encodable {
         case ruleSignatureChanged
         case ruleNeverBuilt
         case ruleInputRebuilt
+        case ruleForced
+        case dynamicTaskRegistration
+        case dynamicTaskRequest
+        case none
 
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: BuildOperationTaskBacktraceCategoryCodingKeys.self)
@@ -696,6 +714,14 @@ public class IDEActivityLogSectionAttachment: Encodable {
                 self = .ruleNeverBuilt
             } else if container.contains(.ruleInputRebuilt) {
                 self = .ruleInputRebuilt
+            } else if container.contains(.ruleForced) {
+                self = .ruleForced
+            } else if container.contains(.dynamicTaskRegistration) {
+                self = .dynamicTaskRegistration
+            } else if container.contains(.dynamicTaskRequest) {
+                self = .dynamicTaskRequest
+            } else if container.contains(.none) {
+                self = .none
             } else {
                 throw DecodingError.dataCorrupted(
                     DecodingError.Context(
@@ -717,6 +743,14 @@ public class IDEActivityLogSectionAttachment: Encodable {
                 try container.encode(EmptyObject(), forKey: .ruleNeverBuilt)
             case .ruleInputRebuilt:
                 try container.encode(EmptyObject(), forKey: .ruleInputRebuilt)
+            case .ruleForced:
+                try container.encode(EmptyObject(), forKey: .ruleForced)
+            case .dynamicTaskRegistration:
+                try container.encode(EmptyObject(), forKey: .dynamicTaskRegistration)
+            case .dynamicTaskRequest:
+                try container.encode(EmptyObject(), forKey: .dynamicTaskRequest)
+            case .none:
+                try container.encode(EmptyObject(), forKey: .none)
             }
         }
     }
@@ -726,6 +760,10 @@ public class IDEActivityLogSectionAttachment: Encodable {
         case ruleSignatureChanged
         case ruleNeverBuilt
         case ruleInputRebuilt
+        case ruleForced
+        case dynamicTaskRegistration
+        case dynamicTaskRequest
+        case none
     }
 
     private struct EmptyObject: Codable {

@@ -389,15 +389,15 @@ public class ActivityParser {
                                                                minorVersion: try parseAsInt(token: iterator.next()),
                                                                metrics: try parseAsJson(token: iterator.next(),
                                                                                          type: jsonType),
-                                                                backtraces: [])
+                                                                backtrace: nil)
                 case .some("TaskBacktrace"):
-                    let jsonType = [IDEActivityLogSectionAttachment.BuildOperationTaskBacktrace].self
+                    let jsonType = IDEActivityLogSectionAttachment.BuildOperationTaskBacktrace.self
                     return try IDEActivityLogSectionAttachment(identifier: identifier,
                                                                majorVersion: try parseAsInt(token: iterator.next()),
                                                                minorVersion: try parseAsInt(token: iterator.next()),
                                                                metrics: nil,
-                                                               backtraces: try parseAsJson(token: iterator.next(),
-                                                                                         type: jsonType) ?? [])
+                                                               backtrace: try parseAsJson(token: iterator.next(),
+                                                                                         type: jsonType))
                 default:
                     throw XCLogParserError.parseError("Unexpected attachment identifier \(identifier)")
                 }

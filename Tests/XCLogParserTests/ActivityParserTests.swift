@@ -346,7 +346,7 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual("localizedResultString", logSection.localizedResultString)
         XCTAssertEqual("xcbuildSignature", logSection.xcbuildSignature)
         XCTAssertEqual(2, logSection.attachments.count)
-        XCTAssertEqual(logSection.attachments[0].backtraces[0].category, .ruleNeverBuilt)
+        XCTAssertEqual(logSection.attachments[0].backtrace?.frames.first?.category, .ruleNeverBuilt)
         XCTAssertEqual(logSection.attachments[1].metrics?.wcDuration, 1)
         XCTAssertEqual(0, logSection.unknown)
     }
