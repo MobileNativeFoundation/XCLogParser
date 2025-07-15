@@ -19,7 +19,7 @@
 
 import Foundation
 
-public enum LogManifestEntryType: String, Encodable {
+public enum LogManifestEntryType: String, Encodable, Sendable {
     case xcode
     case xcodebuild
 
@@ -37,7 +37,7 @@ public enum LogManifestEntryType: String, Encodable {
     }
 }
 
-public struct LogManifestEntry: Encodable {
+public struct LogManifestEntry: Encodable, Sendable {
     public let uniqueIdentifier: String
     public let title: String
     public let scheme: String
@@ -63,7 +63,7 @@ public struct LogManifestEntry: Encodable {
 
 }
 
-public struct LogManifestEntryStatistics: Encodable {
+public struct LogManifestEntryStatistics: Encodable, Sendable {
     public let totalNumberOfErrors: Int
     public let totalNumberOfAnalyzerIssues: Int
     public let highLevelStatus: String

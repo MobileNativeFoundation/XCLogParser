@@ -21,7 +21,7 @@ import Foundation
 
 /// Parses a LogManifest.plist file.
 /// That file has a list of the existing Xcode Logs inside a Derived Data's project directory
-public struct LogManifest {
+public struct LogManifest: Sendable {
 
     public init() {}
 
