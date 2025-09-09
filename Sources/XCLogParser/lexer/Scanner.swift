@@ -37,8 +37,11 @@ final class Scanner {
 
     func scan(count: Int) -> String? {
         let start = String.Index(compilerSafeOffset: self.offset, in: self.string)
-        let end = String.Index(compilerSafeOffset: self.offset + count, in: self.string)
+        let endOffset = self.offset + count
 
+        guard endOffset <= self.string.utf16.count else { return nil }
+
+        let end = String.Index(compilerSafeOffset: endOffset, in: self.string)
         let result = self.string[start..<end]
 
         guard result.count == count else { return nil }
