@@ -25,7 +25,7 @@ public struct LogManifest {
 
     public init() {}
 
-    public func getWithLogOptions(_ logOptions: LogOptions) throws  -> [LogManifestEntry] {
+    public func getWithLogOptions(_ logOptions: LogOptions) throws -> [LogManifestEntry] {
         let logFinder = LogFinder()
         let logManifestURL = try logFinder.findLogManifestWithLogOptions(logOptions)
         let logManifestDictionary = try getDictionaryFromURL(logManifestURL)
