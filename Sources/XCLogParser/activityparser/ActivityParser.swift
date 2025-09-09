@@ -380,12 +380,27 @@ public class ActivityParser {
             }
 
             if className == "IDEFoundation.\(String(describing: IDEActivityLogSectionAttachment.self))" {
-                let jsonType = IDEActivityLogSectionAttachment.BuildOperationTaskMetrics.self
-                return try IDEActivityLogSectionAttachment(identifier: try parseAsString(token: iterator.next()),
-                                                           majorVersion: try parseAsInt(token: iterator.next()),
-                                                           minorVersion: try parseAsInt(token: iterator.next()),
-                                                           metrics: try parseAsJson(token: iterator.next(),
-                                                                                    type: jsonType))
+                let identifier = try parseAsString(token: iterator.next())
+                switch identifier.components(separatedBy: "ActivityLogSectionAttachment.").last {
+                case .some("TaskMetrics"):
+                    let jsonType = IDEActivityLogSectionAttachment.BuildOperationTaskMetrics.self
+                    return try IDEActivityLogSectionAttachment(identifier: identifier,
+                                                               majorVersion: try parseAsInt(token: iterator.next()),
+                                                               minorVersion: try parseAsInt(token: iterator.next()),
+                                                               metrics: try parseAsJson(token: iterator.next(),
+                                                                                         type: jsonType),
+                                                                backtrace: nil)
+                case .some("TaskBacktrace"):
+                    let jsonType = IDEActivityLogSectionAttachment.BuildOperationTaskBacktrace.self
+                    return try IDEActivityLogSectionAttachment(identifier: identifier,
+                                                               majorVersion: try parseAsInt(token: iterator.next()),
+                                                               minorVersion: try parseAsInt(token: iterator.next()),
+                                                               metrics: nil,
+                                                               backtrace: try parseAsJson(token: iterator.next(),
+                                                                                         type: jsonType))
+                default:
+                    throw XCLogParserError.parseError("Unexpected attachment identifier \(identifier)")
+                }
             }
             throw XCLogParserError.parseError("Unexpected className found parsing IDEConsoleItem \(className)")
     }
