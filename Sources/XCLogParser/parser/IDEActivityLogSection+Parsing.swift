@@ -42,8 +42,7 @@ extension IDEActivityLogSection {
     func groupedByTarget() -> IDEActivityLogSection {
         // The only way to know if the structure is flatten is to check the first elements
         // for the `(in target 'ABC' from project Project)` string
-        let firstElements = subSections.prefix(15) // we only analyze up to the first 15 subsections
-        let isFlatten = firstElements.contains { $0.getTargetFromCommand() != nil }
+        let isFlatten = subSections.contains { $0.getTargetFromCommand() != nil }
         if isFlatten {
             let mainTarget = "$MainTarget"
             let targetsDictionary = subSections.reduce(
