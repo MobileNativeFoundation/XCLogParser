@@ -44,6 +44,7 @@ extension IDEActivityLogSection {
         // for the `(in target 'ABC' from project Project)` string
         let firstElements = subSections.prefix(50)
         let isFlatten = firstElements.contains { $0.getTargetFromCommand() != nil }
+
         if isFlatten {
             let mainTarget = "$MainTarget"
             let targetsDictionary = subSections.reduce(
