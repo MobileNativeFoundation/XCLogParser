@@ -86,7 +86,7 @@ extension IDEActivityLogSection {
     public func getSwiftIndividualSteps(buildStep: BuildStep,
                                         parentCommandDetailDesc: String,
                                         currentIndex: inout Int) -> [BuildStep]? {
-        let pattern = #"^CompileSwift\s\w+\s\w+\s.+\.swift\s"#
+        let pattern = #"^SwiftCompile\s\w+\s\w+\s.+\.swift\s"#
         guard commandDetailDesc.range(of: pattern, options: .regularExpression) == nil else {
             return nil
         }

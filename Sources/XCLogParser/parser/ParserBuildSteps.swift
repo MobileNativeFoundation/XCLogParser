@@ -75,7 +75,7 @@ public final class ParserBuildSteps {
     }()
 
     lazy var swiftcArchRegexp: NSRegularExpression? = {
-        let pattern = "^CompileSwift normal (\\w*) "
+        let pattern = "^SwiftCompile normal (\\w*) "
         return NSRegularExpression.fromPattern(pattern)
     }()
 
