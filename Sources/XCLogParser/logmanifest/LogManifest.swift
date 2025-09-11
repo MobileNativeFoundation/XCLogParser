@@ -32,6 +32,7 @@ public struct LogManifest {
         return try parse(dictionary: logManifestDictionary, atPath: logManifestURL.path)
     }
 
+    // swiftlint:disable function_body_length
     public func parse(dictionary: NSDictionary, atPath path: String) throws -> [LogManifestEntry] {
         guard let logs = dictionary["logs"] as? [String: [String: Any]] else {
             throw LogError.invalidLogManifest("The file at \(path) is not a valid " +

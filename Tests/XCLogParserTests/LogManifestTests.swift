@@ -148,7 +148,6 @@ class LogManifestTests: XCTestCase {
             return
         }
 
-        
         let startDate = Date(timeIntervalSinceReferenceDate: firstStartedRecording)
         let endDate = Date(timeIntervalSinceReferenceDate: firstStoppedRecording)
         let expectedDuration = endDate.timeIntervalSince1970 - startDate.timeIntervalSince1970
