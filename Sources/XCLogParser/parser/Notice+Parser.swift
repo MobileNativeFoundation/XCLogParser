@@ -31,7 +31,8 @@ extension Notice {
     /// - returns: An Array of `Notice`
     public static func parseFromLogSection(_ logSection: IDEActivityLogSection,
                                            forType type: DetailStepType,
-                                           truncLargeIssues: Bool)
+                                           truncLargeIssues: Bool,
+                                           isSubsection: Bool = false)
         -> [Notice] {
         var logSection = logSection
         if truncLargeIssues && logSection.messages.count > 100 {
@@ -60,7 +61,9 @@ extension Notice {
             // Special case, Interface builder warning can only be spotted by checking the whole text of the
             // log section
             let noticeTypeTitle = message.categoryIdent.isEmpty ? logSection.text : message.categoryIdent
-            if var notice = Notice(withType: NoticeType.fromTitle(noticeTypeTitle),
+            let initialType = NoticeType.fromTitleAndSeverity(noticeTypeTitle, severity: message.severity)
+            
+            if var notice = Notice(withType: initialType,
                                    logMessage: message,
                                    detail: logSection.text) {
                 // Add the right details to Swift errors
@@ -73,8 +76,8 @@ extension Notice {
                         var errorLocation = notice.documentURL.replacingOccurrences(of: "file://", with: "")
                         errorLocation += ":\(notice.startingLineNumber):\(notice.startingColumnNumber):"
                         // do not report error in a file that it does not belong to (we'll ended
-                        // up having duplicated errors)
-                        if !logSection.location.documentURLString.isEmpty
+                        // up having duplicated errors) - but only for main sections, not subsections
+                        if !isSubsection && !logSection.location.documentURLString.isEmpty
                             && logSection.location.documentURLString != notice.documentURL {
                             return nil
                         }
@@ -164,8 +167,17 @@ extension Notice {
         }
         return zip(logSection.messages, clangFlags)
             .compactMap { (message, warningFlag) -> Notice? in
-                // If the warning is treated as error, we marked the issue as error
-                let type: NoticeType = warningFlag.contains("-Werror") ? .clangError : .clangWarning
+                // Determine type based on both flags and severity
+                var type: NoticeType
+                if warningFlag.contains("-Werror") {
+                    type = .clangError
+                } else {
+                    // Use severity to determine if this should be treated as error or warning
+                    // Severity 2+ = error (treated as error by compiler)
+                    // Severity 1 = warning
+                    type = message.severity >= 2 ? .clangError : .clangWarning
+                }
+                
                 let notice = Notice(withType: type, logMessage: message, clangFlag: warningFlag)
 
                 if let notice = notice,

@@ -98,6 +98,31 @@ public final class ParserBuildSteps {
         self.truncLargeIssues = truncLargeIssues
     }
 
+    /// Collects all warnings and errors from a BuildStep tree and deduplicates them
+    /// - parameter buildStep: The root BuildStep to collect notices from
+    /// - returns: A tuple of (warnings, errors) arrays with duplicates removed
+    private func collectAndDeduplicateNotices(from buildStep: BuildStep) -> ([Notice], [Notice]) {
+        var allWarnings: [Notice] = []
+        var allErrors: [Notice] = []
+        
+        func collectNotices(from step: BuildStep) {
+            if let warnings = step.warnings {
+                allWarnings.append(contentsOf: warnings)
+            }
+            if let errors = step.errors {
+                allErrors.append(contentsOf: errors)
+            }
+            
+            for subStep in step.subSteps {
+                collectNotices(from: subStep)
+            }
+        }
+        
+        collectNotices(from: buildStep)
+        
+        return (allWarnings.removingDuplicates(), allErrors.removingDuplicates())
+    }
+
     /// Parses the content from an Xcode log into a `BuildStep`
     /// - parameter activityLog: An `IDEActivityLog`
     /// - returns: A `BuildStep` with the parsed content from the log.
@@ -106,8 +131,12 @@ public final class ParserBuildSteps {
         buildStatus = BuildStatusSanitizer.sanitize(originalStatus: activityLog.mainSection.localizedResultString)
         let mainSectionWithTargets = activityLog.mainSection.groupedByTarget()
         var mainBuildStep = try parseLogSection(logSection: mainSectionWithTargets, type: .main, parentSection: nil)
-        mainBuildStep.errorCount = totalErrors
-        mainBuildStep.warningCount = totalWarnings
+        
+        // Collect and deduplicate all warnings and errors from the entire build tree
+        let (deduplicatedWarnings, deduplicatedErrors) = collectAndDeduplicateNotices(from: mainBuildStep)
+        mainBuildStep.errorCount = deduplicatedErrors.count
+        mainBuildStep.warningCount = deduplicatedWarnings.count
+        
         mainBuildStep = decorateWithSwiftcTimes(mainBuildStep)
         return mainBuildStep
     }
@@ -131,7 +160,41 @@ public final class ParserBuildSteps {
                 targetErrors = 0
                 targetWarnings = 0
             }
-            let notices = parseWarningsAndErrorsFromLogSection(logSection, forType: detailType)
+            var notices = parseWarningsAndErrorsFromLogSection(logSection, forType: detailType)
+            
+            
+            // For Swift compilations and other compilation types, also check subsections for errors/warnings
+            // Also ensure Swift file-level compilations are processed correctly
+            if (detailType == .swiftCompilation || detailType == .cCompilation || detailType == .other) && !logSection.subSections.isEmpty {
+                // Initialize notices if nil
+                if notices == nil {
+                    notices = ["warnings": [], "errors": [], "notes": []]
+                }
+                
+                for subSection in logSection.subSections {
+                    if let subNotices = parseWarningsAndErrorsFromLogSectionAsSubsection(subSection, forType: detailType) {
+                        // Merge subsection notices with parent section notices
+                        if let parentWarnings = notices?["warnings"], let subWarnings = subNotices["warnings"] {
+                            notices?["warnings"] = parentWarnings + subWarnings
+                        } else if let subWarnings = subNotices["warnings"] {
+                            notices?["warnings"] = subWarnings
+                        }
+                        
+                        if let parentErrors = notices?["errors"], let subErrors = subNotices["errors"] {
+                            notices?["errors"] = parentErrors + subErrors
+                        } else if let subErrors = subNotices["errors"] {
+                            notices?["errors"] = subErrors
+                        }
+                        
+                        if let parentNotes = notices?["notes"], let subNotes = subNotices["notes"] {
+                            notices?["notes"] = parentNotes + subNotes
+                        } else if let subNotes = subNotices["notes"] {
+                            notices?["notes"] = subNotes
+                        }
+                    }
+                }
+            }
+            
             let warnings: [Notice]? = notices?["warnings"]
             let errors: [Notice]? = notices?["errors"]
             let notes: [Notice]? = notices?["notes"]
@@ -146,6 +209,7 @@ public final class ParserBuildSteps {
                 totalWarnings += warnings.count
                 targetWarnings += warnings.count
             }
+            
             var step = BuildStep(type: type,
                                  machineName: machineName,
                                  buildIdentifier: self.buildIdentifier,
@@ -306,6 +370,14 @@ public final class ParserBuildSteps {
     private func parseWarningsAndErrorsFromLogSection(_ logSection: IDEActivityLogSection, forType type: DetailStepType)
         -> [String: [Notice]]? {
         let notices = Notice.parseFromLogSection(logSection, forType: type, truncLargeIssues: truncLargeIssues)
+        return ["warnings": notices.getWarnings(),
+                "errors": notices.getErrors(),
+                "notes": notices.getNotes()]
+    }
+    
+    private func parseWarningsAndErrorsFromLogSectionAsSubsection(_ logSection: IDEActivityLogSection, forType type: DetailStepType)
+        -> [String: [Notice]]? {
+        let notices = Notice.parseFromLogSection(logSection, forType: type, truncLargeIssues: truncLargeIssues, isSubsection: true)
         return ["warnings": notices.getWarnings(),
                 "errors": notices.getErrors(),
                 "notes": notices.getNotes()]

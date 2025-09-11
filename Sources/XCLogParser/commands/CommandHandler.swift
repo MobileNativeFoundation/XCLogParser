@@ -71,6 +71,17 @@ public struct CommandHandler {
         let reporterOutput = ReporterOutputFactory.makeReporterOutput(path: options.outputPath)
         let logReporter = options.reporter.makeLogReporter()
         try logReporter.report(build: buildSteps, output: reporterOutput, rootOutput: options.rootOutput)
+        
+        // Exit with appropriate code based on build status
+        if shouldExitWithFailureCode(buildSteps: buildSteps) {
+            exit(1)
+        }
+    }
+    
+    private func shouldExitWithFailureCode(buildSteps: BuildStep) -> Bool {
+        // Check if the main build failed
+        let buildStatus = buildSteps.buildStatus.lowercased()
+        return buildStatus.contains("failed") || buildStatus.contains("error")
     }
 
 }

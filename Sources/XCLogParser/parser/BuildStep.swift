@@ -98,6 +98,8 @@ public enum DetailStepType: String, Encodable {
             return .cCompilation
         case Prefix("CompileSwift "):
             return .swiftCompilation
+        case Prefix("SwiftCompile "):
+            return .swiftCompilation
         case Prefix("Ld "):
             return .linker
         case Prefix("PhaseScriptExecution "):
