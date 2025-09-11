@@ -48,8 +48,17 @@ public struct LogManifestEntry: Encodable, Sendable {
     public let type: LogManifestEntryType
     public let statistics: LogManifestEntryStatistics
 
-    public init(uniqueIdentifier: String, title: String, scheme: String, fileName: String,
-                timestampStart: TimeInterval, timestampEnd: TimeInterval, duration: Double, type: LogManifestEntryType, statistics: LogManifestEntryStatistics) {
+    public init(
+        uniqueIdentifier: String,
+        title: String,
+        scheme: String,
+        fileName: String,
+        timestampStart: TimeInterval,
+        timestampEnd: TimeInterval,
+        duration: Double,
+        type: LogManifestEntryType,
+        statistics: LogManifestEntryStatistics
+    ) {
         self.uniqueIdentifier = uniqueIdentifier
         self.title = title
         self.scheme = scheme
@@ -70,7 +79,13 @@ public struct LogManifestEntryStatistics: Encodable, Sendable {
     public let totalNumberOfTestFailures: Int
     public let totalNumberOfWarnings: Int
 
-    public init(totalNumberOfErrors: Int, totalNumberOfAnalyzerIssues: Int, highLevelStatus: String, totalNumberOfTestFailures: Int, totalNumberOfWarnings: Int) {
+    public init(
+        totalNumberOfErrors: Int,
+        totalNumberOfAnalyzerIssues: Int,
+        highLevelStatus: String,
+        totalNumberOfTestFailures: Int,
+        totalNumberOfWarnings: Int
+    ) {
         self.totalNumberOfErrors = totalNumberOfErrors
         self.totalNumberOfAnalyzerIssues = totalNumberOfAnalyzerIssues
         self.highLevelStatus = highLevelStatus
