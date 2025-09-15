@@ -389,6 +389,7 @@ public class ActivityParser {
                                                                minorVersion: try parseAsInt(token: iterator.next()),
                                                                metrics: try parseAsJson(token: iterator.next(),
                                                                                          type: jsonType),
+                                                               buildOperationMetrics: nil,
                                                                 backtrace: nil)
                 case .some("TaskBacktrace"):
                     let jsonType = IDEActivityLogSectionAttachment.BuildOperationTaskBacktrace.self
@@ -396,8 +397,20 @@ public class ActivityParser {
                                                                majorVersion: try parseAsInt(token: iterator.next()),
                                                                minorVersion: try parseAsInt(token: iterator.next()),
                                                                metrics: nil,
+                                                               buildOperationMetrics: nil,
                                                                backtrace: try parseAsJson(token: iterator.next(),
                                                                                          type: jsonType))
+                case .some("BuildOperationMetrics"):
+                    let jsonType = IDEActivityLogSectionAttachment.BuildOperationMetrics.self
+                    return try IDEActivityLogSectionAttachment(identifier: identifier,
+                                                               majorVersion: try parseAsInt(token: iterator.next()),
+                                                               minorVersion: try parseAsInt(token: iterator.next()),
+                                                               metrics: nil,
+                                                               buildOperationMetrics: try parseAsJson(
+                                                                   token: iterator.next(),
+                                                                   type: jsonType
+                                                               ),
+                                                               backtrace: nil)
                 default:
                     throw XCLogParserError.parseError("Unexpected attachment identifier \(identifier)")
                 }

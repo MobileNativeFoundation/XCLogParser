@@ -658,6 +658,7 @@ public class IDEActivityLogSectionAttachment: Encodable {
     public let majorVersion: UInt64
     public let minorVersion: UInt64
     public let metrics: BuildOperationTaskMetrics?
+    public let buildOperationMetrics: BuildOperationMetrics?
     public let backtrace: BuildOperationTaskBacktrace?
 
     public init(
@@ -665,12 +666,14 @@ public class IDEActivityLogSectionAttachment: Encodable {
         majorVersion: UInt64,
         minorVersion: UInt64,
         metrics: BuildOperationTaskMetrics?,
+        buildOperationMetrics: BuildOperationMetrics?,
         backtrace: BuildOperationTaskBacktrace?
     ) throws {
         self.identifier = identifier
         self.majorVersion = majorVersion
         self.minorVersion = minorVersion
         self.metrics = metrics
+        self.buildOperationMetrics = buildOperationMetrics
         self.backtrace = backtrace
     }
 
@@ -768,5 +771,24 @@ public class IDEActivityLogSectionAttachment: Encodable {
 
     private struct EmptyObject: Codable {
         // Empty struct for objects with no properties
+    }
+
+    public struct BuildOperationMetrics: Codable {
+        public let clangCacheHits: Int
+        public let clangCacheMisses: Int
+        public let swiftCacheHits: Int
+        public let swiftCacheMisses: Int
+
+        public init(
+            clangCacheHits: Int,
+            clangCacheMisses: Int,
+            swiftCacheHits: Int,
+            swiftCacheMisses: Int
+        ) {
+            self.clangCacheHits = clangCacheHits
+            self.clangCacheMisses = clangCacheMisses
+            self.swiftCacheHits = swiftCacheHits
+            self.swiftCacheMisses = swiftCacheMisses
+        }
     }
 }

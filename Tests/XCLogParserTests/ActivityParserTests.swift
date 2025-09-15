@@ -97,13 +97,19 @@ class ActivityParserTests: XCTestCase {
                          Token.string("501796C4-6BE4-4F80-9F9D-3269617ECC17"),
                          Token.string("localizedResultString"),
                          Token.string("xcbuildSignature"),
-                         Token.list(2),
+                         Token.list(3),
                          Token.classNameRef("IDEFoundation.IDEActivityLogSectionAttachment"),
                          Token.string("com.apple.dt.ActivityLogSectionAttachment.TaskBacktrace"),
                          Token.int(1),
                          Token.int(0),
                          // swiftlint:disable:next line_length
                          Token.json(#"[{"description":"'Planning Swift module ConcurrencyExtras (arm64)' had never run","category":{"ruleNeverBuilt":{}},"identifier":{"storage":{"task":{"_0":[0,80,50,58,116,97,114,103,101,116,45,67,111,110,99,117,114,114,101,110,99,121,69,120,116,114,97,115,45,101,102,52,50,51,48,52,53,57,52,98,102,56,53,50,102,52,51,56,101,102,55,99,51,97,49,51,54,98,50,99,57,48,100,102,56,55,49,56,97,102,50,98,57,100,51,97,97,99,48,100,48,100,99,97,50,50,98,52,99,50,57,99,50,45,58,66,101,116,97,32,68,101,98,117,103,58,51,99,57,97,99,57,53,50,98,52,99,56,49,100,57,99,99,49,55,100,49,97,102,52,55,49,97,48,52,53,101,56]}}},"frameKind":{"genericTask":{}}}]"#),
+                         Token.classNameRef("IDEFoundation.IDEActivityLogSectionAttachment"),
+                         Token.string("com.apple.dt.ActivityLogSectionAttachment.BuildOperationMetrics"),
+                         Token.int(1),
+                         Token.int(0),
+                         // swiftlint:disable:next line_length
+                         Token.json(#"{"clangCacheHits":0,"clangCacheMisses":2,"swiftCacheHits":0,"swiftCacheMisses":8}"#),
                          Token.classNameRef("IDEFoundation.IDEActivityLogSectionAttachment"),
                          Token.string("com.apple.dt.ActivityLogSectionAttachment.TaskMetrics"),
                          Token.int(1),
@@ -345,9 +351,11 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual("501796C4-6BE4-4F80-9F9D-3269617ECC17", logSection.uniqueIdentifier)
         XCTAssertEqual("localizedResultString", logSection.localizedResultString)
         XCTAssertEqual("xcbuildSignature", logSection.xcbuildSignature)
-        XCTAssertEqual(2, logSection.attachments.count)
+        XCTAssertEqual(3, logSection.attachments.count)
         XCTAssertEqual(logSection.attachments[0].backtrace?.frames.first?.category, .ruleNeverBuilt)
-        XCTAssertEqual(logSection.attachments[1].metrics?.wcDuration, 1)
+        print(logSection.attachments)
+        XCTAssertEqual(logSection.attachments[1].buildOperationMetrics?.clangCacheMisses, 2)
+        XCTAssertEqual(logSection.attachments[2].metrics?.wcDuration, 1)
         XCTAssertEqual(0, logSection.unknown)
     }
 
