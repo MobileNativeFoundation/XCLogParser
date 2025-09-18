@@ -532,6 +532,100 @@ note: use 'updatedDoSomething' instead\r doSomething()\r        ^~~~~~~~~~~\r   
         XCTAssertEqual(100, build.warnings?.count ?? 0, "Warnings should be truncated up to 100")
     }
 
+    func testAmbiguousCategoryMessagesShouldRespectSeverity() throws {
+        let timestamp = Date().timeIntervalSinceReferenceDate
+        let textDocumentLocation = DVTTextDocumentLocation(documentURLString: "file:///project/test.h",
+                                                           timestamp: timestamp,
+                                                           startingLineNumber: 348,
+                                                           startingColumnNumber: 15,
+                                                           endingLineNumber: 348,
+                                                           endingColumnNumber: 15,
+                                                           characterRangeEnd: 18446744073709551615,
+                                                           characterRangeStart: 0,
+                                                           locationEncoding: 0)
+        
+        // Create a Parse Issue message with severity 1 (should be warning)
+        let parseIssueWarning = IDEActivityLogMessage(title: "Constexpr if is a C++17 extension",
+                                                     shortTitle: "",
+                                                     timeEmitted: timestamp,
+                                                     rangeEndInSectionText: 18446744073709551615,
+                                                     rangeStartInSectionText: 0,
+                                                     subMessages: [],
+                                                     severity: 1,
+                                                     type: "com.apple.dt.IDE.diagnostic",
+                                                     location: textDocumentLocation,
+                                                     categoryIdent: "Parse Issue",
+                                                     secondaryLocations: [],
+                                                     additionalDescription: "")
+        
+        // Create a Parse Issue message with severity 2 (should be error)
+        let parseIssueError = IDEActivityLogMessage(title: "Unknown type 'InvalidType'",
+                                                   shortTitle: "",
+                                                   timeEmitted: timestamp,
+                                                   rangeEndInSectionText: 18446744073709551615,
+                                                   rangeStartInSectionText: 0,
+                                                   subMessages: [],
+                                                   severity: 2,
+                                                   type: "com.apple.dt.IDE.diagnostic",
+                                                   location: textDocumentLocation,
+                                                   categoryIdent: "Parse Issue",
+                                                   secondaryLocations: [],
+                                                   additionalDescription: "")
+        
+        // Test that Semantic Issue also works (another ambiguous category)
+        let semanticIssueWarning = IDEActivityLogMessage(title: "Implicit conversion warning",
+                                                   shortTitle: "",
+                                                   timeEmitted: timestamp,
+                                                   rangeEndInSectionText: 18446744073709551615,
+                                                   rangeStartInSectionText: 0,
+                                                   subMessages: [],
+                                                   severity: 1,
+                                                   type: "com.apple.dt.IDE.diagnostic",
+                                                   location: textDocumentLocation,
+                                                   categoryIdent: "Semantic Issue",
+                                                   secondaryLocations: [],
+                                                   additionalDescription: "")
+        
+        let fakeLog = getFakeIDEActivityLogWithMessages([parseIssueWarning, parseIssueError, semanticIssueWarning],
+                                                       andText: "test text",
+                                                       loc: textDocumentLocation)
+        let build = try parser.parse(activityLog: fakeLog)
+        
+        // Verify counts
+        XCTAssertEqual(2, build.warningCount, "Should have 2 warnings (Parse Issue + Semantic Issue with severity 1)")
+        XCTAssertEqual(1, build.errorCount, "Should have 1 error from Parse Issue with severity 2")
+        
+        // Verify warnings
+        XCTAssertNotNil(build.warnings, "Warnings shouldn't be empty")
+        XCTAssertEqual(2, build.warnings?.count ?? 0, "Should have 2 warnings")
+        
+        // Find the Parse Issue warning
+        guard let parseWarning = build.warnings?.first(where: { $0.title == parseIssueWarning.title }) else {
+            XCTFail("Parse Issue warning not found")
+            return
+        }
+        XCTAssertEqual(NoticeType.clangWarning, parseWarning.type, "Parse Issue with severity 1 should be clangWarning")
+        XCTAssertEqual(1, parseWarning.severity, "Parse Issue warning should have severity 1")
+        
+        // Find the Semantic Issue warning
+        guard let semanticWarning = build.warnings?.first(where: { $0.title == semanticIssueWarning.title }) else {
+            XCTFail("Semantic Issue warning not found")
+            return
+        }
+        XCTAssertEqual(NoticeType.clangWarning, semanticWarning.type, "Semantic Issue with severity 1 should be clangWarning")
+        XCTAssertEqual(1, semanticWarning.severity, "Semantic Issue warning should have severity 1")
+        
+        // Verify error
+        XCTAssertNotNil(build.errors, "Errors shouldn't be empty")
+        guard let error = build.errors?.first else {
+            XCTFail("Build's errors are empty")
+            return
+        }
+        XCTAssertEqual(parseIssueError.title, error.title)
+        XCTAssertEqual(NoticeType.clangError, error.type, "Parse Issue with severity 2 should be clangError")
+        XCTAssertEqual(2, error.severity, "Error should have severity 2")
+    }
+
     // swiftlint:disable line_length
     let commandDetailSwiftSteps = """
 CompileSwift normal x86_64 (in target 'Alamofire' from project 'Pods')
@@ -561,4 +655,89 @@ CompileSwift normal x86_64 (in target 'Alamofire' from project 'Pods')
                                      attachments: [],
                                      unknown: 0)
     }()
+    
+    func testSwiftCompilationErrorInSubsection() throws {
+        // Test that Swift compilation errors in subsections are properly detected
+        let errorMessage = IDEActivityLogMessage(
+            title: "Cannot find type 'UnknownType' in scope",
+            shortTitle: "",
+            timeEmitted: 1.0,
+            rangeEndInSectionText: UInt64.max,
+            rangeStartInSectionText: 0,
+            subMessages: [],
+            severity: 2,
+            type: "com.apple.dt.IDE.diagnostic",
+            location: DVTTextDocumentLocation(
+                documentURLString: "file:///path/to/TestFile.swift",
+                timestamp: 1.0,
+                startingLineNumber: 10,
+                startingColumnNumber: 20,
+                endingLineNumber: 10,
+                endingColumnNumber: 30,
+                characterRangeEnd: 100,
+                characterRangeStart: 90,
+                locationEncoding: 0
+            ),
+            categoryIdent: "Swift Compiler Error",
+            secondaryLocations: [],
+            additionalDescription: ""
+        )
+        
+        let subsection = IDEActivityLogSection(
+            sectionType: 2,
+            domainType: "",
+            title: "Compile TestFile.swift (arm64)",
+            signature: "",
+            timeStartedRecording: 1.0,
+            timeStoppedRecording: 2.0,
+            subSections: [],
+            text: "",
+            messages: [errorMessage],
+            wasCancelled: false,
+            isQuiet: false,
+            wasFetchedFromCache: false,
+            subtitle: "",
+            location: DVTDocumentLocation(documentURLString: "", timestamp: 0),
+            commandDetailDesc: "",
+            uniqueIdentifier: "",
+            localizedResultString: "",
+            xcbuildSignature: "",
+            attachments: [],
+            unknown: 0
+        )
+        
+        let swiftCompileSection = IDEActivityLogSection(
+            sectionType: 2,
+            domainType: "",
+            title: "Compiling TestFile.swift",
+            signature: "SwiftCompile normal arm64 Compiling\\ TestFile.swift /path/to/TestFile.swift (in target 'TestTarget' from project 'TestProject')",
+            timeStartedRecording: 1.0,
+            timeStoppedRecording: 2.0,
+            subSections: [subsection],
+            text: "",
+            messages: [],
+            wasCancelled: false,
+            isQuiet: false,
+            wasFetchedFromCache: false,
+            subtitle: "",
+            location: DVTDocumentLocation(documentURLString: "", timestamp: 0),
+            commandDetailDesc: "",
+            uniqueIdentifier: "",
+            localizedResultString: "",
+            xcbuildSignature: "",
+            attachments: [],
+            unknown: 0
+        )
+        
+        let step = try parser.parseLogSection(
+            logSection: swiftCompileSection,
+            type: .detail,
+            parentSection: nil
+        )
+        
+        // Should detect the error from the subsection
+        XCTAssertEqual(step.errorCount, 1, "Should detect 1 error from subsection")
+        XCTAssertEqual(step.errors?.count, 1, "Should have 1 error in errors array")
+        XCTAssertEqual(step.errors?.first?.title, "Cannot find type 'UnknownType' in scope", "Should have correct error title")
+    }
 }
