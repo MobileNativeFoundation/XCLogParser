@@ -513,8 +513,8 @@ xclogparser parse --file path/to/log.xcactivitylog --reporter html --output buil
 
 | Environment | Version     |
 | ----------- |-------------|
-| 🛠 Xcode    | 13.0        |
-| 🐦 Language | Swift 5.5   |
+| 🛠 Xcode    | 16.4        |
+| 🐦 Language | Swift 6.0   |
 
 ## Status
 
