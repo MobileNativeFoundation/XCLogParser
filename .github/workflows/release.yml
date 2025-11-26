@@ -2,6 +2,12 @@ name: release_binaries
 on:
   release:
     types: created
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., v0.2.40)'
+        required: true
+        type: string
 
 jobs:
   macOS:
@@ -15,7 +21,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
       - name: Set tag name
-        run: echo "TAG_NAME=$(echo $GITHUB_REF | cut -c 11-)" >> $GITHUB_ENV
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            echo "TAG_NAME=${{ inputs.tag }}" >> $GITHUB_ENV
+          else
+            echo "TAG_NAME=$(echo $GITHUB_REF | cut -c 11-)" >> $GITHUB_ENV
+          fi
       - name: Build x86_64-apple-macosx
         run: rake 'build[release, x86_64-apple-macosx]'
       - name: Zip x86_64-apple-macosx release
@@ -38,7 +49,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: releases/*
           file_glob: true
-          tag: ${{ github.ref }}
+          tag: ${{ inputs.tag || github.ref }}
           overwrite: true
 
   linux:
@@ -54,7 +65,12 @@ jobs:
       - name: Build
         run: LANG=en_US.UTF-8 LC_CTYPE=UTF-8 rake build[release]
       - name: Set tag name
-        run: echo "TAG_NAME=$(echo $GITHUB_REF | cut -c 11-)" >> $GITHUB_ENV
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            echo "TAG_NAME=${{ inputs.tag }}" >> $GITHUB_ENV
+          else
+            echo "TAG_NAME=$(echo $GITHUB_REF | cut -c 11-)" >> $GITHUB_ENV
+          fi
       - name: Zip release
         uses: montudor/action-zip@v0.1.0
         with:
@@ -67,5 +83,5 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: releases/*
           file_glob: true
-          tag: ${{ github.ref }}
+          tag: ${{ inputs.tag || github.ref }}
           overwrite: true
