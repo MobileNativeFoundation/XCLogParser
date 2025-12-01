@@ -26,6 +26,9 @@ struct ManifestCommand: ParsableCommand {
         commandName: "manifest",
         abstract: "Shows the content of a LogManifest plist file as a JSON document."
     )
+    
+    @Option(name: .long, help: "Type of .xactivitylog file to look for.")
+    var logs: LogType = .build
 
     @Option(name: .customLong("long_manifest"), help: "The path to an existing LogStoreManifest.plist.")
     var logManifest: String?
@@ -89,6 +92,7 @@ struct ManifestCommand: ParsableCommand {
                                     xcworkspacePath: workspace ?? "",
                                     xcodeprojPath: xcodeproj ?? "",
                                     derivedDataPath: derivedData ?? "",
+                                    logType: logs,
                                     logManifestPath: logManifest ?? "",
                                     strictProjectName: strictProjectName)
 
