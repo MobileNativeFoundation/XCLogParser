@@ -149,7 +149,7 @@ class ActivityParserTests: XCTestCase {
     }()
 
     // Xcode 26.2 format: unknown integer appears before subtitle
-    lazy var IDEActivityLogSectionTokensXcode26_2: [Token] = {
+    lazy var IDEActivityLogSectionTokensXcode262: [Token] = {
         let startTokens = [Token.int(2),
                            Token.string("com.apple.dt.IDE.BuildLogSection"),
                            Token.string("Prepare build"),
@@ -417,9 +417,9 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual(0, logSection.unknown)
     }
 
-    func testParseIDEActivityLogSection_xcode26_2() throws {
+    func testParseIDEActivityLogSectionXcode262() throws {
         parser.logVersion = 12
-        let tokens = IDEActivityLogSectionTokensXcode26_2
+        let tokens = IDEActivityLogSectionTokensXcode262
         var iterator = tokens.makeIterator()
         let logSection = try parser.parseIDEActivityLogSection(iterator: &iterator)
         XCTAssertEqual(2, logSection.sectionType)

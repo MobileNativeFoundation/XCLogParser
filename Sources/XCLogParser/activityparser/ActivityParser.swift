@@ -96,6 +96,7 @@ public class ActivityParser {
                                      additionalDescription: try parseAsString(token: iterator.next()))
     }
 
+    // swiftlint:disable:next function_body_length
     public func parseIDEActivityLogSection(iterator: inout IndexingIterator<[Token]>) throws -> IDEActivityLogSection {
         let sectionType = Int8(try parseAsInt(token: iterator.next()))
         let domainType = try parseAsString(token: iterator.next())
@@ -112,7 +113,7 @@ public class ActivityParser {
         let nextToken = iterator.next()
         var unknown: Int?
         let subtitle: String
-        // On Xcode 26.2 and higher, the unknown integer appears before subtitle followed with another unknown list token
+        // On Xcode 26.2+, the unknown integer appears before subtitle
         switch nextToken {
         case let .some(.int(integer)):
             unknown = Int(integer)
@@ -129,7 +130,7 @@ public class ActivityParser {
         if unknown == nil {
             unknown = isCommandLineLog ? Int(try parseAsInt(token: iterator.next())) : 0
         }
-        
+
         return IDEActivityLogSection(
             sectionType: sectionType,
             domainType: domainType,
