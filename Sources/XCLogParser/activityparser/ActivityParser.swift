@@ -96,28 +96,62 @@ public class ActivityParser {
                                      additionalDescription: try parseAsString(token: iterator.next()))
     }
 
-    public func parseIDEActivityLogSection(iterator: inout IndexingIterator<[Token]>)
-        throws -> IDEActivityLogSection {
-        return IDEActivityLogSection(sectionType: Int8(try parseAsInt(token: iterator.next())),
-                                     domainType: try parseAsString(token: iterator.next()),
-                                     title: try parseAsString(token: iterator.next()),
-                                     signature: try parseAsString(token: iterator.next()),
-                                     timeStartedRecording: try parseAsDouble(token: iterator.next()),
-                                     timeStoppedRecording: try parseAsDouble(token: iterator.next()),
-                                     subSections: try parseIDEActivityLogSections(iterator: &iterator),
-                                     text: try parseAsString(token: iterator.next()),
-                                     messages: try parseMessages(iterator: &iterator),
-                                     wasCancelled: try parseBoolean(token: iterator.next()),
-                                     isQuiet: try parseBoolean(token: iterator.next()),
-                                     wasFetchedFromCache: try parseBoolean(token: iterator.next()),
-                                     subtitle: try parseAsString(token: iterator.next()),
-                                     location: try parseDocumentLocation(iterator: &iterator),
-                                     commandDetailDesc: try parseAsString(token: iterator.next()),
-                                     uniqueIdentifier: try parseAsString(token: iterator.next()),
-                                     localizedResultString: try parseAsString(token: iterator.next()),
-                                     xcbuildSignature: try parseAsString(token: iterator.next()),
-                                     attachments: try parseIDEActivityLogSectionAttachments(iterator: &iterator),
-                                     unknown: isCommandLineLog ? Int(try parseAsInt(token: iterator.next())) : 0)
+    public func parseIDEActivityLogSection(iterator: inout IndexingIterator<[Token]>) throws -> IDEActivityLogSection {
+        let sectionType = Int8(try parseAsInt(token: iterator.next()))
+        let domainType = try parseAsString(token: iterator.next())
+        let title = try parseAsString(token: iterator.next())
+        let signature = try parseAsString(token: iterator.next())
+        let timeStartedRecording = try parseAsDouble(token: iterator.next())
+        let timeStoppedRecording = try parseAsDouble(token: iterator.next())
+        let subSections = try parseIDEActivityLogSections(iterator: &iterator)
+        let text = try parseAsString(token: iterator.next())
+        let messages = try parseMessages(iterator: &iterator)
+        let wasCancelled = try parseBoolean(token: iterator.next())
+        let isQuiet = try parseBoolean(token: iterator.next())
+        let wasFetchedFromCache = try parseBoolean(token: iterator.next())
+        let nextToken = iterator.next()
+        var unknown: Int?
+        let subtitle: String
+        // On Xcode 26.2 and higher, the unknown integer appears before subtitle followed with another unknown list token
+        switch nextToken {
+        case let .some(.int(integer)):
+            unknown = Int(integer)
+            subtitle = try String(parseAsString(token: iterator.next()))
+        default:
+            subtitle = String(try parseAsString(token: nextToken))
+        }
+        let location = try parseDocumentLocation(iterator: &iterator)
+        let commandDetailDesc = try parseAsString(token: iterator.next())
+        let uniqueIdentifier = try parseAsString(token: iterator.next())
+        let localizedResultString = try parseAsString(token: iterator.next())
+        let xcbuildSignature = try parseAsString(token: iterator.next())
+        let attachments = try parseIDEActivityLogSectionAttachments(iterator: &iterator)
+        if unknown == nil {
+            unknown = isCommandLineLog ? Int(try parseAsInt(token: iterator.next())) : 0
+        }
+        
+        return IDEActivityLogSection(
+            sectionType: sectionType,
+            domainType: domainType,
+            title: title,
+            signature: signature,
+            timeStartedRecording: timeStartedRecording,
+            timeStoppedRecording: timeStoppedRecording,
+            subSections: subSections,
+            text: text,
+            messages: messages,
+            wasCancelled: wasCancelled,
+            isQuiet: isQuiet,
+            wasFetchedFromCache: wasFetchedFromCache,
+            subtitle: subtitle,
+            location: location,
+            commandDetailDesc: commandDetailDesc,
+            uniqueIdentifier: uniqueIdentifier,
+            localizedResultString: localizedResultString,
+            xcbuildSignature: xcbuildSignature,
+            attachments: attachments,
+            unknown: unknown ?? 0
+        )
     }
 
     public func parseIDEActivityLogUnitTestSection(iterator: inout IndexingIterator<[Token]>)

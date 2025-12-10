@@ -148,6 +148,36 @@ class ActivityParserTests: XCTestCase {
         return startTokens + logMessageTokens + endTokens
     }()
 
+    // Xcode 26.2 format: unknown integer appears before subtitle
+    lazy var IDEActivityLogSectionTokensXcode26_2: [Token] = {
+        let startTokens = [Token.int(2),
+                           Token.string("com.apple.dt.IDE.BuildLogSection"),
+                           Token.string("Prepare build"),
+                           Token.string("Prepare build"),
+                           Token.double(575479851.278759),
+                           Token.double(575479851.778325),
+                           Token.null,
+                           Token.string("note: Using legacy build system"),
+                           Token.list(1),
+                           Token.className("IDEActivityLogMessage"),
+                           Token.classNameRef("IDEActivityLogMessage"),
+        ]
+        let logMessageTokens = IDEActivityLogMessageTokens
+        let endTokens = [Token.int(1),
+                         Token.int(0),
+                         Token.int(1),
+                         Token.int(42),  // unknown integer before subtitle (Xcode 26.2+)
+                         Token.string("subtitle"),
+                         Token.null,
+                         Token.string("commandDetailDesc"),
+                         Token.string("501796C4-6BE4-4F80-9F9D-3269617ECC17"),
+                         Token.string("localizedResultString"),
+                         Token.string("xcbuildSignature"),
+                         Token.list(0),  // attachments
+        ]
+        return startTokens + logMessageTokens + endTokens
+    }()
+
     let IDEConsoleItemTokens: [Token] = [
         Token.className("IDEConsoleItem"),
         Token.classNameRef("IDEConsoleItem"),
@@ -385,6 +415,34 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual("xcbuildSignature", logSection.xcbuildSignature)
         XCTAssertEqual(0, logSection.attachments.count)
         XCTAssertEqual(0, logSection.unknown)
+    }
+
+    func testParseIDEActivityLogSection_xcode26_2() throws {
+        parser.logVersion = 12
+        let tokens = IDEActivityLogSectionTokensXcode26_2
+        var iterator = tokens.makeIterator()
+        let logSection = try parser.parseIDEActivityLogSection(iterator: &iterator)
+        XCTAssertEqual(2, logSection.sectionType)
+        XCTAssertEqual("com.apple.dt.IDE.BuildLogSection", logSection.domainType)
+        XCTAssertEqual("Prepare build", logSection.title)
+        XCTAssertEqual("Prepare build", logSection.signature)
+        XCTAssertEqual(575479851.278759, logSection.timeStartedRecording)
+        XCTAssertEqual(575479851.778325, logSection.timeStoppedRecording)
+        XCTAssertEqual(0, logSection.subSections.count)
+        XCTAssertEqual("note: Using legacy build system", logSection.text)
+        XCTAssertEqual(1, logSection.messages.count)
+        XCTAssertTrue(logSection.wasCancelled)
+        XCTAssertFalse(logSection.isQuiet)
+        XCTAssertTrue(logSection.wasFetchedFromCache)
+        XCTAssertEqual("subtitle", logSection.subtitle)
+        XCTAssertEqual("", logSection.location.documentURLString)
+        XCTAssertEqual(0, logSection.location.timestamp)
+        XCTAssertEqual("commandDetailDesc", logSection.commandDetailDesc)
+        XCTAssertEqual("501796C4-6BE4-4F80-9F9D-3269617ECC17", logSection.uniqueIdentifier)
+        XCTAssertEqual("localizedResultString", logSection.localizedResultString)
+        XCTAssertEqual("xcbuildSignature", logSection.xcbuildSignature)
+        XCTAssertEqual(0, logSection.attachments.count)
+        XCTAssertEqual(42, logSection.unknown)
     }
 
     func testParseActivityLog() throws {
