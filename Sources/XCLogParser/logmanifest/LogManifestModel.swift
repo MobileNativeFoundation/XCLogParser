@@ -19,7 +19,7 @@
 
 import Foundation
 
-public enum LogManifestEntryType: String, Encodable {
+public enum LogManifestEntryType: String, Encodable, Sendable {
     case xcode
     case xcodebuild
 
@@ -37,18 +37,28 @@ public enum LogManifestEntryType: String, Encodable {
     }
 }
 
-public struct LogManifestEntry: Encodable {
+public struct LogManifestEntry: Encodable, Sendable {
     public let uniqueIdentifier: String
     public let title: String
     public let scheme: String
     public let fileName: String
-    public let timestampStart: Int
-    public let timestampEnd: Int
-    public let duration: Int
+    public let timestampStart: TimeInterval
+    public let timestampEnd: TimeInterval
+    public let duration: Double
     public let type: LogManifestEntryType
+    public let statistics: LogManifestEntryStatistics
 
-    public init(uniqueIdentifier: String, title: String, scheme: String, fileName: String,
-                timestampStart: Int, timestampEnd: Int, duration: Int, type: LogManifestEntryType) {
+    public init(
+        uniqueIdentifier: String,
+        title: String,
+        scheme: String,
+        fileName: String,
+        timestampStart: TimeInterval,
+        timestampEnd: TimeInterval,
+        duration: Double,
+        type: LogManifestEntryType,
+        statistics: LogManifestEntryStatistics
+    ) {
         self.uniqueIdentifier = uniqueIdentifier
         self.title = title
         self.scheme = scheme
@@ -57,6 +67,29 @@ public struct LogManifestEntry: Encodable {
         self.timestampEnd = timestampEnd
         self.duration = duration
         self.type = type
+        self.statistics = statistics
     }
 
+}
+
+public struct LogManifestEntryStatistics: Encodable, Sendable {
+    public let totalNumberOfErrors: Int
+    public let totalNumberOfAnalyzerIssues: Int
+    public let highLevelStatus: String
+    public let totalNumberOfTestFailures: Int
+    public let totalNumberOfWarnings: Int
+
+    public init(
+        totalNumberOfErrors: Int,
+        totalNumberOfAnalyzerIssues: Int,
+        highLevelStatus: String,
+        totalNumberOfTestFailures: Int,
+        totalNumberOfWarnings: Int
+    ) {
+        self.totalNumberOfErrors = totalNumberOfErrors
+        self.totalNumberOfAnalyzerIssues = totalNumberOfAnalyzerIssues
+        self.highLevelStatus = highLevelStatus
+        self.totalNumberOfTestFailures = totalNumberOfTestFailures
+        self.totalNumberOfWarnings = totalNumberOfWarnings
+    }
 }
