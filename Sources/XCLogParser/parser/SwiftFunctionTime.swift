@@ -20,7 +20,7 @@
 import Foundation
 
 /// Represents the time it took to the Swift Compiler to compile a function
-public struct SwiftFunctionTime: Encodable {
+public struct SwiftFunctionTime: Encodable, Hashable {
     /// URL of the file where the function is
     public let file: String
 
