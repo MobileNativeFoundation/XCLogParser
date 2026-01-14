@@ -46,7 +46,7 @@ public struct LogManifestEntry: Encodable, Sendable {
     public let timestampEnd: TimeInterval
     public let duration: Double
     public let type: LogManifestEntryType
-    public let statistics: LogManifestEntryStatistics
+    public let statistics: LogManifestEntryStatistics?
 
     public init(
         uniqueIdentifier: String,
@@ -57,7 +57,7 @@ public struct LogManifestEntry: Encodable, Sendable {
         timestampEnd: TimeInterval,
         duration: Double,
         type: LogManifestEntryType,
-        statistics: LogManifestEntryStatistics
+        statistics: LogManifestEntryStatistics?
     ) {
         self.uniqueIdentifier = uniqueIdentifier
         self.title = title

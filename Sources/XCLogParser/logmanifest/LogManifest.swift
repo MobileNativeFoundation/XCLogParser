@@ -47,13 +47,7 @@ public struct LogManifest: Sendable {
                 let timeStartedRecording = entry.value["timeStartedRecording"] as? Double,
                 let timeStoppedRecording = entry.value["timeStoppedRecording"] as? Double,
                 let className = entry.value["className"] as? String,
-                let type = LogManifestEntryType.buildFromClassName(className),
-                let primaryObservable = entry.value["primaryObservable"] as? [String: Any],
-                let totalNumberOfAnalyzerIssues = primaryObservable["totalNumberOfAnalyzerIssues"] as? Int,
-                let totalNumberOfErrors = primaryObservable["totalNumberOfErrors"] as? Int,
-                let totalNumberOfWarnings = primaryObservable["totalNumberOfWarnings"] as? Int,
-                let totalNumberOfTestFailures = primaryObservable["totalNumberOfTestFailures"] as? Int,
-                let highLevelStatus = primaryObservable["highLevelStatus"] as? String
+                let type = LogManifestEntryType.buildFromClassName(className)
                 else {
                     throw LogError.invalidLogManifest("The file at \(path) is not a valid " +
                         "LogManifest file.")
@@ -62,13 +56,26 @@ public struct LogManifest: Sendable {
             let endDate = Date(timeIntervalSinceReferenceDate: timeStoppedRecording)
             let timestampStart = startDate.timeIntervalSince1970
             let timestampEnd = endDate.timeIntervalSince1970
-            let statistics = LogManifestEntryStatistics(
-                totalNumberOfErrors: totalNumberOfErrors,
-                totalNumberOfAnalyzerIssues: totalNumberOfAnalyzerIssues,
-                highLevelStatus: highLevelStatus,
-                totalNumberOfTestFailures: totalNumberOfTestFailures,
-                totalNumberOfWarnings: totalNumberOfWarnings
-            )
+            
+            // Optionally extract statistics if available
+            let statistics: LogManifestEntryStatistics? = {
+                guard let primaryObservable = entry.value["primaryObservable"] as? [String: Any],
+                      let totalNumberOfAnalyzerIssues = primaryObservable["totalNumberOfAnalyzerIssues"] as? Int,
+                      let totalNumberOfErrors = primaryObservable["totalNumberOfErrors"] as? Int,
+                      let totalNumberOfWarnings = primaryObservable["totalNumberOfWarnings"] as? Int,
+                      let totalNumberOfTestFailures = primaryObservable["totalNumberOfTestFailures"] as? Int,
+                      let highLevelStatus = primaryObservable["highLevelStatus"] as? String
+                else {
+                    return nil
+                }
+                return LogManifestEntryStatistics(
+                    totalNumberOfErrors: totalNumberOfErrors,
+                    totalNumberOfAnalyzerIssues: totalNumberOfAnalyzerIssues,
+                    highLevelStatus: highLevelStatus,
+                    totalNumberOfTestFailures: totalNumberOfTestFailures,
+                    totalNumberOfWarnings: totalNumberOfWarnings
+                )
+            }()
             return LogManifestEntry(uniqueIdentifier: uniqueIdentifier,
                                     title: title,
                                     scheme: scheme,
