@@ -58,7 +58,7 @@ end
 
 desc 'Create a release zip'
 task :archive do
-  Rake::Task["build"].invoke('release', ['macos'], 'true')
+  Rake::Task["build"].invoke('release', nil, ['macos'], 'true')
 end
 
 desc 'Generates a Swift class with the file content from Resources'
