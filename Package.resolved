@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "grpc-swift",
+        "repositoryURL": "https://github.com/grpc/grpc-swift.git",
+        "state": {
+          "branch": null,
+          "revision": "84bac657e9930d26e9124bac082f26586dc2d209",
+          "version": "1.19.1"
+        }
+      },
+      {
         "package": "Gzip",
         "repositoryURL": "https://github.com/1024jp/GzipSwift",
         "state": {
@@ -20,12 +29,39 @@
         }
       },
       {
+        "package": "opentelemetry-swift",
+        "repositoryURL": "https://github.com/open-telemetry/opentelemetry-swift",
+        "state": {
+          "branch": null,
+          "revision": "8d6fa745c186e3b7556f330b5236da25fa7c9d62",
+          "version": "1.7.0"
+        }
+      },
+      {
+        "package": "Opentracing",
+        "repositoryURL": "https://github.com/undefinedlabs/opentracing-objc",
+        "state": {
+          "branch": null,
+          "revision": "18c1a35ca966236cee0c5a714a51a73ff33384c1",
+          "version": "0.5.2"
+        }
+      },
+      {
         "package": "PathKit",
         "repositoryURL": "https://github.com/kylef/PathKit.git",
         "state": {
           "branch": null,
           "revision": "3bfd2737b700b9a36565a8c94f4ad2b050a5e574",
           "version": "1.0.1"
+        }
+      },
+      {
+        "package": "Reachability",
+        "repositoryURL": "https://github.com/ashleymills/Reachability.swift",
+        "state": {
+          "branch": null,
+          "revision": "c01bbdf2d633cf049ae1ed1a68a2020a8bda32e2",
+          "version": "5.1.0"
         }
       },
       {
@@ -44,6 +80,105 @@
           "branch": null,
           "revision": "fddd1c00396eed152c45a46bea9f47b98e59301d",
           "version": "1.2.0"
+        }
+      },
+      {
+        "package": "swift-atomics",
+        "repositoryURL": "https://github.com/apple/swift-atomics.git",
+        "state": {
+          "branch": null,
+          "revision": "cd142fd2f64be2100422d658e7411e39489da985",
+          "version": "1.2.0"
+        }
+      },
+      {
+        "package": "swift-collections",
+        "repositoryURL": "https://github.com/apple/swift-collections.git",
+        "state": {
+          "branch": null,
+          "revision": "a902f1823a7ff3c9ab2fba0f992396b948eda307",
+          "version": "1.0.5"
+        }
+      },
+      {
+        "package": "swift-log",
+        "repositoryURL": "https://github.com/apple/swift-log.git",
+        "state": {
+          "branch": null,
+          "revision": "532d8b529501fb73a2455b179e0bbb6d49b652ed",
+          "version": "1.5.3"
+        }
+      },
+      {
+        "package": "swift-metrics",
+        "repositoryURL": "https://github.com/apple/swift-metrics.git",
+        "state": {
+          "branch": null,
+          "revision": "971ba26378ab69c43737ee7ba967a896cb74c0d1",
+          "version": "2.4.1"
+        }
+      },
+      {
+        "package": "swift-nio",
+        "repositoryURL": "https://github.com/apple/swift-nio.git",
+        "state": {
+          "branch": null,
+          "revision": "3db5c4aeee8100d2db6f1eaf3864afdad5dc68fd",
+          "version": "2.59.0"
+        }
+      },
+      {
+        "package": "swift-nio-extras",
+        "repositoryURL": "https://github.com/apple/swift-nio-extras.git",
+        "state": {
+          "branch": null,
+          "revision": "fb70a0f5e984f23be48b11b4f1909f3bee016178",
+          "version": "1.19.1"
+        }
+      },
+      {
+        "package": "swift-nio-http2",
+        "repositoryURL": "https://github.com/apple/swift-nio-http2.git",
+        "state": {
+          "branch": null,
+          "revision": "9c22e4f810ce780453f563fba98e1a1039f83d56",
+          "version": "1.28.1"
+        }
+      },
+      {
+        "package": "swift-nio-ssl",
+        "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
+        "state": {
+          "branch": null,
+          "revision": "320bd978cceb8e88c125dcbb774943a92f6286e9",
+          "version": "2.25.0"
+        }
+      },
+      {
+        "package": "swift-nio-transport-services",
+        "repositoryURL": "https://github.com/apple/swift-nio-transport-services.git",
+        "state": {
+          "branch": null,
+          "revision": "e7403c35ca6bb539a7ca353b91cc2d8ec0362d58",
+          "version": "1.19.0"
+        }
+      },
+      {
+        "package": "SwiftProtobuf",
+        "repositoryURL": "https://github.com/apple/swift-protobuf.git",
+        "state": {
+          "branch": null,
+          "revision": "3c54ab05249f59f2c6641dd2920b8358ea9ed127",
+          "version": "1.24.0"
+        }
+      },
+      {
+        "package": "Thrift",
+        "repositoryURL": "https://github.com/undefinedlabs/Thrift-Swift",
+        "state": {
+          "branch": null,
+          "revision": "18ff09e6b30e589ed38f90a1af23e193b8ecef8e",
+          "version": "1.1.2"
         }
       }
     ]
