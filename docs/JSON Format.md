@@ -76,6 +76,87 @@ Other fields:
 - `compilationEndTimestamp`: Timestamp in which the actual compilation finished. For a Target this could be before `endTimestamp` because in the new Xcode Build System linking can happen way after compilation.
 - `compilationDuration` Actual duration in seconds of just the compilation phase. In a Target this could be significant shorter than the `duration`.
 
+## Attachments (Xcode 15.3+)
+
+When using the `dump` command, each `IDEActivityLogSection` may include an `attachments` array. This was introduced in SLF version 11 (Xcode 15.3). Each attachment has an `identifier`, `majorVersion`, `minorVersion`, and one of the following typed payloads:
+
+### BuildOperationTaskMetrics
+
+Per-task execution metrics:
+
+```json
+{
+  "identifier": "com.apple.dt.ActivityLogSectionAttachment.TaskMetrics",
+  "majorVersion": 1,
+  "minorVersion": 0,
+  "metrics": {
+    "utime": 1834,
+    "stime": 1723,
+    "maxRSS": 3391488,
+    "wcStartTime": 793866997013418,
+    "wcDuration": 141479
+  }
+}
+```
+
+### BuildOperationMetrics
+
+Aggregate build operation metrics. The JSON format differs by Xcode version:
+
+**Xcode 15.3 - Xcode 16.x:**
+```json
+{
+  "identifier": "com.apple.dt.ActivityLogSectionAttachment.BuildOperationMetrics",
+  "majorVersion": 1,
+  "minorVersion": 0,
+  "buildOperationMetrics": {
+    "clangCacheHits": 0,
+    "clangCacheMisses": 2,
+    "swiftCacheHits": 0,
+    "swiftCacheMisses": 8
+  }
+}
+```
+
+**Xcode 26.4+:**
+```json
+{
+  "identifier": "com.apple.dt.ActivityLogSectionAttachment.BuildOperationMetrics",
+  "majorVersion": 1,
+  "minorVersion": 0,
+  "buildOperationMetrics": {
+    "counters": {},
+    "taskCounters": {
+      "SwiftDriver": {
+        "moduleDependenciesNotValidatedTasks": 1
+      }
+    }
+  }
+}
+```
+
+All fields in `buildOperationMetrics` are optional to support both formats.
+
+### BuildOperationTaskBacktrace
+
+Backtrace frames explaining why a build task was executed:
+
+```json
+{
+  "identifier": "com.apple.dt.ActivityLogSectionAttachment.TaskBacktrace",
+  "majorVersion": 1,
+  "minorVersion": 0,
+  "backtrace": [
+    {
+      "description": "'Planning Swift module Foo' had never run",
+      "category": { "ruleNeverBuilt": {} }
+    }
+  ]
+}
+```
+
+## Detail step types
+
 When possible, the `signature` content of `detail` steps is parsed to determine its type. This makes it easier to aggregate the data.
 
 Value | Description

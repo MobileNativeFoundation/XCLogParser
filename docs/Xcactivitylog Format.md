@@ -136,7 +136,15 @@ You can get these tokens:
 [type: "string", value: "Prepare build"],
 ```
 
-The first integer is the version of the `SLF` format used. In Xcode 10.x and 11 Beta, the version is 10. The values after the version are the actual content of the log.
+The first integer is the version of the `SLF` format used. The values after the version are the actual content of the log.
+
+### SLF version history
+
+Version | Xcode Version | Changes
+--- | --- | ---
+10 | Xcode 10.x - 14.x | Initial format
+11 | Xcode 15.3+ | Added `IDEFoundation.IDEActivityLogSectionAttachment` list to `IDEActivityLogSection`
+12 | Xcode 26.2+ | Added an unknown integer field before `subtitle` in `IDEActivityLogSection`
 
 ## Parsing an xcactivitylog
 
@@ -156,3 +164,29 @@ Inside the logs you can find these classes:
 If you search for them, you will find that they belong to the IDEFoundation.framework. A private framework part of Xcode. You can class dump it to get the headers of those classes. Once you have the headers, you will have the name and type of the properties that belong to the class. Now, you can match them to the tokens you got from the log. Some of them are in the same order than in the headers, but for others it will be about trial and error.
 
 In the project you can find those classes with their properties in the order in which they appear in the log in the file [IDEActivityModel.swift](../Sources/XCLogParser/activityparser/IDEActivityModel.swift).
+
+## IDEActivityLogSectionAttachment (SLF version 11+)
+
+Starting with SLF version 11 (Xcode 15.3), each `IDEActivityLogSection` includes an array of `IDEFoundation.IDEActivityLogSectionAttachment` entries after the `xcbuildSignature` field. Each attachment has an `identifier` string, a `majorVersion` integer, a `minorVersion` integer, and a JSON payload. The identifier determines the type of the JSON payload:
+
+Identifier | JSON Type | Description
+--- | --- | ---
+`...TaskMetrics` | `BuildOperationTaskMetrics` | Per-task timing metrics (`utime`, `stime`, `maxRSS`, `wcStartTime`, `wcDuration`)
+`...TaskBacktrace` | `BuildOperationTaskBacktrace` | Backtrace frames explaining why a task was run
+`...BuildOperationMetrics` | `BuildOperationMetrics` | Aggregate build operation metrics (see below)
+
+### BuildOperationMetrics format changes
+
+In **Xcode 15.3 - Xcode 16.x**, the `BuildOperationMetrics` JSON contains compiler cache statistics:
+
+```json
+{"clangCacheHits":0,"clangCacheMisses":2,"swiftCacheHits":0,"swiftCacheMisses":8}
+```
+
+Starting with **Xcode 26.4**, the format changed to a dynamic counter-based structure:
+
+```json
+{"counters":{},"taskCounters":{"SwiftDriver":{"moduleDependenciesNotValidatedTasks":1}}}
+```
+
+XCLogParser supports both formats. All fields are optional to maintain backward compatibility.
