@@ -562,4 +562,30 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual(expectedDVTMemberDocumentLocation, documentMemberLocation)
     }
 
+    func testBuildOperationMetricsWithMissingKeys() throws {
+        let json = #"{}"#
+        let data = json.data(using: .utf8)!
+        let metrics = try JSONDecoder().decode(
+            IDEActivityLogSectionAttachment.BuildOperationMetrics.self,
+            from: data
+        )
+        XCTAssertEqual(metrics.clangCacheHits, 0)
+        XCTAssertEqual(metrics.clangCacheMisses, 0)
+        XCTAssertEqual(metrics.swiftCacheHits, 0)
+        XCTAssertEqual(metrics.swiftCacheMisses, 0)
+    }
+
+    func testBuildOperationMetricsWithPartialKeys() throws {
+        let json = #"{"swiftCacheHits":5,"swiftCacheMisses":3}"#
+        let data = json.data(using: .utf8)!
+        let metrics = try JSONDecoder().decode(
+            IDEActivityLogSectionAttachment.BuildOperationMetrics.self,
+            from: data
+        )
+        XCTAssertEqual(metrics.clangCacheHits, 0)
+        XCTAssertEqual(metrics.clangCacheMisses, 0)
+        XCTAssertEqual(metrics.swiftCacheHits, 5)
+        XCTAssertEqual(metrics.swiftCacheMisses, 3)
+    }
+
 }
