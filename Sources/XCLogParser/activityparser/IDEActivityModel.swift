@@ -780,15 +780,23 @@ public class IDEActivityLogSectionAttachment: Encodable {
         public let swiftCacheMisses: Int
 
         public init(
-            clangCacheHits: Int,
-            clangCacheMisses: Int,
-            swiftCacheHits: Int,
-            swiftCacheMisses: Int
+            clangCacheHits: Int = 0,
+            clangCacheMisses: Int = 0,
+            swiftCacheHits: Int = 0,
+            swiftCacheMisses: Int = 0
         ) {
             self.clangCacheHits = clangCacheHits
             self.clangCacheMisses = clangCacheMisses
             self.swiftCacheHits = swiftCacheHits
             self.swiftCacheMisses = swiftCacheMisses
+        }
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            clangCacheHits = try container.decodeIfPresent(Int.self, forKey: .clangCacheHits) ?? 0
+            clangCacheMisses = try container.decodeIfPresent(Int.self, forKey: .clangCacheMisses) ?? 0
+            swiftCacheHits = try container.decodeIfPresent(Int.self, forKey: .swiftCacheHits) ?? 0
+            swiftCacheMisses = try container.decodeIfPresent(Int.self, forKey: .swiftCacheMisses) ?? 0
         }
     }
 }
