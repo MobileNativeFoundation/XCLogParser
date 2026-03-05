@@ -436,14 +436,12 @@ public class ActivityParser {
                                                                backtrace: try parseAsJson(token: iterator.next(),
                                                                                          type: jsonType))
                 case .some("BuildOperationMetrics"):
-                    let jsonType = IDEActivityLogSectionAttachment.BuildOperationMetrics.self
                     return try IDEActivityLogSectionAttachment(identifier: identifier,
                                                                majorVersion: try parseAsInt(token: iterator.next()),
                                                                minorVersion: try parseAsInt(token: iterator.next()),
                                                                metrics: nil,
-                                                               buildOperationMetrics: try parseAsJson(
-                                                                   token: iterator.next(),
-                                                                   type: jsonType
+                                                               buildOperationMetrics: try parseBuildOperationMetrics(
+                                                                   token: iterator.next()
                                                                ),
                                                                backtrace: nil)
                 default:
@@ -690,6 +688,25 @@ public class ActivityParser {
             return nil
         default:
             throw XCLogParserError.parseError("Unexpected token parsing JSON String: \(token)")
+        }
+    }
+
+    private func parseBuildOperationMetrics(
+        token: Token?
+    ) throws -> IDEActivityLogSectionAttachment.BuildOperationMetrics? {
+        guard let token = token else {
+            throw XCLogParserError.parseError("Unexpected EOF parsing BuildOperationMetrics")
+        }
+        switch token {
+        case .json(let string):
+            guard let data = string.data(using: .utf8) else {
+                throw XCLogParserError.parseError("Unexpected JSON string \(string)")
+            }
+            return try IDEActivityLogSectionAttachment.BuildOperationMetrics(from: data)
+        case .null:
+            return nil
+        default:
+            throw XCLogParserError.parseError("Unexpected token parsing BuildOperationMetrics: \(token)")
         }
     }
 
