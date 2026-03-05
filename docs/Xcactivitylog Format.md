@@ -189,4 +189,4 @@ Starting with **Xcode 26.4**, the format changed to a dynamic counter-based stru
 {"counters":{},"taskCounters":{"SwiftDriver":{"moduleDependenciesNotValidatedTasks":1}}}
 ```
 
-XCLogParser supports both formats. All fields are optional to maintain backward compatibility.
+XCLogParser automatically detects and supports both formats.

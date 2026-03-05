@@ -773,30 +773,42 @@ public class IDEActivityLogSectionAttachment: Encodable {
         // Empty struct for objects with no properties
     }
 
-    public struct BuildOperationMetrics: Codable {
-        public let clangCacheHits: Int
-        public let clangCacheMisses: Int
-        public let swiftCacheHits: Int
-        public let swiftCacheMisses: Int
+    /// Build operation metrics whose JSON schema differs by Xcode version.
+    public enum BuildOperationMetrics: Encodable {
+        /// Xcode 15.3 - Xcode 16.x format
+        case v15_3(CacheMetrics)
+        /// Xcode 26.4+ format
+        case v26_4(CounterMetrics)
 
-        public init(
-            clangCacheHits: Int = 0,
-            clangCacheMisses: Int = 0,
-            swiftCacheHits: Int = 0,
-            swiftCacheMisses: Int = 0
-        ) {
-            self.clangCacheHits = clangCacheHits
-            self.clangCacheMisses = clangCacheMisses
-            self.swiftCacheHits = swiftCacheHits
-            self.swiftCacheMisses = swiftCacheMisses
+        public struct CacheMetrics: Codable {
+            public let clangCacheHits: Int
+            public let clangCacheMisses: Int
+            public let swiftCacheHits: Int
+            public let swiftCacheMisses: Int
         }
 
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            clangCacheHits = try container.decodeIfPresent(Int.self, forKey: .clangCacheHits) ?? 0
-            clangCacheMisses = try container.decodeIfPresent(Int.self, forKey: .clangCacheMisses) ?? 0
-            swiftCacheHits = try container.decodeIfPresent(Int.self, forKey: .swiftCacheHits) ?? 0
-            swiftCacheMisses = try container.decodeIfPresent(Int.self, forKey: .swiftCacheMisses) ?? 0
+        public struct CounterMetrics: Codable {
+            public let counters: [String: Int]
+            public let taskCounters: [String: [String: Int]]
+        }
+
+        public init(from jsonData: Data) throws {
+            let decoder = JSONDecoder()
+            if let cache = try? decoder.decode(CacheMetrics.self, from: jsonData) {
+                self = .v15_3(cache)
+            } else {
+                let counter = try decoder.decode(CounterMetrics.self, from: jsonData)
+                self = .v26_4(counter)
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            switch self {
+            case .v15_3(let metrics):
+                try metrics.encode(to: encoder)
+            case .v26_4(let metrics):
+                try metrics.encode(to: encoder)
+            }
         }
     }
 }

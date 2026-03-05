@@ -135,7 +135,7 @@ Aggregate build operation metrics. The JSON format differs by Xcode version:
 }
 ```
 
-All fields in `buildOperationMetrics` are optional to support both formats.
+XCLogParser automatically detects and supports both formats.
 
 ### BuildOperationTaskBacktrace
 

@@ -420,7 +420,11 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual(3, logSection.attachments.count)
         XCTAssertEqual(logSection.attachments[0].backtrace?.frames.first?.category, .ruleNeverBuilt)
         print(logSection.attachments)
-        XCTAssertEqual(logSection.attachments[1].buildOperationMetrics?.clangCacheMisses, 2)
+        if case .some(.v15_3(let cache)) = logSection.attachments[1].buildOperationMetrics {
+            XCTAssertEqual(cache.clangCacheMisses, 2)
+        } else {
+            XCTFail("Expected v15_3 BuildOperationMetrics")
+        }
         XCTAssertEqual(logSection.attachments[2].metrics?.wcDuration, 1)
         XCTAssertEqual(0, logSection.unknown)
     }
@@ -506,14 +510,12 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual("localizedResultString", logSection.localizedResultString)
         XCTAssertEqual("xcbuildSignature", logSection.xcbuildSignature)
         XCTAssertEqual(1, logSection.attachments.count)
-        let metrics = logSection.attachments[0].buildOperationMetrics
-        XCTAssertNotNil(metrics)
-        XCTAssertNil(metrics?.clangCacheHits)
-        XCTAssertNil(metrics?.clangCacheMisses)
-        XCTAssertNil(metrics?.swiftCacheHits)
-        XCTAssertNil(metrics?.swiftCacheMisses)
-        XCTAssertEqual(metrics?.counters, [:])
-        XCTAssertEqual(metrics?.taskCounters?["SwiftDriver"]?["moduleDependenciesNotValidatedTasks"], 1)
+        if case .some(.v26_4(let counter)) = logSection.attachments[0].buildOperationMetrics {
+            XCTAssertEqual(counter.counters, [:])
+            XCTAssertEqual(counter.taskCounters["SwiftDriver"]?["moduleDependenciesNotValidatedTasks"], 1)
+        } else {
+            XCTFail("Expected v26_4 BuildOperationMetrics")
+        }
         XCTAssertEqual(42, logSection.unknown)
     }
 
@@ -634,30 +636,30 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual(expectedDVTMemberDocumentLocation, documentMemberLocation)
     }
 
-    func testBuildOperationMetricsWithMissingKeys() throws {
-        let json = #"{}"#
+    func testBuildOperationMetricsWithCacheFormat() throws {
+        let json = #"{"clangCacheHits":1,"clangCacheMisses":2,"swiftCacheHits":3,"swiftCacheMisses":4}"#
         let data = json.data(using: .utf8)!
-        let metrics = try JSONDecoder().decode(
-            IDEActivityLogSectionAttachment.BuildOperationMetrics.self,
-            from: data
-        )
-        XCTAssertEqual(metrics.clangCacheHits, 0)
-        XCTAssertEqual(metrics.clangCacheMisses, 0)
-        XCTAssertEqual(metrics.swiftCacheHits, 0)
-        XCTAssertEqual(metrics.swiftCacheMisses, 0)
+        let metrics = try IDEActivityLogSectionAttachment.BuildOperationMetrics(from: data)
+        if case .v15_3(let cache) = metrics {
+            XCTAssertEqual(cache.clangCacheHits, 1)
+            XCTAssertEqual(cache.clangCacheMisses, 2)
+            XCTAssertEqual(cache.swiftCacheHits, 3)
+            XCTAssertEqual(cache.swiftCacheMisses, 4)
+        } else {
+            XCTFail("Expected v15_3 BuildOperationMetrics")
+        }
     }
 
-    func testBuildOperationMetricsWithPartialKeys() throws {
-        let json = #"{"swiftCacheHits":5,"swiftCacheMisses":3}"#
+    func testBuildOperationMetricsWithCounterFormat() throws {
+        let json = #"{"counters":{"a":1},"taskCounters":{"SwiftDriver":{"x":2}}}"#
         let data = json.data(using: .utf8)!
-        let metrics = try JSONDecoder().decode(
-            IDEActivityLogSectionAttachment.BuildOperationMetrics.self,
-            from: data
-        )
-        XCTAssertEqual(metrics.clangCacheHits, 0)
-        XCTAssertEqual(metrics.clangCacheMisses, 0)
-        XCTAssertEqual(metrics.swiftCacheHits, 5)
-        XCTAssertEqual(metrics.swiftCacheMisses, 3)
+        let metrics = try IDEActivityLogSectionAttachment.BuildOperationMetrics(from: data)
+        if case .v26_4(let counter) = metrics {
+            XCTAssertEqual(counter.counters["a"], 1)
+            XCTAssertEqual(counter.taskCounters["SwiftDriver"]?["x"], 2)
+        } else {
+            XCTFail("Expected v26_4 BuildOperationMetrics")
+        }
     }
 
 }
