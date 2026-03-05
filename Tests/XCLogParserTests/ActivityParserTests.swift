@@ -178,6 +178,42 @@ class ActivityParserTests: XCTestCase {
         return startTokens + logMessageTokens + endTokens
     }()
 
+    // Xcode 26.4 format: BuildOperationMetrics JSON format changed
+    lazy var IDEActivityLogSectionTokensXcode264: [Token] = {
+        let startTokens = [Token.int(2),
+                           Token.string("com.apple.dt.IDE.BuildLogSection"),
+                           Token.string("Prepare build"),
+                           Token.string("Prepare build"),
+                           Token.double(575479851.278759),
+                           Token.double(575479851.778325),
+                           Token.null,
+                           Token.string("note: Using legacy build system"),
+                           Token.list(1),
+                           Token.className("IDEActivityLogMessage"),
+                           Token.classNameRef("IDEActivityLogMessage"),
+        ]
+        let logMessageTokens = IDEActivityLogMessageTokens
+        let endTokens = [Token.int(1),
+                         Token.int(0),
+                         Token.int(1),
+                         Token.int(42),  // unknown integer before subtitle (Xcode 26.2+)
+                         Token.string("subtitle"),
+                         Token.null,
+                         Token.string("commandDetailDesc"),
+                         Token.string("501796C4-6BE4-4F80-9F9D-3269617ECC17"),
+                         Token.string("localizedResultString"),
+                         Token.string("xcbuildSignature"),
+                         Token.list(1),  // 1 attachment
+                         Token.classNameRef("IDEFoundation.IDEActivityLogSectionAttachment"),
+                         Token.string("com.apple.dt.ActivityLogSectionAttachment.BuildOperationMetrics"),
+                         Token.int(1),
+                         Token.int(0),
+                         // swiftlint:disable:next line_length
+                         Token.json(#"{"counters":{},"taskCounters":{"SwiftDriver":{"moduleDependenciesNotValidatedTasks":1}}}"#),
+        ]
+        return startTokens + logMessageTokens + endTokens
+    }()
+
     let IDEConsoleItemTokens: [Token] = [
         Token.className("IDEConsoleItem"),
         Token.classNameRef("IDEConsoleItem"),
@@ -384,7 +420,11 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual(3, logSection.attachments.count)
         XCTAssertEqual(logSection.attachments[0].backtrace?.frames.first?.category, .ruleNeverBuilt)
         print(logSection.attachments)
-        XCTAssertEqual(logSection.attachments[1].buildOperationMetrics?.clangCacheMisses, 2)
+        if case .some(.v15_3(let cache)) = logSection.attachments[1].buildOperationMetrics {
+            XCTAssertEqual(cache.clangCacheMisses, 2)
+        } else {
+            XCTFail("Expected v15_3 BuildOperationMetrics")
+        }
         XCTAssertEqual(logSection.attachments[2].metrics?.wcDuration, 1)
         XCTAssertEqual(0, logSection.unknown)
     }
@@ -442,6 +482,40 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual("localizedResultString", logSection.localizedResultString)
         XCTAssertEqual("xcbuildSignature", logSection.xcbuildSignature)
         XCTAssertEqual(0, logSection.attachments.count)
+        XCTAssertEqual(42, logSection.unknown)
+    }
+
+    func testParseIDEActivityLogSectionXcode264() throws {
+        parser.logVersion = 12
+        let tokens = IDEActivityLogSectionTokensXcode264
+        var iterator = tokens.makeIterator()
+        let logSection = try parser.parseIDEActivityLogSection(iterator: &iterator)
+        XCTAssertEqual(2, logSection.sectionType)
+        XCTAssertEqual("com.apple.dt.IDE.BuildLogSection", logSection.domainType)
+        XCTAssertEqual("Prepare build", logSection.title)
+        XCTAssertEqual("Prepare build", logSection.signature)
+        XCTAssertEqual(575479851.278759, logSection.timeStartedRecording)
+        XCTAssertEqual(575479851.778325, logSection.timeStoppedRecording)
+        XCTAssertEqual(0, logSection.subSections.count)
+        XCTAssertEqual("note: Using legacy build system", logSection.text)
+        XCTAssertEqual(1, logSection.messages.count)
+        XCTAssertTrue(logSection.wasCancelled)
+        XCTAssertFalse(logSection.isQuiet)
+        XCTAssertTrue(logSection.wasFetchedFromCache)
+        XCTAssertEqual("subtitle", logSection.subtitle)
+        XCTAssertEqual("", logSection.location.documentURLString)
+        XCTAssertEqual(0, logSection.location.timestamp)
+        XCTAssertEqual("commandDetailDesc", logSection.commandDetailDesc)
+        XCTAssertEqual("501796C4-6BE4-4F80-9F9D-3269617ECC17", logSection.uniqueIdentifier)
+        XCTAssertEqual("localizedResultString", logSection.localizedResultString)
+        XCTAssertEqual("xcbuildSignature", logSection.xcbuildSignature)
+        XCTAssertEqual(1, logSection.attachments.count)
+        if case .some(.v26_4(let counter)) = logSection.attachments[0].buildOperationMetrics {
+            XCTAssertEqual(counter.counters, [:])
+            XCTAssertEqual(counter.taskCounters["SwiftDriver"]?["moduleDependenciesNotValidatedTasks"], 1)
+        } else {
+            XCTFail("Expected v26_4 BuildOperationMetrics")
+        }
         XCTAssertEqual(42, logSection.unknown)
     }
 
@@ -562,30 +636,30 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual(expectedDVTMemberDocumentLocation, documentMemberLocation)
     }
 
-    func testBuildOperationMetricsWithMissingKeys() throws {
-        let json = #"{}"#
+    func testBuildOperationMetricsWithCacheFormat() throws {
+        let json = #"{"clangCacheHits":1,"clangCacheMisses":2,"swiftCacheHits":3,"swiftCacheMisses":4}"#
         let data = json.data(using: .utf8)!
-        let metrics = try JSONDecoder().decode(
-            IDEActivityLogSectionAttachment.BuildOperationMetrics.self,
-            from: data
-        )
-        XCTAssertEqual(metrics.clangCacheHits, 0)
-        XCTAssertEqual(metrics.clangCacheMisses, 0)
-        XCTAssertEqual(metrics.swiftCacheHits, 0)
-        XCTAssertEqual(metrics.swiftCacheMisses, 0)
+        let metrics = try IDEActivityLogSectionAttachment.BuildOperationMetrics(from: data)
+        if case .v15_3(let cache) = metrics {
+            XCTAssertEqual(cache.clangCacheHits, 1)
+            XCTAssertEqual(cache.clangCacheMisses, 2)
+            XCTAssertEqual(cache.swiftCacheHits, 3)
+            XCTAssertEqual(cache.swiftCacheMisses, 4)
+        } else {
+            XCTFail("Expected v15_3 BuildOperationMetrics")
+        }
     }
 
-    func testBuildOperationMetricsWithPartialKeys() throws {
-        let json = #"{"swiftCacheHits":5,"swiftCacheMisses":3}"#
+    func testBuildOperationMetricsWithCounterFormat() throws {
+        let json = #"{"counters":{"a":1},"taskCounters":{"SwiftDriver":{"x":2}}}"#
         let data = json.data(using: .utf8)!
-        let metrics = try JSONDecoder().decode(
-            IDEActivityLogSectionAttachment.BuildOperationMetrics.self,
-            from: data
-        )
-        XCTAssertEqual(metrics.clangCacheHits, 0)
-        XCTAssertEqual(metrics.clangCacheMisses, 0)
-        XCTAssertEqual(metrics.swiftCacheHits, 5)
-        XCTAssertEqual(metrics.swiftCacheMisses, 3)
+        let metrics = try IDEActivityLogSectionAttachment.BuildOperationMetrics(from: data)
+        if case .v26_4(let counter) = metrics {
+            XCTAssertEqual(counter.counters["a"], 1)
+            XCTAssertEqual(counter.taskCounters["SwiftDriver"]?["x"], 2)
+        } else {
+            XCTFail("Expected v26_4 BuildOperationMetrics")
+        }
     }
 
 }
