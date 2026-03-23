@@ -774,41 +774,39 @@ public class IDEActivityLogSectionAttachment: Encodable {
     }
 
     /// Build operation metrics whose JSON schema differs by Xcode version.
-    public enum BuildOperationMetrics: Encodable {
-        /// Xcode 15.3 - Xcode 16.x format
-        case v15_3(CacheMetrics)
-        /// Xcode 26.4+ format
-        case v26_4(CounterMetrics)
+    public struct BuildOperationMetrics: Codable {
+        public let counters: [String: Int]
+        public let taskCounters: [String: [String: Int]]
 
-        public struct CacheMetrics: Codable {
-            public let clangCacheHits: Int
-            public let clangCacheMisses: Int
-            public let swiftCacheHits: Int
-            public let swiftCacheMisses: Int
+        public init(counters: [String: Int], taskCounters: [String: [String: Int]]) {
+            self.counters = counters
+            self.taskCounters = taskCounters
         }
 
-        public struct CounterMetrics: Codable {
-            public let counters: [String: Int]
-            public let taskCounters: [String: [String: Int]]
-        }
-
+        /// Parses BuildOperationMetrics from JSON data, translating the legacy
+        /// Xcode 15.3 - Xcode 26.3 cache format into the unified counter format.
         public init(from jsonData: Data) throws {
             let decoder = JSONDecoder()
-            if let cache = try? decoder.decode(CacheMetrics.self, from: jsonData) {
-                self = .v15_3(cache)
+            if let direct = try? decoder.decode(BuildOperationMetrics.self, from: jsonData) {
+                self = direct
             } else {
-                let counter = try decoder.decode(CounterMetrics.self, from: jsonData)
-                self = .v26_4(counter)
+                let legacy = try decoder.decode(LegacyCacheMetrics.self, from: jsonData)
+                self.counters = [
+                    "clangCacheHits": legacy.clangCacheHits,
+                    "clangCacheMisses": legacy.clangCacheMisses,
+                    "swiftCacheHits": legacy.swiftCacheHits,
+                    "swiftCacheMisses": legacy.swiftCacheMisses,
+                ]
+                self.taskCounters = [:]
             }
         }
 
-        public func encode(to encoder: Encoder) throws {
-            switch self {
-            case .v15_3(let metrics):
-                try metrics.encode(to: encoder)
-            case .v26_4(let metrics):
-                try metrics.encode(to: encoder)
-            }
+        /// Legacy Xcode 15.3 - Xcode 26.3 format, used only for deserialization.
+        private struct LegacyCacheMetrics: Decodable {
+            let clangCacheHits: Int
+            let clangCacheMisses: Int
+            let swiftCacheHits: Int
+            let swiftCacheMisses: Int
         }
     }
 }

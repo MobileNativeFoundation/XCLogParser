@@ -420,10 +420,10 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual(3, logSection.attachments.count)
         XCTAssertEqual(logSection.attachments[0].backtrace?.frames.first?.category, .ruleNeverBuilt)
         print(logSection.attachments)
-        if case .some(.v15_3(let cache)) = logSection.attachments[1].buildOperationMetrics {
-            XCTAssertEqual(cache.clangCacheMisses, 2)
+        if let metrics = logSection.attachments[1].buildOperationMetrics {
+            XCTAssertEqual(metrics.counters["clangCacheMisses"], 2)
         } else {
-            XCTFail("Expected v15_3 BuildOperationMetrics")
+            XCTFail("Expected BuildOperationMetrics")
         }
         XCTAssertEqual(logSection.attachments[2].metrics?.wcDuration, 1)
         XCTAssertEqual(0, logSection.unknown)
@@ -510,11 +510,11 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual("localizedResultString", logSection.localizedResultString)
         XCTAssertEqual("xcbuildSignature", logSection.xcbuildSignature)
         XCTAssertEqual(1, logSection.attachments.count)
-        if case .some(.v26_4(let counter)) = logSection.attachments[0].buildOperationMetrics {
-            XCTAssertEqual(counter.counters, [:])
-            XCTAssertEqual(counter.taskCounters["SwiftDriver"]?["moduleDependenciesNotValidatedTasks"], 1)
+        if let metrics = logSection.attachments[0].buildOperationMetrics {
+            XCTAssertEqual(metrics.counters, [:])
+            XCTAssertEqual(metrics.taskCounters["SwiftDriver"]?["moduleDependenciesNotValidatedTasks"], 1)
         } else {
-            XCTFail("Expected v26_4 BuildOperationMetrics")
+            XCTFail("Expected BuildOperationMetrics")
         }
         XCTAssertEqual(42, logSection.unknown)
     }
@@ -640,26 +640,19 @@ class ActivityParserTests: XCTestCase {
         let json = #"{"clangCacheHits":1,"clangCacheMisses":2,"swiftCacheHits":3,"swiftCacheMisses":4}"#
         let data = json.data(using: .utf8)!
         let metrics = try IDEActivityLogSectionAttachment.BuildOperationMetrics(from: data)
-        if case .v15_3(let cache) = metrics {
-            XCTAssertEqual(cache.clangCacheHits, 1)
-            XCTAssertEqual(cache.clangCacheMisses, 2)
-            XCTAssertEqual(cache.swiftCacheHits, 3)
-            XCTAssertEqual(cache.swiftCacheMisses, 4)
-        } else {
-            XCTFail("Expected v15_3 BuildOperationMetrics")
-        }
+        XCTAssertEqual(metrics.counters["clangCacheHits"], 1)
+        XCTAssertEqual(metrics.counters["clangCacheMisses"], 2)
+        XCTAssertEqual(metrics.counters["swiftCacheHits"], 3)
+        XCTAssertEqual(metrics.counters["swiftCacheMisses"], 4)
+        XCTAssertEqual(metrics.taskCounters, [:])
     }
 
     func testBuildOperationMetricsWithCounterFormat() throws {
         let json = #"{"counters":{"a":1},"taskCounters":{"SwiftDriver":{"x":2}}}"#
         let data = json.data(using: .utf8)!
         let metrics = try IDEActivityLogSectionAttachment.BuildOperationMetrics(from: data)
-        if case .v26_4(let counter) = metrics {
-            XCTAssertEqual(counter.counters["a"], 1)
-            XCTAssertEqual(counter.taskCounters["SwiftDriver"]?["x"], 2)
-        } else {
-            XCTFail("Expected v26_4 BuildOperationMetrics")
-        }
+        XCTAssertEqual(metrics.counters["a"], 1)
+        XCTAssertEqual(metrics.taskCounters["SwiftDriver"]?["x"], 2)
     }
 
 }
