@@ -800,13 +800,13 @@ public class IDEActivityLogSectionAttachment: Encodable {
                 self.taskCounters = [:]
             }
         }
-
-        /// Legacy Xcode 15.3 - Xcode 26.3 format, used only for deserialization.
-        private struct LegacyCacheMetrics: Decodable {
-            let clangCacheHits: Int
-            let clangCacheMisses: Int
-            let swiftCacheHits: Int
-            let swiftCacheMisses: Int
-        }
     }
+}
+
+/// Legacy Xcode 15.3 - Xcode 26.3 BuildOperationMetrics format, used only for deserialization.
+private struct LegacyCacheMetrics: Decodable {
+    let clangCacheHits: Int
+    let clangCacheMisses: Int
+    let swiftCacheHits: Int
+    let swiftCacheMisses: Int
 }
