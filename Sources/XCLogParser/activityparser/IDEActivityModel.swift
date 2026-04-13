@@ -773,30 +773,40 @@ public class IDEActivityLogSectionAttachment: Encodable {
         // Empty struct for objects with no properties
     }
 
+    /// Build operation metrics whose JSON schema differs by Xcode version.
     public struct BuildOperationMetrics: Codable {
-        public let clangCacheHits: Int
-        public let clangCacheMisses: Int
-        public let swiftCacheHits: Int
-        public let swiftCacheMisses: Int
+        public let counters: [String: Int]
+        public let taskCounters: [String: [String: Int]]
 
-        public init(
-            clangCacheHits: Int = 0,
-            clangCacheMisses: Int = 0,
-            swiftCacheHits: Int = 0,
-            swiftCacheMisses: Int = 0
-        ) {
-            self.clangCacheHits = clangCacheHits
-            self.clangCacheMisses = clangCacheMisses
-            self.swiftCacheHits = swiftCacheHits
-            self.swiftCacheMisses = swiftCacheMisses
+        public init(counters: [String: Int], taskCounters: [String: [String: Int]]) {
+            self.counters = counters
+            self.taskCounters = taskCounters
         }
 
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            clangCacheHits = try container.decodeIfPresent(Int.self, forKey: .clangCacheHits) ?? 0
-            clangCacheMisses = try container.decodeIfPresent(Int.self, forKey: .clangCacheMisses) ?? 0
-            swiftCacheHits = try container.decodeIfPresent(Int.self, forKey: .swiftCacheHits) ?? 0
-            swiftCacheMisses = try container.decodeIfPresent(Int.self, forKey: .swiftCacheMisses) ?? 0
+        /// Parses BuildOperationMetrics from JSON data, translating the legacy
+        /// Xcode 15.3 - Xcode 26.3 cache format into the unified counter format.
+        public init(from jsonData: Data) throws {
+            let decoder = JSONDecoder()
+            if let direct = try? decoder.decode(BuildOperationMetrics.self, from: jsonData) {
+                self = direct
+            } else {
+                let legacy = try decoder.decode(LegacyCacheMetrics.self, from: jsonData)
+                self.counters = [
+                    "clangCacheHits": legacy.clangCacheHits,
+                    "clangCacheMisses": legacy.clangCacheMisses,
+                    "swiftCacheHits": legacy.swiftCacheHits,
+                    "swiftCacheMisses": legacy.swiftCacheMisses,
+                ]
+                self.taskCounters = [:]
+            }
         }
     }
+}
+
+/// Legacy Xcode 15.3 - Xcode 26.3 BuildOperationMetrics format, used only for deserialization.
+private struct LegacyCacheMetrics: Decodable {
+    let clangCacheHits: Int
+    let clangCacheMisses: Int
+    let swiftCacheHits: Int
+    let swiftCacheMisses: Int
 }
