@@ -541,8 +541,8 @@ CompileSwift normal x86_64 (in target 'Alamofire' from project 'Pods')
     lazy var fakeSwiftCompilation: IDEActivityLogSection = {
         return IDEActivityLogSection(sectionType: 1,
                                      domainType: "",
-                                     title: "CompileSwift",
-                                     signature: "CompileSwift normal x86_64",
+                                     title: "SwiftCompile",
+                                     signature: "SwiftCompile normal x86_64",
                                      timeStartedRecording: 1.0,
                                      timeStoppedRecording: 2.0,
                                      subSections: [],
