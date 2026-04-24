@@ -346,6 +346,31 @@ note: use 'updatedDoSomething' instead\r doSomething()\r        ^~~~~~~~~~~\r   
         XCTAssertEqual(expectedCompilationDuration, targetStep.compilationDuration)
     }
 
+    func testParseTargetCompilationTimesIgnoresStaleSubsteps() {
+        // For incremental builds, Xcode reuses substep entries from previous build sessions for
+        // files that didn't need recompilation. Those substeps keep their original (older)
+        // timestamps and are not flagged `wasFetchedFromCache`. The target's compilationDuration
+        // must remain non-negative; substeps that ended before the target started belong to a
+        // prior session and should be ignored.
+        let now = Date().timeIntervalSince1970
+        let staleCompileEnd = now - 1000
+        let staleStep = makeFakeBuildStep(title: "Stale Compile",
+                                          type: .detail,
+                                          detailStepType: .cCompilation,
+                                          startTimestamp: now - 1010,
+                                          fetchedFromCache: false)
+            .with(newCompilationEndTimestamp: staleCompileEnd, andCompilationDuration: 10)
+        var targetStep = makeFakeBuildStep(title: "Build Target",
+                                           type: .target,
+                                           detailStepType: .none,
+                                           startTimestamp: now,
+                                           fetchedFromCache: false).with(subSteps: [staleStep])
+
+        targetStep = parser.addCompilationTimes(step: targetStep)
+        XCTAssertEqual(targetStep.startTimestamp, targetStep.compilationEndTimestamp)
+        XCTAssertEqual(0.0, targetStep.compilationDuration)
+    }
+
     func testParseAppCompilationTimes() {
         let expectedCompilationDuration = 50.0
         let now = Date().timeIntervalSince1970
