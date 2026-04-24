@@ -373,8 +373,16 @@ public final class ParserBuildSteps {
 
     private func addCompilationTimesToTarget(_ target: BuildStep) -> BuildStep {
 
+        // For incremental builds, Xcode reuses substep entries from prior build sessions for files
+        // that didn't need recompilation. Those substeps keep their original (older) timestamps and
+        // are not flagged `wasFetchedFromCache`. Filtering them out by requiring the substep to
+        // have ended at or after the target started avoids producing a negative compilationDuration.
         let lastCompilationStep = target.subSteps
-            .filter { $0.isCompilationStep() && $0.fetchedFromCache == false }
+            .filter {
+                $0.isCompilationStep()
+                    && $0.fetchedFromCache == false
+                    && $0.compilationEndTimestamp >= target.startTimestamp
+            }
             .max { $0.compilationEndTimestamp < $1.compilationEndTimestamp }
         guard let lastStep = lastCompilationStep else {
             return target.with(newCompilationEndTimestamp: target.startTimestamp, andCompilationDuration: 0.0)
@@ -385,7 +393,11 @@ public final class ParserBuildSteps {
 
     private func addCompilationTimesToApp(_ app: BuildStep) -> BuildStep {
         let lastCompilationStep = app.subSteps
-            .filter { $0.compilationDuration > 0 && $0.fetchedFromCache == false }
+            .filter {
+                $0.compilationDuration > 0
+                    && $0.fetchedFromCache == false
+                    && $0.compilationEndTimestamp >= app.startTimestamp
+            }
             .max { $0.compilationEndTimestamp < $1.compilationEndTimestamp }
         guard let lastStep = lastCompilationStep else {
             return app.with(newCompilationEndTimestamp: app.startTimestamp,
