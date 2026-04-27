@@ -792,10 +792,10 @@ public class IDEActivityLogSectionAttachment: Encodable {
             } else {
                 let legacy = try decoder.decode(LegacyCacheMetrics.self, from: jsonData)
                 self.counters = [
-                    "clangCacheHits": legacy.clangCacheHits,
-                    "clangCacheMisses": legacy.clangCacheMisses,
-                    "swiftCacheHits": legacy.swiftCacheHits,
-                    "swiftCacheMisses": legacy.swiftCacheMisses,
+                    "clangCacheHits": legacy.clangCacheHits ?? 0,
+                    "clangCacheMisses": legacy.clangCacheMisses ?? 0,
+                    "swiftCacheHits": legacy.swiftCacheHits ?? 0,
+                    "swiftCacheMisses": legacy.swiftCacheMisses ?? 0,
                 ]
                 self.taskCounters = [:]
             }
@@ -805,8 +805,8 @@ public class IDEActivityLogSectionAttachment: Encodable {
 
 /// Legacy Xcode 15.3 - Xcode 26.3 BuildOperationMetrics format, used only for deserialization.
 private struct LegacyCacheMetrics: Decodable {
-    let clangCacheHits: Int
-    let clangCacheMisses: Int
-    let swiftCacheHits: Int
-    let swiftCacheMisses: Int
+    let clangCacheHits: Int?
+    let clangCacheMisses: Int?
+    let swiftCacheHits: Int?
+    let swiftCacheMisses: Int?
 }
