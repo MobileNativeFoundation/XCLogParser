@@ -26,6 +26,9 @@ struct DumpCommand: ParsableCommand {
         commandName: "dump",
         abstract: "Dumps the xcactivitylog file into a JSON document"
     )
+    
+    @Option(name: .long, help: "Type of .xactivitylog file to look for.")
+    var logs: LogType = .build
 
     @Option(name: .long, help: "The path to a .xcactivitylog file.")
     var file: String?
@@ -104,6 +107,7 @@ struct DumpCommand: ParsableCommand {
                                     xcodeprojPath: xcodeproj ?? "",
                                     derivedDataPath: derivedData ?? "",
                                     xcactivitylogPath: file ?? "",
+                                    logType: logs,
                                     strictProjectName: strictProjectName)
         let actionOptions = ActionOptions(reporter: .json,
                                           outputPath: output ?? "",
