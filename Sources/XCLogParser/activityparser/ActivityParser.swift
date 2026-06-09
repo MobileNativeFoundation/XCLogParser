@@ -105,7 +105,14 @@ public class ActivityParser {
         let timeStartedRecording = try parseAsDouble(token: iterator.next())
         let timeStoppedRecording = try parseAsDouble(token: iterator.next())
         let subSections = try parseIDEActivityLogSections(iterator: &iterator)
-        let text = try parseAsString(token: iterator.next())
+        var textToken = iterator.next()
+        // On Xcode 27.0+, an integer that most likely represents the ended status
+        // appears before text. XCLogParser does not currently model it because
+        // there is no use case for exposing it.
+        if case .some(.int) = textToken {
+            textToken = iterator.next()
+        }
+        let text = try parseAsString(token: textToken)
         let messages = try parseMessages(iterator: &iterator)
         let wasCancelled = try parseBoolean(token: iterator.next())
         let isQuiet = try parseBoolean(token: iterator.next())
