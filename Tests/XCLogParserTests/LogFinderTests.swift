@@ -74,7 +74,7 @@ class LogFinderTests: XCTestCase {
             XCTFail("Unable to create test directories.")
             return
         }
-        let projectFolder = try logFinder.getProjectFolderWithHash("/Users/user/projects/MyProject.xcworkspace")
+        let projectFolder = try logFinder.getProjectFolderWithHash("/Users/user/projects/MyProject.xcworkspace", logType: .build)
         let logsFolder = projectFolder.appending("/Logs/Build")
         let projectLogFolder = derivedDataDir.appendingPathComponent(logsFolder, isDirectory: true)
         _ = try TestUtils.createSubdir(logsFolder, in: derivedDataDir)
@@ -97,13 +97,13 @@ class LogFinderTests: XCTestCase {
             return
         }
         // since there is not a valid xcodeproj in the path, it should fail
-        XCTAssertThrowsError(try logFinder.logsDirectoryForXcodeProject(projectPath: dirWithProject.path))
+        XCTAssertThrowsError(try logFinder.logsDirectoryForXcodeProject(projectPath: dirWithProject.path, logType: .build))
     }
 
     func testGetProjectFolderWithHash() throws {
         let projectPath = "/tmp/MyWorkspace.xcworkspace"
         let expectedProjectFolder = "MyWorkspace-fvaxjdltriwevoggjzpmzcohhhxf/Logs/Build/"
-        let projectFolder = try logFinder.getProjectFolderWithHash(projectPath)
+        let projectFolder = try logFinder.getProjectFolderWithHash(projectPath, logType: .build)
         XCTAssertEqual(expectedProjectFolder, projectFolder)
     }
 
@@ -116,6 +116,7 @@ class LogFinderTests: XCTestCase {
                                     xcworkspacePath: "/tmp/MyWorkspace.xcworkspace",
                                     xcodeprojPath: "",
                                     derivedDataPath: derivedDataDir.path,
+                                    logType: .build,
                                     logManifestPath: "")
         let logManifestURL = try logFinder.findLogManifestURLWithLogOptions(logOptions)
         let expectedPathPattern = "\(derivedDataDir.path)/MyWorkspace-fvaxjdltriwevoggjzpmzcohhhxf" +
@@ -128,6 +129,7 @@ class LogFinderTests: XCTestCase {
                                     xcworkspacePath: "",
                                     xcodeprojPath: "/tmp/MyApp.xcodeproj",
                                     derivedDataPath: "/projects/DerivedData",
+                                    logType: .build,
                                     logManifestPath: "")
         let logManifestURL = try logFinder.findLogManifestURLWithLogOptions(logOptions)
         let expectedPathPattern = "/projects/DerivedData/" +
@@ -140,6 +142,7 @@ class LogFinderTests: XCTestCase {
                                     xcworkspacePath: "",
                                     xcodeprojPath: "/tmp/MyApp.xcodeproj",
                                     derivedDataPath: "/projects/DerivedData",
+                                    logType: .build,
                                     logManifestPath: "")
         XCTAssertThrowsError(try logFinder.findLogManifestWithLogOptions(logOptions))
     }
@@ -154,6 +157,7 @@ class LogFinderTests: XCTestCase {
                                     xcworkspacePath: "",
                                     xcodeprojPath: "/tmp/MyApp.xcodeproj",
                                     derivedDataPath: customDerivedDataDir.path,
+                                    logType: .build,
                                     logManifestPath: "")
 
         let latestLog = try logFinder.findLatestLogWithLogOptions(logOptions)
