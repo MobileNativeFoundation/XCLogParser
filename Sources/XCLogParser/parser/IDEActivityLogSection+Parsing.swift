@@ -86,7 +86,10 @@ extension IDEActivityLogSection {
     public func getSwiftIndividualSteps(buildStep: BuildStep,
                                         parentCommandDetailDesc: String,
                                         currentIndex: inout Int) -> [BuildStep]? {
-        let pattern = #"^CompileSwift\s\w+\s\w+\s.+\.swift\s"#
+        // Both spellings of the task: `CompileSwift` up to Xcode 13, `SwiftCompile` from Xcode 14.
+        // Without the modern one the guard stops recognizing a command that already names the files,
+        // and the steps synthesized below duplicate the per-file subSections the log provides.
+        let pattern = #"^(?:CompileSwift|SwiftCompile)\s\w+\s\w+\s.+\.swift\s"#
         guard commandDetailDesc.range(of: pattern, options: .regularExpression) == nil else {
             return nil
         }
