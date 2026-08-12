@@ -98,8 +98,9 @@ public enum DetailStepType: String, Encodable {
             return .cCompilation
         case Prefix("CompileSwift "):
             return .swiftCompilation
-        // Xcode 14 and later name the same task `SwiftCompile`, both for a single file and for a
-        // batch of them. `CompileSwift` still appears in logs from older Xcode versions.
+        // The same task under the name the integrated driver uses, for a single file and for a batch
+        // of them. Both spellings show up in one log: targets that compile whole module keep
+        // emitting `CompileSwift`.
         case Prefix("SwiftCompile "):
             return .swiftCompilation
         case Prefix("Ld "):

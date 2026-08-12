@@ -21,7 +21,8 @@ import XCTest
 @testable import XCLogParser
 
 /// Signatures in this file are taken from an Xcode 26.5 build log, with paths and module names
-/// replaced. Xcode renamed the Swift compilation tasks, so both spellings have to be recognized.
+/// replaced. A single log carries both spellings of the Swift compilation tasks, so both have to
+/// be recognized.
 class DetailStepTypeTests: XCTestCase {
 
     func testSwiftCompileOfASingleFileIsASwiftCompilation() {
@@ -38,7 +39,7 @@ class DetailStepTypeTests: XCTestCase {
         XCTAssertEqual(.swiftCompilation, DetailStepType.getDetailType(signature: signature))
     }
 
-    func testCompileSwiftFromOlderXcodeVersionsIsStillASwiftCompilation() {
+    func testCompileSwiftIsStillASwiftCompilation() {
         let signature = "CompileSwift normal arm64 /path/to/Foo/Bar.swift"
 
         XCTAssertEqual(.swiftCompilation, DetailStepType.getDetailType(signature: signature))
@@ -51,7 +52,7 @@ class DetailStepTypeTests: XCTestCase {
         XCTAssertEqual(.swiftAggregatedCompilation, DetailStepType.getDetailType(signature: signature))
     }
 
-    func testCompileSwiftSourcesFromOlderXcodeVersionsIsStillAnAggregatedCompilation() {
+    func testCompileSwiftSourcesIsStillAnAggregatedCompilation() {
         let signature = "CompileSwiftSources normal arm64 com.apple.xcode.tools.swift.compiler"
 
         XCTAssertEqual(.swiftAggregatedCompilation, DetailStepType.getDetailType(signature: signature))
