@@ -224,11 +224,14 @@ public struct HtmlReporter: LogReporter {
                 swiftTypeCheckTimes.append(contentsOf: typeChecks)
             } else {
                 swiftSteps.append(step)
-                if let functions = step.swiftFunctionTimes {
-                    swiftFunctionTimes.append(contentsOf: functions)
-                }
-                if let typeChecks = step.swiftTypeCheckTimes {
-                    swiftTypeCheckTimes.append(contentsOf: typeChecks)
+                // from Xcode 14 on the step is a batch and the times are on its per file substeps
+                for candidate in [step] + step.subSteps {
+                    if let functions = candidate.swiftFunctionTimes {
+                        swiftFunctionTimes.append(contentsOf: functions)
+                    }
+                    if let typeChecks = candidate.swiftTypeCheckTimes {
+                        swiftTypeCheckTimes.append(contentsOf: typeChecks)
+                    }
                 }
             }
         }
