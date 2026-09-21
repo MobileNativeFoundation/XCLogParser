@@ -243,17 +243,16 @@ public struct HtmlReporter: LogReporter {
         swiftTypeCheckTimes.sort { $0.durationMS > $1.durationMS }
         let topTypeChecks = Array(swiftTypeCheckTimes.prefix(Self.maxSwifTypeChecks))
 
-        try write(
-            slowestSwiftFiles: Array(swiftSteps.prefix(Self.maxSlowestFiles)),
-            slowestCFiles: Array(cSteps.prefix(Self.maxSlowestFiles)),
-            swiftFunctionTimes: topFunctions,
-            swiftTypeCheckTimes: topTypeChecks,
-            toDir: buildDir)
+        try write(swiftSteps: swiftSteps,
+                  cSteps: cSteps,
+                  swiftFunctionTimes: topFunctions,
+                  swiftTypeCheckTimes: topTypeChecks,
+                  toDir: buildDir)
 
     }
 
-    private func write(slowestSwiftFiles: [BuildStep],
-                       slowestCFiles: [BuildStep],
+    private func write(swiftSteps: [BuildStep],
+                       cSteps: [BuildStep],
                        swiftFunctionTimes: [SwiftFunctionTime],
                        swiftTypeCheckTimes: [SwiftTypeCheck],
                        toDir buildDir: String) throws {
@@ -261,8 +260,8 @@ public struct HtmlReporter: LogReporter {
         encoder.outputFormatting = .prettyPrinted
         let functionsJson = try encoder.encode(swiftFunctionTimes)
         let typeChecksJson = try encoder.encode(swiftTypeCheckTimes)
-        let swiftJson = try encoder.encode(slowestSwiftFiles)
-        let cJson = try encoder.encode(slowestCFiles)
+        let swiftJson = try encoder.encode(Array(swiftSteps.prefix(Self.maxSlowestFiles)))
+        let cJson = try encoder.encode(Array(cSteps.prefix(Self.maxSlowestFiles)))
         guard let functionsString = String(data: functionsJson, encoding: .utf8),
               let typeChecksString = String(data: typeChecksJson, encoding: .utf8),
               let swiftString = String(data: swiftJson, encoding: .utf8),
@@ -278,6 +277,10 @@ public struct HtmlReporter: LogReporter {
         const topSwiftFunctions = \(functionsString);
 
         const topSwifTypeChecks = \(typeChecksString);
+
+        const swiftFilesCount = \(swiftSteps.count);
+
+        const cFilesCount = \(cSteps.count);
         """.write(toFile: "\(buildDir)/js/top_files.js", atomically: true, encoding: .utf8)
     }
 }

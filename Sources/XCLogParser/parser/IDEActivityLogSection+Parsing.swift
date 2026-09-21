@@ -44,27 +44,18 @@ extension IDEActivityLogSection {
         // for the `(in target 'ABC' from project Project)` string
         let isFlatten = subSections.contains { $0.getTargetFromCommand() != nil }
         if isFlatten {
-            let mainTarget = "$MainTarget"
             let targetsDictionary = subSections.reduce(
                 [String: IDEActivityLogSection]()) { targets, subSection -> [String: IDEActivityLogSection] in
-                // some substeps belong to the root project, we use a fixed name for them
-                let targetName = subSection.getTargetFromCommand() ?? mainTarget
+                // sections without a target (build description, module scans) are grouped as one
+                let targetName = subSection.getTargetFromCommand() ?? Self.buildSystemTarget
                 let target = getOrBuildTarget(targetName, in: targets, using: subSection)
                 target.subSections.append(subSection)
                 var updatedTargets = targets
                 updatedTargets[targetName] = target
                 return updatedTargets
             }
-            let nonMainTargets = targetsDictionary.filter { (key: String, _) -> Bool in
-                return key != mainTarget
-            }
-            var subSections = [IDEActivityLogSection]()
-            if let mainTarget = targetsDictionary[mainTarget] {
-                subSections.append(contentsOf: mainTarget.subSections)
-            }
-            subSections.append(contentsOf: nonMainTargets.values)
             let withTargets = self
-            withTargets.subSections = subSections.sorted { lhs, rhs -> Bool in
+            withTargets.subSections = targetsDictionary.values.sorted { lhs, rhs -> Bool in
                 lhs.timeStartedRecording < rhs.timeStartedRecording
             }
             return withTargets
@@ -136,10 +127,12 @@ extension IDEActivityLogSection {
             return buildTargetSection(name, with: section)
     }
 
+    static let buildSystemTarget = "Build system"
+
     private func buildTargetSection(_ name: String, with section: IDEActivityLogSection) -> IDEActivityLogSection {
         return IDEActivityLogSection(sectionType: 2,
                                      domainType: section.domainType,
-                                     title: "Build target \(name)",
+                                     title: name == Self.buildSystemTarget ? name : "Build target \(name)",
             signature: name,
             timeStartedRecording: section.timeStartedRecording,
             timeStoppedRecording: section.timeStoppedRecording,

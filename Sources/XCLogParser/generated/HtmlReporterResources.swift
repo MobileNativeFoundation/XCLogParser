@@ -287,14 +287,9 @@ function loadMainData() {
     targets = buildData.filter(function (step) {
         return step.type === 'target' && step.fetchedFromCache === false;
     });
-    cFiles = buildData.filter(function (step) {
-        return step.type === 'detail' && step.detailStepType === cCompilation
-            && step.fetchedFromCache === false;
-    });
-    swiftFiles = buildData.filter(function (step) {
-        return step.type === 'detail' && step.detailStepType === swiftCompilation
-            && step.fetchedFromCache === false;
-    });
+    // buildData only has the main step and the targets here, the counts come from top_files.js
+    cFiles = new Array(cFilesCount);
+    swiftFiles = new Array(swiftFilesCount);
 }
 
 function loadTargetData(target) {
