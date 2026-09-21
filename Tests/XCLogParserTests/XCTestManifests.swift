@@ -138,6 +138,7 @@ extension SwiftCompilerParserTests {
     // to regenerate.
     static let __allTests__SwiftCompilerParserTests = [
         ("testParseSwiftFunctionTimes", testParseSwiftFunctionTimes),
+        ("testParseSwiftFunctionTimesWithoutTheFlagInTheCommand", testParseSwiftFunctionTimesWithoutTheFlagInTheCommand),
         ("testParseSwiftTypeCheckTimes", testParseSwiftTypeCheckTimes),
     ]
 }

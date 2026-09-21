@@ -52,8 +52,11 @@ public class SwiftCompilerParser {
         DispatchQueue.concurrentPerform(iterations: commands.count) { index in
             let (rawFunctionTimes, commandDesc) = commands[index]
 
+            // Xcode 26 and later put the flags on the SwiftDriver section, not on the
+            // SwiftCompile section that holds the output, so also accept output that looks like times
             let hasCompilerFlag = functionTimes.hasCompilerFlag(commandDesc: commandDesc)
                                   || typeCheckTimes.hasCompilerFlag(commandDesc: commandDesc)
+                                  || rawFunctionTimes.contains("ms\t")
 
             guard hasCompilerFlag && rawFunctionTimes.isEmpty == false else {
                 return
