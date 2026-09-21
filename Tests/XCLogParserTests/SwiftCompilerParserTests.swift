@@ -67,6 +67,19 @@ class SwiftCompilerParserTests: XCTestCase {
         XCTAssertEqual(2, initializer.occurrences, file: file, line: line)
     }
 
+    /// Xcode 26 and later keep the swift-frontend flags on the SwiftDriver section, so the
+    /// SwiftCompile section that holds the timings never names the flag in its command.
+    func testParseSwiftFunctionTimesWithoutTheFlagInTheCommand() {
+        let section = getFakeSwiftcSection(
+            text: "4.96ms\t/Users/user/myapp/MyView.swift:11:14\tinitializer init(frame:)\r",
+            commandDescription: "SwiftCompile normal arm64 Compiling\\ MyView.swift /Users/user/myapp/MyView.swift")
+        parser.addLogSection(section)
+
+        parser.parse()
+
+        XCTAssertEqual(1, parser.findFunctionTimesForFilePath("file:///Users/user/myapp/MyView.swift")?.count)
+    }
+
     func testParseSwiftTypeCheckTimes() throws {
         try runTestParseSwiftTypeCheckTimes(rawFile: "project/CreatorHeaderViewModel",
                                             escapedFile: "project/CreatorHeaderViewModel")

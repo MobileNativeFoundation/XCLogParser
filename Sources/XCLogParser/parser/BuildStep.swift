@@ -98,6 +98,11 @@ public enum DetailStepType: String, Encodable {
             return .cCompilation
         case Prefix("CompileSwift "):
             return .swiftCompilation
+        // The same task under the name the integrated driver uses, for a single file and for a batch
+        // of them. Both spellings show up in one log: targets that compile whole module keep
+        // emitting `CompileSwift`.
+        case Prefix("SwiftCompile "):
+            return .swiftCompilation
         case Prefix("Ld "):
             return .linker
         case Prefix("PhaseScriptExecution "):
@@ -121,6 +126,10 @@ public enum DetailStepType: String, Encodable {
         case Prefix("CompileXIB "):
             return .XIBCompilation
         case Prefix("CompileSwiftSources "):
+            return .swiftAggregatedCompilation
+        // The driver job that replaced `CompileSwiftSources`. The trailing space matters: without it
+        // the prefix also swallows `SwiftDriverJobDiscovery`, which is not a compilation step.
+        case Prefix("SwiftDriver "):
             return .swiftAggregatedCompilation
         case Prefix("PrecompileSwiftBridgingHeader "):
             return .precompileBridgingHeader
