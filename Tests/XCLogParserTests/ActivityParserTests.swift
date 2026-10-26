@@ -232,10 +232,10 @@ class ActivityParserTests: XCTestCase {
                            Token.classNameRef("IDEActivityLogMessage"),
         ]
         let logMessageTokens = IDEActivityLogMessageTokens
-        let endTokens = [Token.int(1),
+        let endTokens = [Token.int(1),  // resultCode
+                         Token.int(0),
                          Token.int(0),
                          Token.int(1),
-                         Token.int(42),
                          Token.string("subtitle"),
                          Token.null,
                          Token.string("commandDetailDesc"),
@@ -243,8 +243,38 @@ class ActivityParserTests: XCTestCase {
                          Token.string("localizedResultString"),
                          Token.string("xcbuildSignature"),
                          Token.list(0),  // attachments
+                         Token.int(7),
         ]
         return startTokens + logMessageTokens + endTokens
+    }()
+
+    lazy var IDEActivityLogSectionTokensWithSubSectionsXcode270: [Token] = {
+        let startTokens = [Token.int(2),
+                           Token.string("com.apple.dt.IDE.BuildLogSection"),
+                           Token.string("Prepare build"),
+                           Token.string("Prepare build"),
+                           Token.double(575479851.278759),
+                           Token.double(575479851.778325),
+                           Token.list(2),
+        ]
+        let subSectionTokens = [Token.classNameRef("IDEActivityLogSection")] + IDEActivityLogSectionTokensXcode270
+        let endTokens = [Token.int(0),
+                         Token.string("note: Using legacy build system"),
+                         Token.null,
+                         Token.int(1),
+                         Token.int(0),
+                         Token.int(0),
+                         Token.int(1),
+                         Token.string("subtitle"),
+                         Token.null,
+                         Token.string("commandDetailDesc"),
+                         Token.string("501796C4-6BE4-4F80-9F9D-3269617ECC17"),
+                         Token.string("localizedResultString"),
+                         Token.string("xcbuildSignature"),
+                         Token.list(0),
+                         Token.int(8),
+        ]
+        return startTokens + subSectionTokens + subSectionTokens + endTokens
     }()
 
     let IDEConsoleItemTokens: [Token] = [
@@ -460,6 +490,7 @@ class ActivityParserTests: XCTestCase {
         }
         XCTAssertEqual(logSection.attachments[2].metrics?.wcDuration, 1)
         XCTAssertEqual(0, logSection.unknown)
+        XCTAssertNil(logSection.resultCode)
     }
 
     func testParseIDEActivityLogSection_version10() throws {
@@ -488,6 +519,7 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual("xcbuildSignature", logSection.xcbuildSignature)
         XCTAssertEqual(0, logSection.attachments.count)
         XCTAssertEqual(0, logSection.unknown)
+        XCTAssertNil(logSection.resultCode)
     }
 
     func testParseIDEActivityLogSectionXcode262() throws {
@@ -566,7 +598,7 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual(0, logSection.subSections.count)
         XCTAssertEqual("note: Using legacy build system", logSection.text)
         XCTAssertEqual(1, logSection.messages.count)
-        XCTAssertTrue(logSection.wasCancelled)
+        XCTAssertFalse(logSection.wasCancelled)
         XCTAssertFalse(logSection.isQuiet)
         XCTAssertTrue(logSection.wasFetchedFromCache)
         XCTAssertEqual("subtitle", logSection.subtitle)
@@ -577,7 +609,32 @@ class ActivityParserTests: XCTestCase {
         XCTAssertEqual("localizedResultString", logSection.localizedResultString)
         XCTAssertEqual("xcbuildSignature", logSection.xcbuildSignature)
         XCTAssertEqual(0, logSection.attachments.count)
-        XCTAssertEqual(42, logSection.unknown)
+        XCTAssertEqual(7, logSection.unknown)
+        XCTAssertEqual(1, logSection.resultCode)
+        XCTAssertNil(iterator.next())
+    }
+
+    func testParseNestedIDEActivityLogSectionsXcode270() throws {
+        parser.logVersion = 13
+        let tokens = IDEActivityLogSectionTokensWithSubSectionsXcode270
+        var iterator = tokens.makeIterator()
+        let logSection = try parser.parseIDEActivityLogSection(iterator: &iterator)
+        XCTAssertEqual(2, logSection.subSections.count)
+        XCTAssertEqual([7, 7], logSection.subSections.map(\.unknown))
+        XCTAssertEqual(8, logSection.unknown)
+        XCTAssertNil(iterator.next())
+    }
+
+    func testParseNestedIDEActivityLogSectionsXcode270CommandLine() throws {
+        parser.logVersion = 13
+        parser.isCommandLineLog = true
+        let tokens = IDEActivityLogSectionTokensWithSubSectionsXcode270
+        var iterator = tokens.makeIterator()
+        let logSection = try parser.parseIDEActivityLogSection(iterator: &iterator)
+        XCTAssertEqual(2, logSection.subSections.count)
+        XCTAssertEqual([7, 7], logSection.subSections.map(\.unknown))
+        XCTAssertEqual(8, logSection.unknown)
+        XCTAssertNil(iterator.next())
     }
 
     func testParseActivityLog() throws {

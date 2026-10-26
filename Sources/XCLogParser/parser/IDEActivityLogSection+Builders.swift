@@ -31,6 +31,7 @@ extension IDEActivityLogSection {
                                      subSections: self.subSections,
                                      text: self.text,
                                      messages: newMessages,
+                                     resultCode: self.resultCode,
                                      wasCancelled: self.wasCancelled,
                                      isQuiet: self.isQuiet,
                                      wasFetchedFromCache: self.wasFetchedFromCache,

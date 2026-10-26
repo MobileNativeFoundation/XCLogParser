@@ -40,6 +40,7 @@ public class IDEActivityLogSection: Encodable {
     public var subSections: [IDEActivityLogSection]
     public let text: String
     public let messages: [IDEActivityLogMessage]
+    public let resultCode: UInt64?
     public let wasCancelled: Bool
     public let isQuiet: Bool
     public var wasFetchedFromCache: Bool
@@ -61,6 +62,7 @@ public class IDEActivityLogSection: Encodable {
                 subSections: [IDEActivityLogSection],
                 text: String,
                 messages: [IDEActivityLogMessage],
+                resultCode: UInt64?,
                 wasCancelled: Bool,
                 isQuiet: Bool,
                 wasFetchedFromCache: Bool,
@@ -81,6 +83,7 @@ public class IDEActivityLogSection: Encodable {
         self.subSections = subSections
         self.text = text
         self.messages = messages
+        self.resultCode = resultCode
         self.wasCancelled = wasCancelled
         self.isQuiet = isQuiet
         self.wasFetchedFromCache = wasFetchedFromCache
@@ -146,6 +149,7 @@ public class IDEActivityLogUnitTestSection: IDEActivityLogSection {
                    subSections: subSections,
                    text: text,
                    messages: messages,
+                   resultCode: nil,
                    wasCancelled: wasCancelled,
                    isQuiet: isQuiet,
                    wasFetchedFromCache: wasFetchedFromCache,
@@ -439,6 +443,7 @@ public class DBGConsoleLog: IDEActivityLogSection {
                    subSections: subSections,
                    text: text,
                    messages: messages,
+                   resultCode: nil,
                    wasCancelled: wasCancelled,
                    isQuiet: isQuiet,
                    wasFetchedFromCache: wasFetchedFromCache,

@@ -86,6 +86,7 @@ class ClangCompilerParserTests: XCTestCase {
                                      subSections: [],
                                      text: text,
                                      messages: [],
+                                     resultCode: nil,
                                      wasCancelled: false,
                                      isQuiet: false,
                                      wasFetchedFromCache: false,

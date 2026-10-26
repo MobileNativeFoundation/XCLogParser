@@ -118,6 +118,7 @@ class SwiftCompilerParserTests: XCTestCase {
                                      subSections: [],
                                      text: text,
                                      messages: [],
+                                     resultCode: nil,
                                      wasCancelled: false,
                                      isQuiet: false,
                                      wasFetchedFromCache: false,
