@@ -146,6 +146,7 @@ extension IDEActivityLogSection {
             subSections: [IDEActivityLogSection](),
             text: "",
             messages: [IDEActivityLogMessage](),
+            resultCode: nil,
             wasCancelled: section.wasCancelled,
             isQuiet: section.isQuiet,
             wasFetchedFromCache: section.wasFetchedFromCache,

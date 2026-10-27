@@ -98,6 +98,9 @@ public class ActivityParser {
 
     // swiftlint:disable:next function_body_length
     public func parseIDEActivityLogSection(iterator: inout IndexingIterator<[Token]>) throws -> IDEActivityLogSection {
+        guard let logVersion else {
+            throw XCLogParserError.parseError("Log version not parsed before parsing IDEActivityLogSection")
+        }
         let sectionType = Int8(try parseAsInt(token: iterator.next()))
         let domainType = try parseAsString(token: iterator.next())
         let title = try parseAsString(token: iterator.next())
@@ -114,6 +117,7 @@ public class ActivityParser {
         }
         let text = try parseAsString(token: textToken)
         let messages = try parseMessages(iterator: &iterator)
+        let resultCode = logVersion >= 13 ? try parseAsInt(token: iterator.next()) : nil
         let wasCancelled = try parseBoolean(token: iterator.next())
         let isQuiet = try parseBoolean(token: iterator.next())
         let wasFetchedFromCache = try parseBoolean(token: iterator.next())
@@ -134,8 +138,8 @@ public class ActivityParser {
         let localizedResultString = try parseAsString(token: iterator.next())
         let xcbuildSignature = try parseAsString(token: iterator.next())
         let attachments = try parseIDEActivityLogSectionAttachments(iterator: &iterator)
-        if unknown == nil {
-            unknown = isCommandLineLog ? Int(try parseAsInt(token: iterator.next())) : 0
+        if logVersion >= 13 || (unknown == nil && isCommandLineLog) {
+            unknown = Int(try parseAsInt(token: iterator.next()))
         }
 
         return IDEActivityLogSection(
@@ -148,6 +152,7 @@ public class ActivityParser {
             subSections: subSections,
             text: text,
             messages: messages,
+            resultCode: resultCode,
             wasCancelled: wasCancelled,
             isQuiet: isQuiet,
             wasFetchedFromCache: wasFetchedFromCache,

@@ -15,6 +15,8 @@ extension ActivityParserTests {
         ("testParseIDEActivityLogMessage", testParseIDEActivityLogMessage),
         ("testParseIDEActivityLogSection", testParseIDEActivityLogSection),
         ("testParseIDEActivityLogSectionXcode270", testParseIDEActivityLogSectionXcode270),
+        ("testParseNestedIDEActivityLogSectionsXcode270", testParseNestedIDEActivityLogSectionsXcode270),
+        ("testParseNestedIDEActivityLogSectionsXcode270CommandLine", testParseNestedIDEActivityLogSectionsXcode270CommandLine),
         ("testParseXcode3ProjectLocation", testParseXcode3ProjectLocation),
     ]
 }
