@@ -206,6 +206,98 @@ note: use 'updatedDoSomething' instead\r doSomething()\r        ^~~~~~~~~~~\r   
         XCTAssertEqual(detailsByLocation.count, 4)
     }
 
+    func testSwiftDiagnosticDetailsPreserveContinuationLinesAndUnicode() {
+        let warning = "/project/🦊.swift:3:4: warning: café"
+        let error = "/project/other.swift:5:6: error: invalid type"
+        let text = "ignored preamble\r\r\(warning)\r  中文\r\r  ^~\r\(error)\r  source\r"
+
+        XCTAssertEqual(Notice.parseSwiftIssuesDetailsByLocation(text), [
+            "/project/🦊.swift:3:4:": "\(warning)\n  中文\n  ^~",
+            "/project/other.swift:5:6:": "\(error)\n  source"
+        ])
+        XCTAssertTrue(Notice.parseSwiftIssuesDetailsByLocation("").isEmpty)
+        XCTAssertTrue(Notice.parseSwiftIssuesDetailsByLocation("preamble\rplain output").isEmpty)
+    }
+
+    func testSwiftDiagnosticDetailsKeepLastOccurrenceAtLocation() {
+        let first = "/project/file.swift:1:2: warning: first"
+        let last = "/project/file.swift:1:2: error: last"
+        XCTAssertEqual(Notice.parseSwiftIssuesDetailsByLocation("\(first)\rsource\r\(last)\rtail"), [
+            "/project/file.swift:1:2:": "\(last)\ntail"
+        ])
+    }
+
+    func testSwiftDiagnosticDetailsPreserveErrorMarkerPrecedence() {
+        // Existing parsing prefers an error marker even when a warning marker appears first.
+        let text = "/project/file.swift:1:2: warning: quoted : error: message\rcontinuation"
+        XCTAssertEqual(Notice.parseSwiftIssuesDetailsByLocation(text), [
+            "/project/file.swift:1:2: warning: quoted :": text.replacingOccurrences(of: "\r", with: "\n")
+        ])
+    }
+
+    func testSwiftDiagnosticDetailsWithLargeContinuation() {
+        let header = "/project/file.swift:1:2: error: failed"
+        let line = String(repeating: "x", count: 1024)
+        let text = header + "\r" + Array(repeating: line, count: 40_000).joined(separator: "\r") + "\rtail"
+        let start = Date()
+        let details = Notice.parseSwiftIssuesDetailsByLocation(text)
+        let elapsed = Date().timeIntervalSince(start)
+
+        XCTAssertEqual(details.count, 1)
+        XCTAssertEqual(details["/project/file.swift:1:2:"], text.replacingOccurrences(of: "\r", with: "\n"))
+        // A coarse regression guard with ample headroom, not a microbenchmark.
+        // Repeatedly copying this growing diagnostic processes hundreds of GB.
+        XCTAssertLessThan(elapsed, 10, "Large diagnostics must not repeatedly copy their accumulated text")
+    }
+
+    func testSwiftDiagnosticDetailsWithManyLocations() {
+        let count = 40_000
+        let text = (0..<count).map { "/project/file.swift:\($0):1: error: failure\rsource" }.joined(separator: "\r")
+        let start = Date()
+        let details = Notice.parseSwiftIssuesDetailsByLocation(text)
+        let elapsed = Date().timeIntervalSince(start)
+
+        XCTAssertEqual(details.count, count)
+        XCTAssertEqual(details["/project/file.swift:0:1:"], "/project/file.swift:0:1: error: failure\nsource")
+        XCTAssertEqual(details["/project/file.swift:39999:1:"], "/project/file.swift:39999:1: error: failure\nsource")
+        XCTAssertLessThan(elapsed, 10, "Accumulating locations must not copy the dictionary for every diagnostic")
+    }
+
+    func testManyNoticesPreserveOrderWithoutTruncation() {
+        let messages = (0..<60_000).map { diagnosticMessage(title: "note \($0)") }
+        let section = getFakeIDEActivityLogWithMessages(messages, andText: "").mainSection
+        let start = Date()
+        let notices = Notice.parseFromLogSection(section, forType: .other, truncLargeIssues: false)
+        let elapsed = Date().timeIntervalSince(start)
+
+        XCTAssertEqual(notices.map { $0.title }, messages.map { $0.title })
+        XCTAssertTrue(notices.allSatisfy { $0.type == .note })
+        XCTAssertLessThan(elapsed, 10, "Flattening notices must not copy the growing array for every message")
+    }
+
+    func testManyClangWarningsFilterDuplicateTitlesAndKeepUnmatchedNotes() {
+        let messages = (0..<40_000).map { diagnosticMessage(title: "warning \($0)") }
+        let text = Array(repeating: "[-Wunused-variable]", count: messages.count).joined(separator: "\r")
+        let allMessages = messages + [diagnosticMessage(title: "warning 0"), diagnosticMessage(title: "remaining note")]
+        let section = getFakeIDEActivityLogWithMessages(allMessages, andText: text).mainSection
+        let start = Date()
+        let notices = Notice.parseFromLogSection(section, forType: .cCompilation, truncLargeIssues: false)
+        let elapsed = Date().timeIntervalSince(start)
+
+        XCTAssertEqual(notices.map { $0.title }, messages.map { $0.title } + ["remaining note"])
+        XCTAssertTrue(notices.dropLast().allSatisfy { $0.type == .clangWarning })
+        XCTAssertEqual(notices.last?.type, .note)
+        XCTAssertLessThan(elapsed, 10, "Filtering messages must not scan all Clang warning titles per message")
+    }
+
+    private func diagnosticMessage(title: String) -> IDEActivityLogMessage {
+        return IDEActivityLogMessage(title: title, shortTitle: "", timeEmitted: 0,
+                                     rangeEndInSectionText: 0, rangeStartInSectionText: 0,
+                                     subMessages: [], severity: 1, type: "",
+                                     location: DVTDocumentLocation(documentURLString: "", timestamp: 0),
+                                     categoryIdent: "Notice", secondaryLocations: [], additionalDescription: "")
+    }
+
     func testParseInterfaceBuilderWarning() throws {
         let timestamp = Date().timeIntervalSinceReferenceDate
         let memberId = IBMemberID(memberIdentifier: "ABC")
@@ -587,3 +679,5 @@ CompileSwift normal x86_64 (in target 'Alamofire' from project 'Pods')
                                      unknown: 0)
     }()
 }
+
+// swiftlint:enable type_body_length file_length line_length

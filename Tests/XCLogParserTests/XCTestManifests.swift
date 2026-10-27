@@ -109,6 +109,13 @@ extension ParserTests {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__ParserTests = [
+        ("testManyClangWarningsFilterDuplicateTitlesAndKeepUnmatchedNotes", testManyClangWarningsFilterDuplicateTitlesAndKeepUnmatchedNotes),
+        ("testManyNoticesPreserveOrderWithoutTruncation", testManyNoticesPreserveOrderWithoutTruncation),
+        ("testSwiftDiagnosticDetailsKeepLastOccurrenceAtLocation", testSwiftDiagnosticDetailsKeepLastOccurrenceAtLocation),
+        ("testSwiftDiagnosticDetailsPreserveContinuationLinesAndUnicode", testSwiftDiagnosticDetailsPreserveContinuationLinesAndUnicode),
+        ("testSwiftDiagnosticDetailsPreserveErrorMarkerPrecedence", testSwiftDiagnosticDetailsPreserveErrorMarkerPrecedence),
+        ("testSwiftDiagnosticDetailsWithLargeContinuation", testSwiftDiagnosticDetailsWithLargeContinuation),
+        ("testSwiftDiagnosticDetailsWithManyLocations", testSwiftDiagnosticDetailsWithManyLocations),
         ("testBuildIdentifierShouldUseMachineName", testBuildIdentifierShouldUseMachineName),
         ("testDateFormatterUsesJSONFormat", testDateFormatterUsesJSONFormat),
         ("testGetIndividualSteps", testGetIndividualSteps),
